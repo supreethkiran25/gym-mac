@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardRemindersRouteImport } from './routes/dashboard.reminders'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard.payments'
 import { Route as DashboardMembersRouteImport } from './routes/dashboard.members'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardRemindersRoute = DashboardRemindersRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/reminders'
+    | '/dashboard/settings'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/reminders'
+    | '/dashboard/settings'
     | '/dashboard'
   id:
     | '__root__'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/reminders'
+    | '/dashboard/settings'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -135,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/reminders': {
@@ -173,6 +192,7 @@ interface DashboardRouteChildren {
   DashboardMembersRoute: typeof DashboardMembersRoute
   DashboardPaymentsRoute: typeof DashboardPaymentsRoute
   DashboardRemindersRoute: typeof DashboardRemindersRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -181,6 +201,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardMembersRoute: DashboardMembersRoute,
   DashboardPaymentsRoute: DashboardPaymentsRoute,
   DashboardRemindersRoute: DashboardRemindersRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
