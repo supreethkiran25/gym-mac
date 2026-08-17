@@ -348,285 +348,40 @@ const DEFAULT_PLANS: MembershipPlan[] = [
 
 const DEFAULT_MEMBERS: Member[] = [
   {
-    id: "m-1",
-    name: "Aarav Sharma",
-    phone: "+91 98201 12233",
-    email: "aarav.sharma@example.com",
+    id: "m-kariya",
+    name: "Kariya",
+    phone: "+91 98765 43210",
+    email: "kariya@gymflow.com",
     plan: "Monthly Flex",
-    joinDate: "2025-11-21",
-    expiry: "2026-05-21",
-    status: "Expiring",
+    joinDate: "2026-05-01",
+    expiry: "2026-06-01",
+    status: "Active",
     due: 0,
-    attendanceRate: 86,
-    lastVisit: "Today, 7:15 AM",
+    attendanceRate: 100,
+    lastVisit: "Today, 6:30 AM",
     isCurrentlyInside: true,
-    checkInTime: "07:15 AM",
-    assignedTrainer: "Coach Vikram",
-    healthGoal: "Hypertrophy & Strength (Target 80kg)",
-    emergencyContact: "+91 98201 99887 (Father)",
+    checkInTime: "06:30 AM",
+    assignedTrainer: "Head Coach",
+    healthGoal: "Strength & Muscle Building",
+    emergencyContact: "+91 98765 00000",
     assignedWorkout: "Push-Pull-Legs Hypertrophy Split",
     assignedDiet: "High Protein Muscle Fuel (2400 kcal)",
-    assignedLocker: 12,
-    notes: "Consistent morning lifter. Focus on squats and deadlifts.",
+    assignedLocker: 1,
+    notes: "Primary active member.",
     timeline: [
-      { id: "t-1", type: "attendance", title: "Checked in at Main Gate", timestamp: "Today, 7:15 AM" },
-      { id: "t-2", type: "payment", title: "Monthly Renewal ₹2,800 paid via UPI", timestamp: "Apr 21, 2026", amount: 2800 },
-      { id: "t-3", type: "pt_session", title: "Upper Body Strength Assessment completed", timestamp: "Apr 05, 2026" },
-      { id: "t-4", type: "registration", title: "Joined Iron House on Monthly Flex", timestamp: "Nov 21, 2025" },
+      { id: "t-1", type: "attendance", title: "Checked in at Main Floor", timestamp: "Today, 6:30 AM" },
+      { id: "t-2", type: "payment", title: "Monthly Flex Membership ₹2,800 paid via UPI", timestamp: "May 01, 2026", amount: 2800 },
+      { id: "t-3", type: "registration", title: "Enrolled in Gym", timestamp: "May 01, 2026" },
     ],
     invoices: [
-      { id: "inv-101", invoiceNumber: "INV-2026-041", date: "2026-04-21", amount: 2800, plan: "Monthly Flex", method: "UPI", status: "Paid" },
-      { id: "inv-102", invoiceNumber: "INV-2026-029", date: "2026-03-21", amount: 2800, plan: "Monthly Flex", method: "UPI", status: "Paid" },
-    ],
-  },
-  {
-    id: "m-2",
-    name: "Mehul Patel",
-    phone: "+91 97401 88123",
-    email: "mehul.p@example.com",
-    plan: "Quarterly Pro",
-    joinDate: "2026-02-23",
-    expiry: "2026-05-23",
-    status: "Partial",
-    due: 1500,
-    attendanceRate: 74,
-    lastVisit: "Yesterday, 6:30 PM",
-    isCurrentlyInside: false,
-    assignedTrainer: "Coach Rohit",
-    healthGoal: "Fat Loss & Cardiovascular Endurance",
-    emergencyContact: "+91 97401 11223 (Spouse)",
-    assignedWorkout: "Upper-Lower Functional Conditioning",
-    assignedDiet: "Calorie Deficit Fat Shred (1850 kcal)",
-    assignedLocker: 18,
-    notes: "Promised remaining ₹1,500 due by end of week.",
-    timeline: [
-      { id: "t-5", type: "attendance", title: "Evening Cardio & Core session", timestamp: "Yesterday, 6:30 PM" },
-      { id: "t-6", type: "payment", title: "Partial Payment ₹6,000 recorded (Balance ₹1,500)", timestamp: "Feb 23, 2026", amount: 6000 },
-      { id: "t-7", type: "registration", title: "Joined Iron House on Quarterly Pro", timestamp: "Feb 23, 2026" },
-    ],
-    invoices: [
-      { id: "inv-103", invoiceNumber: "INV-2026-015", date: "2026-02-23", amount: 6000, plan: "Quarterly Pro", method: "Cash", status: "Partial" },
-    ],
-  },
-  {
-    id: "m-3",
-    name: "Riya Kapoor",
-    phone: "+91 99876 12390",
-    email: "riya.kapoor@example.com",
-    plan: "Annual Elite",
-    joinDate: "2026-01-15",
-    expiry: "2027-01-15",
-    status: "Active",
-    due: 0,
-    attendanceRate: 94,
-    lastVisit: "Today, 6:00 AM",
-    isCurrentlyInside: true,
-    checkInTime: "06:00 AM",
-    assignedTrainer: "Coach Ananya",
-    healthGoal: "Functional Fitness & Marathon Training",
-    emergencyContact: "+91 99876 99000 (Sister)",
-    assignedWorkout: "HIIT & VO2 Max Endurance",
-    assignedDiet: "Endurance Athlete Carb-Load (2200 kcal)",
-    assignedLocker: 4,
-    notes: "Attends 6:30 AM Spin and Functional HIIT regularly.",
-    timeline: [
-      { id: "t-8", type: "attendance", title: "Checked in for Early Morning Spin", timestamp: "Today, 6:00 AM" },
-      { id: "t-9", type: "pt_session", title: "Lactate Threshold & VO2 Max consult", timestamp: "May 02, 2026" },
-      { id: "t-10", type: "payment", title: "Annual Elite Membership ₹22,000 paid via Card", timestamp: "Jan 15, 2026", amount: 22000 },
-    ],
-    invoices: [
-      { id: "inv-104", invoiceNumber: "INV-2026-004", date: "2026-01-15", amount: 22000, plan: "Annual Elite", method: "Card", status: "Paid" },
-    ],
-  },
-  {
-    id: "m-4",
-    name: "Kabir Nair",
-    phone: "+91 90220 33445",
-    email: "kabir.nair@example.com",
-    plan: "Personal Training 1-on-1",
-    joinDate: "2025-11-27",
-    expiry: "2026-06-27",
-    status: "Active",
-    due: 0,
-    attendanceRate: 92,
-    lastVisit: "Today, 8:00 AM",
-    isCurrentlyInside: true,
-    checkInTime: "08:00 AM",
-    assignedTrainer: "Coach Vikram",
-    healthGoal: "Powerlifting Preparation (Bench 130kg)",
-    assignedWorkout: "5x5 Powerlifting & Max Effort",
-    assignedDiet: "High Protein Muscle Fuel (2400 kcal)",
-    assignedLocker: 7,
-    notes: "Training for state bench press meet.",
-    timeline: [
-      { id: "t-12", type: "attendance", title: "PT Session with Coach Vikram", timestamp: "Today, 8:00 AM" },
-      { id: "t-13", type: "payment", title: "Personal Training Package ₹15,000 paid via UPI", timestamp: "May 10, 2026", amount: 15000 },
-    ],
-    invoices: [
-      { id: "inv-105", invoiceNumber: "INV-2026-048", date: "2026-05-10", amount: 15000, plan: "Personal Training 1-on-1", method: "UPI", status: "Paid" },
-    ],
-  },
-  {
-    id: "m-5",
-    name: "Tara Iyer",
-    phone: "+91 98112 99831",
-    email: "tara.i@example.com",
-    plan: "Monthly Flex",
-    joinDate: "2026-03-12",
-    expiry: "2026-05-12",
-    status: "Expired",
-    due: 2800,
-    attendanceRate: 48,
-    lastVisit: "May 10, 2026",
-    isCurrentlyInside: false,
-    healthGoal: "General Mobility and Posture Correction",
-    notes: "Membership expired 6 days ago. Send reminder via WhatsApp.",
-    timeline: [
-      { id: "t-14", type: "attendance", title: "Yoga & Mat work", timestamp: "May 10, 2026" },
-      { id: "t-15", type: "registration", title: "Joined on Monthly Flex", timestamp: "Mar 12, 2026" },
-    ],
-    invoices: [
-      { id: "inv-106", invoiceNumber: "INV-2026-022", date: "2026-03-12", amount: 2800, plan: "Monthly Flex", method: "Bank", status: "Paid" },
+      { id: "inv-kariya-1", invoiceNumber: "INV-2026-0001", date: "2026-05-01", amount: 2800, plan: "Monthly Flex", method: "UPI", status: "Paid" },
     ],
   },
 ];
 
-const DEFAULT_LEADS: Lead[] = [
-  {
-    id: "lead-1",
-    name: "Devendra Singhania",
-    phone: "+91 98200 44332",
-    email: "devendra@example.com",
-    source: "Instagram",
-    stage: "Trial Scheduled",
-    fitnessGoal: "Weight Loss (Target -12kg)",
-    trialDate: "Today, 5:00 PM",
-    notes: "Inquired via Instagram Reel about Coach Vikram's HIIT class.",
-    assignedTrainer: "Coach Vikram",
-    createdAt: "2026-05-18",
-    budget: 7500,
-  },
-  {
-    id: "lead-2",
-    name: "Kritika Chawla",
-    phone: "+91 97110 88776",
-    email: "kritika.c@example.com",
-    source: "Walk-In",
-    stage: "Trial Completed",
-    fitnessGoal: "Functional Strength & Morning Spin",
-    trialDate: "Yesterday",
-    notes: "Completed 7:30 AM trial. Loved the steam room and turf area. Ready to join Quarterly Pro.",
-    assignedTrainer: "Coach Ananya",
-    createdAt: "2026-05-17",
-    budget: 7500,
-  },
-  {
-    id: "lead-3",
-    name: "Sameer Joshi",
-    phone: "+91 99300 22110",
-    email: "sameer.j@example.com",
-    source: "Google Maps",
-    stage: "Inquiry",
-    fitnessGoal: "Bodybuilding & 1-on-1 Personal Training",
-    notes: "Searched 'Best Gym in Andheri West'. Wants a dedicated senior trainer for contest prep.",
-    assignedTrainer: "Coach Vikram",
-    createdAt: "2026-05-19",
-    budget: 15000,
-  },
-  {
-    id: "lead-4",
-    name: "Pooja Saluja",
-    phone: "+91 98450 33991",
-    email: "pooja.s@example.com",
-    source: "Referral",
-    stage: "Offer Sent",
-    fitnessGoal: "Post-pregnancy core rehab & Pilates",
-    notes: "Referred by Riya Kapoor. Special 10% referral discount offer sent on WhatsApp.",
-    assignedTrainer: "Coach Ananya",
-    createdAt: "2026-05-16",
-    budget: 22000,
-  },
-];
+const DEFAULT_LEADS: Lead[] = [];
 
-const DEFAULT_POS_PRODUCTS: POSProduct[] = [
-  {
-    id: "pos-1",
-    name: "Optimum Nutrition Gold Standard Whey (2kg, Double Rich Chocolate)",
-    category: "Supplements",
-    price: 6800,
-    costPrice: 4900,
-    stock: 18,
-    sku: "ON-WHEY-2KG",
-    icon: "🥛",
-    unit: "Tub",
-  },
-  {
-    id: "pos-2",
-    name: "Cellucor C4 Original Pre-Workout (30 Servings, Fruit Punch)",
-    category: "Supplements",
-    price: 2600,
-    costPrice: 1800,
-    stock: 24,
-    sku: "C4-PRE-30S",
-    icon: "⚡",
-    unit: "Tub",
-  },
-  {
-    id: "pos-3",
-    name: "Fast&Up BCAA 2:1:1 Intra-Workout (30 Servings, Lime)",
-    category: "Supplements",
-    price: 1800,
-    costPrice: 1100,
-    stock: 32,
-    sku: "FA-BCAA-LIME",
-    icon: "🧪",
-    unit: "Tub",
-  },
-  {
-    id: "pos-4",
-    name: "Red Bull Energy Drink (250ml Can - Chilled)",
-    category: "Beverages",
-    price: 150,
-    costPrice: 95,
-    stock: 48,
-    sku: "RB-CAN-250",
-    icon: "🥫",
-    unit: "Can",
-  },
-  {
-    id: "pos-5",
-    name: "Iron House Pro Shaker Bottle (700ml Stainless Steel)",
-    category: "Accessories",
-    price: 750,
-    costPrice: 320,
-    stock: 40,
-    sku: "IH-SHAKER-SS",
-    icon: "🍶",
-    unit: "Bottle",
-  },
-  {
-    id: "pos-6",
-    name: "Harbinger Heavy Duty Weightlifting Straps",
-    category: "Accessories",
-    price: 850,
-    costPrice: 420,
-    stock: 15,
-    sku: "HB-STRAPS-HD",
-    icon: "🥊",
-    unit: "Pair",
-  },
-  {
-    id: "pos-7",
-    name: "Iron House Signature Oversized Heavy Cotton Pump Cover Tee",
-    category: "Apparel",
-    price: 1200,
-    costPrice: 550,
-    stock: 22,
-    sku: "IH-TEE-BLK",
-    icon: "👕",
-    unit: "Tee",
-  },
-];
+const DEFAULT_POS_PRODUCTS: POSProduct[] = [];
 
 const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
   {
@@ -635,8 +390,8 @@ const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
     category: "Hypertrophy",
     daysPerWeek: 6,
     level: "Intermediate",
-    focus: "Maximum muscle growth, progressive overload on compound lifts & isolation finish.",
-    assignedCount: 24,
+    focus: "Maximum muscle growth and progressive overload.",
+    assignedCount: 1,
     routine: [
       {
         day: "Push (Chest, Shoulders, Triceps)",
@@ -651,48 +406,20 @@ const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
       {
         day: "Pull (Back, Rear Delts, Biceps)",
         exercises: [
-          { name: "Barbell Deadlift / Heavy Row", sets: "4", reps: "6-8", rest: "120s" },
-          { name: "Lat Pulldown (Neutral Grip)", sets: "3", reps: "10-12", rest: "75s" },
-          { name: "Chest-Supported T-Bar Row", sets: "3", reps: "10-12", rest: "75s" },
+          { name: "Barbell Deadlift", sets: "4", reps: "6-8", rest: "120s" },
+          { name: "Lat Pulldown", sets: "3", reps: "10-12", rest: "75s" },
+          { name: "Cable Rows", sets: "3", reps: "10-12", rest: "75s" },
           { name: "Face Pulls", sets: "4", reps: "15-20", rest: "60s" },
-          { name: "Incline DB Bicep Curls", sets: "3", reps: "10-12", rest: "60s" },
+          { name: "Bicep Curls", sets: "3", reps: "10-12", rest: "60s" },
         ],
       },
       {
         day: "Legs (Quads, Hamstrings, Calves)",
         exercises: [
           { name: "Barbell Back Squat", sets: "4", reps: "8-10", rest: "120s" },
-          { name: "Romanian Deadlift (RDL)", sets: "3", reps: "10-12", rest: "90s" },
-          { name: "Leg Press 45-degree", sets: "3", reps: "12-15", rest: "75s" },
-          { name: "Lying Hamstring Curls", sets: "3", reps: "12-15", rest: "60s" },
-          { name: "Standing Calf Raises", sets: "4", reps: "15-20", rest: "45s" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "wo-2",
-    title: "5x5 Powerbuilding & Strength",
-    category: "Strength & Power",
-    daysPerWeek: 4,
-    level: "Advanced",
-    focus: "Strength peaking on Squat, Bench, Deadlift, and Overhead Press.",
-    assignedCount: 16,
-    routine: [
-      {
-        day: "Heavy Bench & Upper",
-        exercises: [
-          { name: "Barbell Bench Press", sets: "5", reps: "5", rest: "150s" },
-          { name: "Barbell Row", sets: "5", reps: "5", rest: "120s" },
-          { name: "Weighted Dips", sets: "3", reps: "8", rest: "90s" },
-        ],
-      },
-      {
-        day: "Heavy Squat & Lower",
-        exercises: [
-          { name: "Barbell Back Squat", sets: "5", reps: "5", rest: "180s" },
-          { name: "Romanian Deadlift", sets: "4", reps: "6", rest: "120s" },
-          { name: "Walking DB Lunges", sets: "3", reps: "10/leg", rest: "90s" },
+          { name: "Romanian Deadlift", sets: "3", reps: "10-12", rest: "90s" },
+          { name: "Leg Press", sets: "3", reps: "12-15", rest: "75s" },
+          { name: "Calf Raises", sets: "4", reps: "15-20", rest: "45s" },
         ],
       },
     ],
@@ -708,45 +435,25 @@ const DEFAULT_DIET_PLANS: DietPlan[] = [
     proteinGrams: 180,
     carbsGrams: 240,
     fatsGrams: 65,
-    assignedCount: 32,
+    assignedCount: 1,
     meals: [
-      { time: "07:30 AM", name: "Breakfast", items: ["4 Whole Eggs scrambled with spinach", "2 Slices Toasted Sourdough", "1 Banana + Black Coffee"], calories: 580 },
-      { time: "11:30 AM", name: "Mid-Morning", items: ["1 Scoop Gold Standard Whey", "30g Mixed Almonds & Walnuts"], calories: 320 },
-      { time: "01:30 PM", name: "Lunch", items: ["200g Grilled Chicken Breast / Paneer", "150g Steamed Basmati Rice", "1 Bowl Dal + Cucumber Salad"], calories: 680 },
-      { time: "05:00 PM", name: "Pre-Workout Snack", items: ["1 Apple", "1 Scoop Fast&Up BCAA / Pre-Workout"], calories: 120 },
-      { time: "08:30 PM", name: "Dinner", items: ["180g Baked Fish / Tofu Steak", "2 Multigrain Roti", "Stir-fried Broccoli & Mushrooms"], calories: 700 },
-    ],
-  },
-  {
-    id: "diet-2",
-    title: "Calorie Deficit Fat Shred (1850 kcal)",
-    category: "Calorie Deficit Cut",
-    calorieTarget: 1850,
-    proteinGrams: 160,
-    carbsGrams: 150,
-    fatsGrams: 50,
-    assignedCount: 28,
-    meals: [
-      { time: "08:00 AM", name: "Breakfast", items: ["3 Egg White Omelet + 1 Whole Egg", "1 Slice Multigrain Toast", "Green Tea"], calories: 340 },
-      { time: "01:00 PM", name: "Lunch", items: ["180g Grilled Chicken / Soya Chunks", "100g Brown Rice", "Large Garden Salad with Olive Oil drizzle"], calories: 560 },
-      { time: "04:30 PM", name: "Snack", items: ["1 Scoop Whey in water", "10 Almonds"], calories: 200 },
-      { time: "08:00 PM", name: "Dinner", items: ["150g Grilled Fish / Paneer Tikka", "1 Multigrain Roti", "Clear Vegetable Soup"], calories: 550 },
-      { time: "10:00 PM", name: "Bedtime", items: ["Chamomile Tea + 5g Glutamine"], calories: 20 },
+      { time: "07:30 AM", name: "Breakfast", items: ["4 Eggs", "2 Slices Toast", "1 Banana"], calories: 580 },
+      { time: "01:30 PM", name: "Lunch", items: ["200g Chicken/Paneer", "150g Rice", "Salad"], calories: 680 },
+      { time: "08:30 PM", name: "Dinner", items: ["180g Fish/Tofu", "2 Roti", "Vegetables"], calories: 700 },
     ],
   },
 ];
 
 const DEFAULT_LOCKERS: Locker[] = Array.from({ length: 24 }, (_, i) => {
   const num = i + 1;
-  const isOccupied = num === 12 || num === 18 || num === 4 || num === 7;
-  const isMaintenance = num === 15;
+  const isKariya = num === 1;
   return {
     id: `loc-l-${num}`,
     number: num,
     section: num <= 10 ? "Men's Locker Room" : num <= 20 ? "Women's Locker Room" : "Executive VIP",
-    status: isMaintenance ? "Maintenance" : isOccupied ? "Occupied" : "Available",
-    assignedMemberName: num === 12 ? "Aarav Sharma" : num === 18 ? "Mehul Patel" : num === 4 ? "Riya Kapoor" : num === 7 ? "Kabir Nair" : undefined,
-    expiresOn: isOccupied ? "2026-06-15" : undefined,
+    status: isKariya ? "Occupied" : "Available",
+    assignedMemberName: isKariya ? "Kariya" : undefined,
+    expiresOn: isKariya ? "2026-06-01" : undefined,
   };
 });
 
@@ -772,287 +479,30 @@ const DEFAULT_SETTINGS: GymSettings = {
     "Welcome to {gym}, {name}! Your {plan} pass is now active. Let's crush your fitness goals!",
 };
 
-const DEFAULT_STAFF: StaffMember[] = [
-  {
-    id: "s-1",
-    name: "Vikram Malhotra",
-    role: "Head Coach",
-    phone: "+91 98330 11223",
-    email: "vikram@ironhousegym.com",
-    salary: 65000,
-    shift: "Morning 6:00 AM - 2:00 PM",
-    status: "On Floor",
-    avatar: "VM",
-    assignedClientsCount: 8,
-    leaveRecords: [],
-  },
-  {
-    id: "s-2",
-    name: "Ananya Deshmukh",
-    role: "Nutritionist",
-    phone: "+91 98450 77889",
-    email: "ananya@ironhousegym.com",
-    salary: 52000,
-    shift: "Full Day 9:00 AM - 5:00 PM",
-    status: "On Floor",
-    avatar: "AD",
-    assignedClientsCount: 14,
-    leaveRecords: [],
-  },
-  {
-    id: "s-3",
-    name: "Rohit Khanna",
-    role: "Personal Trainer",
-    phone: "+91 99200 44556",
-    email: "rohit@ironhousegym.com",
-    salary: 48000,
-    shift: "Evening 2:00 PM - 10:00 PM",
-    status: "Off Duty",
-    avatar: "RK",
-    assignedClientsCount: 11,
-    leaveRecords: [],
-  },
-  {
-    id: "s-4",
-    name: "Pooja Hegde",
-    role: "Front Desk Manager",
-    phone: "+91 98110 33221",
-    email: "pooja@ironhousegym.com",
-    salary: 38000,
-    shift: "Morning 6:00 AM - 2:00 PM",
-    status: "On Floor",
-    avatar: "PH",
-    assignedClientsCount: 0,
-    leaveRecords: [],
-  },
-];
+const DEFAULT_STAFF: StaffMember[] = [];
 
-const DEFAULT_CLASSES: GymClass[] = [
-  {
-    id: "c-1",
-    title: "Morning HIIT & Core Blast",
-    trainer: "Vikram Malhotra",
-    trainerId: "s-1",
-    time: "06:30 AM",
-    durationMinutes: 45,
-    days: ["Mon", "Wed", "Fri"],
-    capacity: 20,
-    enrolledMembers: ["m-1", "m-3"],
-    room: "Studio A (Ground Floor)",
-    category: "HIIT",
-    intensity: "High",
-  },
-  {
-    id: "c-2",
-    title: "Strength & Functional Kettlebells",
-    trainer: "Rohit Khanna",
-    trainerId: "s-3",
-    time: "07:30 AM",
-    durationMinutes: 50,
-    days: ["Tue", "Thu", "Sat"],
-    capacity: 15,
-    enrolledMembers: ["m-1", "m-4"],
-    room: "Functional Turf",
-    category: "Strength",
-    intensity: "High",
-  },
-  {
-    id: "c-3",
-    title: "Vinyasa Flow & Deep Recovery",
-    trainer: "Ananya Deshmukh",
-    trainerId: "s-2",
-    time: "08:30 AM",
-    durationMinutes: 60,
-    days: ["Mon", "Wed", "Fri", "Sun"],
-    capacity: 18,
-    enrolledMembers: ["m-3"],
-    room: "Mind & Body Studio",
-    category: "Yoga",
-    intensity: "All Levels",
-  },
-  {
-    id: "c-4",
-    title: "Evening High-RPM Spin Cycle",
-    trainer: "Rohit Khanna",
-    trainerId: "s-3",
-    time: "06:45 PM",
-    durationMinutes: 45,
-    days: ["Mon", "Tue", "Thu", "Fri"],
-    capacity: 16,
-    enrolledMembers: ["m-2"],
-    room: "Spin Studio",
-    category: "Spin",
-    intensity: "High",
-  },
-];
+const DEFAULT_CLASSES: GymClass[] = [];
 
-const DEFAULT_EQUIPMENT: GymEquipment[] = [
-  {
-    id: "eq-1",
-    name: "Matrix Commercial Treadmill T50 #3",
-    category: "Cardio",
-    status: "Service Due",
-    lastServiced: "2026-02-10",
-    nextServiceDate: "2026-05-10",
-    serialNumber: "MTX-TR-2024-003",
-    location: "Cardio Zone (Bay 3)",
-    usageCount: 1420,
-    modelNumber: "T50-Pro",
-    vendorName: "Matrix Fitness India",
-  },
-  {
-    id: "eq-2",
-    name: "Eleiko Olympic Power Rack #1",
-    category: "Strength",
-    status: "Operational",
-    lastServiced: "2026-04-15",
-    nextServiceDate: "2026-08-15",
-    serialNumber: "ELK-PR-2023-011",
-    location: "Heavy Lifting Zone",
-    usageCount: 2850,
-    modelNumber: "Power-X9",
-    vendorName: "Eleiko Sport",
-  },
-  {
-    id: "eq-3",
-    name: "LifeFitness 8-Stack Cable Crossover",
-    category: "Cables",
-    status: "Operational",
-    lastServiced: "2026-04-01",
-    nextServiceDate: "2026-07-01",
-    serialNumber: "LF-CAB-2022-094",
-    location: "Central Floor",
-    usageCount: 3940,
-    modelNumber: "LF-C800",
-    vendorName: "Life Fitness",
-  },
-  {
-    id: "eq-4",
-    name: "Concept2 RowErg #2",
-    category: "Cardio",
-    status: "Under Repair",
-    lastServiced: "2026-01-20",
-    nextServiceDate: "2026-04-20",
-    serialNumber: "C2-ROW-2024-012",
-    location: "HIIT Bay",
-    usageCount: 980,
-    modelNumber: "Model D PM5",
-    vendorName: "Concept2 India",
-  },
-];
+const DEFAULT_EQUIPMENT: GymEquipment[] = [];
 
-const DEFAULT_INSIGHTS: SmartInsight[] = [
-  {
-    id: "ins-1",
-    title: "15% Drop in Renewal Rate Expected",
-    description: "4 key members are expiring in the next 48 hours without auto-debit configured.",
-    type: "warning",
-    metricChange: "-15% renewals",
-    actionLabel: "Send Batch WhatsApp Nudge",
-    actionType: "nudge_expiring",
-  },
-  {
-    id: "ins-2",
-    title: "Evening Peak Capacity Surging",
-    description: "Average 6:00 PM - 8:30 PM floor occupancy reached 94% this week.",
-    type: "opportunity",
-    metricChange: "+28% peak load",
-    actionLabel: "Assign Extra Evening Trainer",
-    actionType: "assign_trainer",
-  },
-  {
-    id: "ins-3",
-    title: "Matrix Treadmill #3 Overdue for Service",
-    description: "Cardio belt calibration is 7 days past scheduled manufacturer maintenance.",
-    type: "alert",
-    metricChange: "7 days overdue",
-    actionLabel: "Log Maintenance Complete",
-    actionType: "service_equipment",
-  },
-  {
-    id: "ins-4",
-    title: "Personal Training Demand Up +24%",
-    description: "6 Quarterly Pro members logged 4+ visits this week and qualify for PT upgrade.",
-    type: "info",
-    metricChange: "+24% PT velocity",
-    actionLabel: "View Upgrade Opportunities",
-    actionType: "promote_pt",
-  },
-];
+const DEFAULT_INSIGHTS: SmartInsight[] = [];
 
 const DEFAULT_PAYMENTS: Payment[] = [
   {
-    id: "p-1",
-    memberId: "m-1",
-    member: "Aarav Sharma",
-    date: "2026-05-18",
+    id: "p-kariya-1",
+    memberId: "m-kariya",
+    member: "Kariya",
+    date: "2026-05-01",
     method: "UPI",
     amount: 2800,
     category: "Membership",
     status: "Paid",
-    invoiceNumber: "INV-2026-051",
-    notes: "Monthly renewal via Google Pay",
-  },
-  {
-    id: "p-2",
-    memberId: "m-4",
-    member: "Kabir Nair",
-    date: "2026-05-17",
-    method: "UPI",
-    amount: 15000,
-    category: "Personal Training",
-    status: "Paid",
-    invoiceNumber: "INV-2026-050",
-    notes: "1-on-1 PT package with Coach Vikram",
-  },
-  {
-    id: "p-3",
-    memberId: "m-3",
-    member: "Riya Kapoor",
-    date: "2026-05-15",
-    method: "Card",
-    amount: 22000,
-    category: "Membership",
-    status: "Paid",
-    invoiceNumber: "INV-2026-049",
-    notes: "Annual membership card swipe",
-  },
-  {
-    id: "p-4",
-    memberId: "m-2",
-    member: "Mehul Patel",
-    date: "2026-05-14",
-    method: "Cash",
-    amount: 6000,
-    category: "Membership",
-    status: "Partial",
-    invoiceNumber: "INV-2026-048",
-    notes: "Quarterly first installment (Due ₹1,500)",
+    invoiceNumber: "INV-2026-0001",
+    notes: "Monthly Flex membership fee",
   },
 ];
 
-const DEFAULT_REMINDERS: ReminderItem[] = [
-  {
-    id: "r-1",
-    memberId: "m-5",
-    name: "Tara Iyer",
-    phone: "+91 98112 99831",
-    reason: "Membership expired (Due ₹2,800)",
-    channel: "WhatsApp",
-    time: "Today, 9:00 AM",
-    status: "Pending",
-  },
-  {
-    id: "r-2",
-    memberId: "m-2",
-    name: "Mehul Patel",
-    phone: "+91 97401 88123",
-    reason: "Pending installment ₹1,500",
-    channel: "WhatsApp",
-    time: "Tomorrow, 10:00 AM",
-    status: "Pending",
-  },
-];
+const DEFAULT_REMINDERS: ReminderItem[] = [];
 
 interface GymStoreContextType {
   theme: "dark" | "light";
@@ -1157,7 +607,7 @@ interface GymStoreContextType {
 
 const GymContext = createContext<GymStoreContextType | null>(null);
 
-const STORAGE_KEY_V6 = "ironhouse_gym_flow_v6";
+const STORAGE_KEY_V7 = "ironhouse_gym_flow_v7";
 
 export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Theme state: dark or light
@@ -1201,7 +651,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [members, setMembers] = useState<Member[]>(() => {
     if (typeof window === "undefined") return DEFAULT_MEMBERS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_members`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_members`);
       return saved ? JSON.parse(saved) : DEFAULT_MEMBERS;
     } catch {
       return DEFAULT_MEMBERS;
@@ -1211,7 +661,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [payments, setPayments] = useState<Payment[]>(() => {
     if (typeof window === "undefined") return DEFAULT_PAYMENTS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_payments`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_payments`);
       return saved ? JSON.parse(saved) : DEFAULT_PAYMENTS;
     } catch {
       return DEFAULT_PAYMENTS;
@@ -1221,7 +671,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [reminders, setReminders] = useState<ReminderItem[]>(() => {
     if (typeof window === "undefined") return DEFAULT_REMINDERS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_reminders`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_reminders`);
       return saved ? JSON.parse(saved) : DEFAULT_REMINDERS;
     } catch {
       return DEFAULT_REMINDERS;
@@ -1231,7 +681,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [staff, setStaff] = useState<StaffMember[]>(() => {
     if (typeof window === "undefined") return DEFAULT_STAFF;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_staff`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_staff`);
       return saved ? JSON.parse(saved) : DEFAULT_STAFF;
     } catch {
       return DEFAULT_STAFF;
@@ -1241,7 +691,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [classes, setClasses] = useState<GymClass[]>(() => {
     if (typeof window === "undefined") return DEFAULT_CLASSES;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_classes`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_classes`);
       return saved ? JSON.parse(saved) : DEFAULT_CLASSES;
     } catch {
       return DEFAULT_CLASSES;
@@ -1251,7 +701,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [equipment, setEquipment] = useState<GymEquipment[]>(() => {
     if (typeof window === "undefined") return DEFAULT_EQUIPMENT;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_equipment`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_equipment`);
       return saved ? JSON.parse(saved) : DEFAULT_EQUIPMENT;
     } catch {
       return DEFAULT_EQUIPMENT;
@@ -1261,7 +711,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [insights, setInsights] = useState<SmartInsight[]>(() => {
     if (typeof window === "undefined") return DEFAULT_INSIGHTS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_insights`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_insights`);
       return saved ? JSON.parse(saved) : DEFAULT_INSIGHTS;
     } catch {
       return DEFAULT_INSIGHTS;
@@ -1271,7 +721,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [settings, setSettings] = useState<GymSettings>(() => {
     if (typeof window === "undefined") return DEFAULT_SETTINGS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_settings`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_settings`);
       return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
     } catch {
       return DEFAULT_SETTINGS;
@@ -1281,7 +731,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [leads, setLeads] = useState<Lead[]>(() => {
     if (typeof window === "undefined") return DEFAULT_LEADS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_leads`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_leads`);
       return saved ? JSON.parse(saved) : DEFAULT_LEADS;
     } catch {
       return DEFAULT_LEADS;
@@ -1291,7 +741,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [posProducts, setPOSProducts] = useState<POSProduct[]>(() => {
     if (typeof window === "undefined") return DEFAULT_POS_PRODUCTS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_pos_products`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_pos_products`);
       return saved ? JSON.parse(saved) : DEFAULT_POS_PRODUCTS;
     } catch {
       return DEFAULT_POS_PRODUCTS;
@@ -1301,7 +751,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [posOrders, setPOSOrders] = useState<POSOrder[]>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_pos_orders`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_pos_orders`);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -1311,7 +761,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [workoutPrograms, setWorkoutPrograms] = useState<WorkoutProgram[]>(() => {
     if (typeof window === "undefined") return DEFAULT_WORKOUT_PROGRAMS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_workout_programs`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_workout_programs`);
       return saved ? JSON.parse(saved) : DEFAULT_WORKOUT_PROGRAMS;
     } catch {
       return DEFAULT_WORKOUT_PROGRAMS;
@@ -1321,7 +771,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [dietPlans, setDietPlans] = useState<DietPlan[]>(() => {
     if (typeof window === "undefined") return DEFAULT_DIET_PLANS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_diet_plans`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_diet_plans`);
       return saved ? JSON.parse(saved) : DEFAULT_DIET_PLANS;
     } catch {
       return DEFAULT_DIET_PLANS;
@@ -1331,7 +781,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [lockers, setLockers] = useState<Locker[]>(() => {
     if (typeof window === "undefined") return DEFAULT_LOCKERS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_lockers`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_lockers`);
       return saved ? JSON.parse(saved) : DEFAULT_LOCKERS;
     } catch {
       return DEFAULT_LOCKERS;
@@ -1341,7 +791,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [locations, setLocations] = useState<GymLocation[]>(() => {
     if (typeof window === "undefined") return DEFAULT_LOCATIONS;
     try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V6}_locations`);
+      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_locations`);
       return saved ? JSON.parse(saved) : DEFAULT_LOCATIONS;
     } catch {
       return DEFAULT_LOCATIONS;
@@ -1370,63 +820,63 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_members`, JSON.stringify(members));
+    localStorage.setItem(`${STORAGE_KEY_V7}_members`, JSON.stringify(members));
   }, [members]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_payments`, JSON.stringify(payments));
+    localStorage.setItem(`${STORAGE_KEY_V7}_payments`, JSON.stringify(payments));
   }, [payments]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_reminders`, JSON.stringify(reminders));
+    localStorage.setItem(`${STORAGE_KEY_V7}_reminders`, JSON.stringify(reminders));
   }, [reminders]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_staff`, JSON.stringify(staff));
+    localStorage.setItem(`${STORAGE_KEY_V7}_staff`, JSON.stringify(staff));
   }, [staff]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_classes`, JSON.stringify(classes));
+    localStorage.setItem(`${STORAGE_KEY_V7}_classes`, JSON.stringify(classes));
   }, [classes]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_equipment`, JSON.stringify(equipment));
+    localStorage.setItem(`${STORAGE_KEY_V7}_equipment`, JSON.stringify(equipment));
   }, [equipment]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_insights`, JSON.stringify(insights));
+    localStorage.setItem(`${STORAGE_KEY_V7}_insights`, JSON.stringify(insights));
   }, [insights]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_settings`, JSON.stringify(settings));
+    localStorage.setItem(`${STORAGE_KEY_V7}_settings`, JSON.stringify(settings));
   }, [settings]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_leads`, JSON.stringify(leads));
+    localStorage.setItem(`${STORAGE_KEY_V7}_leads`, JSON.stringify(leads));
   }, [leads]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_pos_products`, JSON.stringify(posProducts));
+    localStorage.setItem(`${STORAGE_KEY_V7}_pos_products`, JSON.stringify(posProducts));
   }, [posProducts]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_pos_orders`, JSON.stringify(posOrders));
+    localStorage.setItem(`${STORAGE_KEY_V7}_pos_orders`, JSON.stringify(posOrders));
   }, [posOrders]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_workout_programs`, JSON.stringify(workoutPrograms));
+    localStorage.setItem(`${STORAGE_KEY_V7}_workout_programs`, JSON.stringify(workoutPrograms));
   }, [workoutPrograms]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_diet_plans`, JSON.stringify(dietPlans));
+    localStorage.setItem(`${STORAGE_KEY_V7}_diet_plans`, JSON.stringify(dietPlans));
   }, [dietPlans]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_lockers`, JSON.stringify(lockers));
+    localStorage.setItem(`${STORAGE_KEY_V7}_lockers`, JSON.stringify(lockers));
   }, [lockers]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V6}_locations`, JSON.stringify(locations));
+    localStorage.setItem(`${STORAGE_KEY_V7}_locations`, JSON.stringify(locations));
   }, [locations]);
 
   // Keep selectedMember360 synchronized with members list
