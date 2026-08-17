@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "GymFlow — Owner Command Center",
+    "slug": "gymflow-dashboard",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gymflow.dashboard"
+    },
+    "android": {
+      "package": "com.gymflow.dashboard",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
