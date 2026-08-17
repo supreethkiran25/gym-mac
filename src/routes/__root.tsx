@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { GymProvider } from "../lib/gym-store";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -112,7 +114,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <GymProvider>
+        <Outlet />
+        <Toaster position="top-right" richColors />
+      </GymProvider>
     </QueryClientProvider>
   );
 }
+

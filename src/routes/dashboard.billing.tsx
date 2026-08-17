@@ -1,60 +1,100 @@
+import React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Receipt, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { useGymStore } from "../lib/gym-store";
 
 export const Route = createFileRoute("/dashboard/billing")({
   component: Billing,
 });
 
 function Billing() {
+  const { members, settings } = useGymStore();
+
+  const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
+  const currentMonthBill = activeMembersCount * settings.perMemberRate;
+  const estNextMonthBill = (activeMembersCount + 8) * settings.perMemberRate;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-150">
       <div>
-        <h1 className="display text-4xl">Billing</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your Repsheet subscription.</p>
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">SaaS Subscription & Invoices</h1>
+          <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
+            Active Tier
+          </span>
+        </div>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          Transparent usage-based pricing at ₹{settings.perMemberRate} per active member / month.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface p-6 md:col-span-2">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">This month</p>
-          <p className="mt-2 font-serif text-5xl">₹1,540</p>
-          <p className="text-sm text-muted-foreground">154 active members × ₹10</p>
-          <div className="mt-6 flex items-center gap-2 text-sm text-emerald">
+        <div className="rounded-2xl border border-border bg-surface p-6 md:col-span-2 space-y-4">
+          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Current Billing Cycle</p>
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-4xl sm:text-5xl font-bold">
+              {settings.currencySymbol}
+              {currentMonthBill.toLocaleString("en-IN")}
+            </span>
+            <span className="text-xs text-muted-foreground">/ month</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Calculated on {activeMembersCount} active/expiring members × {settings.currencySymbol}
+            {settings.perMemberRate} rate
+          </p>
+          <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-emerald">
             <CheckCircle2 className="h-4 w-4" />
-            Subscription active · auto-renews 1 Jun
+            <span>Active plan · Next auto-settlement on 1st of next month</span>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-6">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Next invoice</p>
-          <p className="mt-2 font-serif text-3xl">₹1,640</p>
-          <p className="text-sm text-muted-foreground">Est. 164 active · 1 Jun 2026</p>
+
+        <div className="rounded-2xl border border-border bg-surface p-6 space-y-3">
+          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Estimated Next Cycle</p>
+          <p className="font-mono text-3xl font-bold">
+            {settings.currencySymbol}
+            {estNextMonthBill.toLocaleString("en-IN")}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Projected on ~{activeMembersCount + 8} active members
+          </p>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
         <div className="border-b border-border px-5 py-4">
-          <h2 className="text-sm font-medium">Payment history</h2>
+          <h2 className="text-sm font-semibold">Platform Subscription Invoices</h2>
         </div>
-        <table className="w-full text-sm">
-          <tbody className="divide-y divide-border">
-            {[
-              ["1 May 2026", "April · 148 members", "₹1,480", "Paid"],
-              ["1 Apr 2026", "March · 141 members", "₹1,410", "Paid"],
-              ["1 Mar 2026", "February · 132 members", "₹1,320", "Paid"],
-              ["1 Feb 2026", "January · 124 members", "₹1,240", "Paid"],
-            ].map(([d, l, a, s]) => (
-              <tr key={d}>
-                <td className="px-5 py-3 text-muted-foreground">{d}</td>
-                <td className="px-5 py-3">{l}</td>
-                <td className="px-5 py-3 font-mono">{a}</td>
-                <td className="px-5 py-3 text-right">
-                  <span className="inline-flex rounded-full bg-emerald-soft px-2.5 py-0.5 text-xs text-accent-foreground">
-                    {s}
-                  </span>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="border-b border-border bg-canvas text-left uppercase text-muted-foreground font-semibold tracking-wider">
+              <tr>
+                <th className="py-3 px-5">Billing Period</th>
+                <th className="py-3 px-5">Active Volume</th>
+                <th className="py-3 px-5">Amount</th>
+                <th className="py-3 px-5 text-right">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {[
+                ["1 May 2026", "April Usage · 148 active members", "₹1,480", "Paid"],
+                ["1 Apr 2026", "March Usage · 141 active members", "₹1,410", "Paid"],
+                ["1 Mar 2026", "February Usage · 132 active members", "₹1,320", "Paid"],
+                ["1 Feb 2026", "January Usage · 124 active members", "₹1,240", "Paid"],
+              ].map(([d, l, a, s]) => (
+                <tr key={d} className="hover:bg-muted/40 transition">
+                  <td className="px-5 py-3.5 text-muted-foreground font-mono">{d}</td>
+                  <td className="px-5 py-3.5 font-medium text-foreground">{l}</td>
+                  <td className="px-5 py-3.5 font-mono font-semibold">{a}</td>
+                  <td className="px-5 py-3.5 text-right">
+                    <span className="inline-flex rounded-full bg-emerald-soft px-2.5 py-0.5 text-xs text-accent-foreground font-semibold">
+                      {s}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
