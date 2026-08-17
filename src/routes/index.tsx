@@ -146,10 +146,7 @@ function HeroVisual() {
               <p className="text-sm font-medium">Upcoming renewals</p>
               <ul className="mt-3 space-y-3 text-sm">
                 {[
-                  ["Aarav S.", "2 days"],
-                  ["Mehul P.", "4 days"],
-                  ["Riya K.", "6 days"],
-                  ["Kabir N.", "1 week"],
+                  ["Kariya", "3 days"],
                 ].map(([n, d]) => (
                   <li key={n} className="flex items-center justify-between">
                     <span>{n}</span>

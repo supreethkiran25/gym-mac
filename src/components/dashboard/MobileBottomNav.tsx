@@ -3,12 +3,11 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
-  Activity,
   CreditCard,
   Plus,
-  UserCheck,
   Search,
-  MoreHorizontal,
+  UserPlus,
+  ShoppingBag,
 } from "lucide-react";
 import { useGymStore } from "../../lib/gym-store";
 
@@ -17,30 +16,31 @@ export function MobileBottomNav() {
   const {
     setIsAddMemberOpen,
     setIsRecordPaymentOpen,
-    setIsCheckInOpen,
     setIsCommandPaletteOpen,
     members,
+    leads,
   } = useGymStore();
 
-  const insideCount = members.filter((m) => m.isCurrentlyInside).length;
+  const pendingDuesCount = members.filter((m) => m.due > 0).length;
+  const activeLeadsCount = leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length;
 
   const items = [
     { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-    { to: "/dashboard/members", label: "Members", icon: Users },
-    { to: "/dashboard/attendance", label: "Live Floor", icon: Activity, badge: insideCount },
+    { to: "/dashboard/members", label: "Members", icon: Users, badge: pendingDuesCount },
+    { to: "/dashboard/leads", label: "Leads", icon: UserPlus, badge: activeLeadsCount },
     { to: "/dashboard/payments", label: "Finances", icon: CreditCard },
   ];
 
   return (
     <>
-      {/* Mobile Floating Quick Action Dock */}
+      {/* Mobile Floating Quick Action Button */}
       <div className="fixed bottom-16 right-4 z-40 flex flex-col gap-2 md:hidden">
         <button
-          onClick={() => setIsCheckInOpen(true)}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald text-white shadow-xl hover:scale-105 active:scale-95 transition"
-          title="Instant Check In"
+          onClick={() => setIsAddMemberOpen(true)}
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background shadow-xl hover:scale-105 active:scale-95 transition"
+          title="Enroll Member"
         >
-          <UserCheck className="h-5 w-5" />
+          <Plus className="h-5 w-5" />
         </button>
       </div>
 
@@ -49,7 +49,7 @@ export function MobileBottomNav() {
         {items.map((item) => {
           const isActive =
             item.to === "/dashboard"
-              ? pathname === "/dashboard"
+              ? pathname === "/dashboard" || pathname === "/dashboard/"
               : pathname.startsWith(item.to);
           return (
             <Link
@@ -64,7 +64,7 @@ export function MobileBottomNav() {
               <div className="relative">
                 <item.icon className="h-5 w-5" />
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span className="absolute -top-1 -right-2 grid h-4 min-w-4 place-items-center rounded-full bg-emerald text-[9px] font-bold text-white px-1">
+                  <span className="absolute -top-1 -right-2 grid h-4 min-w-4 place-items-center rounded-full bg-warn text-[9px] font-bold text-white px-1">
                     {item.badge}
                   </span>
                 )}

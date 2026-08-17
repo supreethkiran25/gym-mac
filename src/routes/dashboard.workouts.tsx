@@ -117,7 +117,7 @@ function WorkoutAndDietHub() {
                   <p className="text-xs text-muted-foreground mt-0.5">{wo.focus}</p>
                 </div>
                 <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-mono font-semibold">
-                  {wo.assignedCount} Enrolled
+                  {members.filter((m) => m.assignedWorkout === wo.title).length} Enrolled
                 </span>
               </div>
 
@@ -185,7 +185,7 @@ function WorkoutAndDietHub() {
                   <h3 className="text-base font-bold text-foreground mt-1.5">{diet.title}</h3>
                 </div>
                 <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-mono font-semibold">
-                  {diet.assignedCount} Enrolled
+                  {members.filter((m) => m.assignedDiet === diet.title).length} Enrolled
                 </span>
               </div>
 

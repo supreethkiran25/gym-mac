@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Users,
+  UserPlus,
   Plus,
   Search,
   MessageCircle,
@@ -164,81 +165,97 @@ function LeadsCRM() {
       </div>
 
       {/* Leads Pipeline Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredLeads.map((lead) => (
-          <div
-            key={lead.id}
-            className="rounded-2xl border border-border bg-surface p-5 space-y-4 hover:border-foreground/40 transition shadow-2xs"
+      {filteredLeads.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center space-y-3">
+          <UserPlus className="h-10 w-10 text-muted-foreground mx-auto" />
+          <h3 className="text-sm font-semibold text-foreground">No Prospect Leads</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Log walk-in inquiries, Instagram trial passes, or phone leads to track conversions.
+          </p>
+          <button
+            onClick={() => setIsAddLeadOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-90 transition"
           >
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-foreground">{lead.name}</h3>
-                  <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                    {lead.source}
-                  </span>
+            <Plus className="h-4 w-4" /> Add First Lead
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredLeads.map((lead) => (
+            <div
+              key={lead.id}
+              className="rounded-2xl border border-border bg-surface p-5 space-y-4 hover:border-foreground/40 transition shadow-2xs"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-foreground">{lead.name}</h3>
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {lead.source}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lead.phone}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{lead.phone}</p>
-              </div>
 
-              <select
-                value={lead.stage}
-                onChange={(e) => updateLeadStage(lead.id, e.target.value as LeadStage)}
-                className="rounded-lg border border-border bg-canvas px-2 py-1 text-xs font-semibold outline-none focus:border-emerald"
-              >
-                {STAGES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="rounded-xl border border-border bg-canvas p-3 text-xs space-y-1.5">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Goal:</span>
-                <span className="font-semibold text-foreground truncate max-w-[160px]">{lead.fitnessGoal}</span>
-              </div>
-              {lead.trialDate && (
-                <div className="flex justify-between text-emerald font-medium">
-                  <span>Trial Slot:</span>
-                  <span>{lead.trialDate}</span>
-                </div>
-              )}
-              {lead.notes && (
-                <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/60">
-                  {lead.notes}
-                </p>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-2 border-t border-border gap-2">
-              <button
-                onClick={() => handleSendWhatsApp(lead)}
-                className="flex-1 py-1.5 rounded-xl border border-border bg-canvas text-xs font-medium hover:bg-muted transition flex items-center justify-center gap-1.5"
-              >
-                <MessageCircle className="h-3.5 w-3.5 text-emerald" />
-                <span>WhatsApp</span>
-              </button>
-
-              {lead.stage !== "Won" ? (
-                <button
-                  onClick={() => setConvertingLead(lead)}
-                  className="flex-1 py-1.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition flex items-center justify-center gap-1.5"
+                <select
+                  value={lead.stage}
+                  onChange={(e) => updateLeadStage(lead.id, e.target.value as LeadStage)}
+                  className="rounded-lg border border-border bg-canvas px-2 py-1 text-xs font-semibold outline-none focus:border-emerald"
                 >
-                  <UserCheck className="h-3.5 w-3.5 text-emerald" />
-                  <span>Convert Member</span>
+                  {STAGES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="rounded-xl border border-border bg-canvas p-3 text-xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Goal:</span>
+                  <span className="font-semibold text-foreground truncate max-w-[160px]">{lead.fitnessGoal}</span>
+                </div>
+                {lead.trialDate && (
+                  <div className="flex justify-between text-emerald font-medium">
+                    <span>Trial Slot:</span>
+                    <span>{lead.trialDate}</span>
+                  </div>
+                )}
+                {lead.notes && (
+                  <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/60">
+                    {lead.notes}
+                  </p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-2 border-t border-border gap-2">
+                <button
+                  onClick={() => handleSendWhatsApp(lead)}
+                  className="flex-1 py-1.5 rounded-xl border border-border bg-canvas text-xs font-medium hover:bg-muted transition flex items-center justify-center gap-1.5"
+                >
+                  <MessageCircle className="h-3.5 w-3.5 text-emerald" />
+                  <span>WhatsApp</span>
                 </button>
-              ) : (
-                <span className="flex-1 text-center text-xs font-semibold text-emerald">
-                  ✓ Active Member
-                </span>
-              )}
+
+                {lead.stage !== "Won" ? (
+                  <button
+                    onClick={() => setConvertingLead(lead)}
+                    className="flex-1 py-1.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition flex items-center justify-center gap-1.5"
+                  >
+                    <UserCheck className="h-3.5 w-3.5 text-emerald" />
+                    <span>Convert</span>
+                  </button>
+                ) : (
+                  <span className="flex-1 py-1.5 text-center text-xs font-bold text-emerald">
+                    ✓ Enrolled
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Convert Lead to Member Modal */}
       {convertingLead && (

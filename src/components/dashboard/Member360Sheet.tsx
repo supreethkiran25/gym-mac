@@ -404,45 +404,78 @@ export function Member360Sheet() {
           {/* Comprehensive Member Timeline */}
           <div className="space-y-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Member Activity Timeline
+              Member Activity & Milestone Timeline
             </span>
 
-            <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-              {m.timeline && m.timeline.length > 0 ? (
-                m.timeline.map((event) => {
-                  const getIcon = () => {
-                    switch (event.type) {
-                      case "attendance":
-                        return <CheckCircle2 className="h-3.5 w-3.5 text-emerald" />;
-                      case "payment":
-                        return <CreditCard className="h-3.5 w-3.5 text-blue-500" />;
-                      case "upgrade":
-                        return <TrendingUp className="h-3.5 w-3.5 text-purple-500" />;
-                      case "pt_session":
-                        return <Dumbbell className="h-3.5 w-3.5 text-amber-500" />;
-                      case "freeze":
-                        return <PauseCircle className="h-3.5 w-3.5 text-orange-500" />;
-                      default:
-                        return <Clock className="h-3.5 w-3.5 text-muted-foreground" />;
-                    }
-                  };
+            {(() => {
+              const timelineEvents = m.timeline && m.timeline.length > 0
+                ? m.timeline
+                : [
+                    {
+                      id: "evt-reg",
+                      title: `Enrolled in ${m.plan}`,
+                      timestamp: m.joinDate || "1 May 2026",
+                      type: "upgrade" as const,
+                    },
+                    ...(m.invoices || []).map((inv) => ({
+                      id: `evt-inv-${inv.id}`,
+                      title: `Payment received: ${settings.currencySymbol}${inv.amount.toLocaleString("en-IN")} via ${inv.method} (${inv.invoiceNumber})`,
+                      timestamp: inv.date,
+                      type: "payment" as const,
+                    })),
+                    {
+                      id: "evt-plan",
+                      title: `Active Training Status: ${m.plan} (${m.status})`,
+                      timestamp: m.joinDate || "1 May 2026",
+                      type: "upgrade" as const,
+                    },
+                    ...(m.assignedWorkout
+                      ? [
+                          {
+                            id: "evt-wo",
+                            title: `Assigned Workout Program: ${m.assignedWorkout}`,
+                            timestamp: "Active Routine",
+                            type: "pt_session" as const,
+                          },
+                        ]
+                      : []),
+                  ];
 
-                  return (
-                    <div key={event.id} className="relative">
-                      <div className="absolute -left-6 top-1 grid h-4 w-4 place-items-center rounded-full bg-surface border border-border">
-                        {getIcon()}
+              return (
+                <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+                  {timelineEvents.map((event) => {
+                    const getIcon = () => {
+                      switch (event.type) {
+                        case "attendance":
+                          return <CheckCircle2 className="h-3.5 w-3.5 text-emerald" />;
+                        case "payment":
+                          return <CreditCard className="h-3.5 w-3.5 text-blue-500" />;
+                        case "upgrade":
+                          return <TrendingUp className="h-3.5 w-3.5 text-purple-500" />;
+                        case "pt_session":
+                          return <Dumbbell className="h-3.5 w-3.5 text-amber-500" />;
+                        case "freeze":
+                          return <PauseCircle className="h-3.5 w-3.5 text-orange-500" />;
+                        default:
+                          return <Clock className="h-3.5 w-3.5 text-muted-foreground" />;
+                      }
+                    };
+
+                    return (
+                      <div key={event.id} className="relative">
+                        <div className="absolute -left-6 top-1 grid h-4 w-4 place-items-center rounded-full bg-surface border border-border">
+                          {getIcon()}
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-foreground">{event.title}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{event.timestamp}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium text-foreground">{event.title}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{event.timestamp}</p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="text-xs text-muted-foreground">No recent activity recorded.</p>
-              )}
-            </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

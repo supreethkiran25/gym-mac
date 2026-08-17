@@ -183,103 +183,119 @@ function EquipmentManager() {
       </div>
 
       {/* Equipment Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredEquipment.map((eq) => {
-          const isDue = eq.status === "Service Due";
-          const isRepair = eq.status === "Under Repair";
+      {filteredEquipment.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center space-y-3">
+          <Dumbbell className="h-10 w-10 text-muted-foreground mx-auto" />
+          <h3 className="text-sm font-semibold text-foreground">No Equipment Registered</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Add gym machines, cardio treadmills, and free weights to track maintenance schedules.
+          </p>
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-90 transition"
+          >
+            <Plus className="h-4 w-4" /> Add First Equipment
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredEquipment.map((eq) => {
+            const isDue = eq.status === "Service Due";
+            const isRepair = eq.status === "Under Repair";
 
-          return (
-            <div
-              key={eq.id}
-              className={`rounded-2xl border p-5 space-y-4 transition flex flex-col justify-between shadow-2xs ${
-                isDue
-                  ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500"
-                  : isRepair
-                  ? "border-rose-500/40 bg-rose-500/5 hover:border-rose-500"
-                  : "border-border bg-surface hover:border-foreground/40"
-              }`}
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold text-foreground">
-                      {eq.category}
-                    </span>
-                    <span className="text-[11px] font-mono text-muted-foreground">{eq.serialNumber}</span>
-                  </div>
-
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                      isDue
-                        ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                        : isRepair
-                        ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
-                        : "bg-emerald-soft text-accent-foreground"
-                    }`}
-                  >
-                    {eq.status}
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">{eq.name}</h3>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span>{eq.location}</span>
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-canvas/80 p-3 text-xs space-y-1 font-mono">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Last Serviced:</span>
-                    <span className="font-semibold text-foreground">{eq.lastServiced}</span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Next Due:</span>
-                    <span className={`font-semibold ${isDue ? "text-amber-500" : "text-foreground"}`}>
-                      {eq.nextServiceDate}
-                    </span>
-                  </div>
-                  {eq.vendorName && (
-                    <div className="flex justify-between text-muted-foreground text-[10px] pt-0.5 border-t border-border/40 font-sans">
-                      <span>Vendor:</span>
-                      <span>{eq.vendorName}</span>
+            return (
+              <div
+                key={eq.id}
+                className={`rounded-2xl border p-5 space-y-4 transition flex flex-col justify-between shadow-2xs ${
+                  isDue
+                    ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500"
+                    : isRepair
+                    ? "border-rose-500/40 bg-rose-500/5 hover:border-rose-500"
+                    : "border-border bg-surface hover:border-foreground/40"
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold text-foreground">
+                        {eq.category}
+                      </span>
+                      <span className="text-[11px] font-mono text-muted-foreground">{eq.serialNumber}</span>
                     </div>
-                  )}
+
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                        isDue
+                          ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                          : isRepair
+                          ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
+                          : "bg-emerald-soft text-accent-foreground"
+                      }`}
+                    >
+                      {eq.status}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">{eq.name}</h3>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span>{eq.location}</span>
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-border/60 bg-canvas/80 p-3 text-xs space-y-1 font-mono">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Last Serviced:</span>
+                      <span className="font-semibold text-foreground">{eq.lastServiced}</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Next Due:</span>
+                      <span className={`font-semibold ${isDue ? "text-amber-500" : "text-foreground"}`}>
+                        {eq.nextServiceDate}
+                      </span>
+                    </div>
+                    {eq.vendorName && (
+                      <div className="flex justify-between text-muted-foreground text-[10px] pt-0.5 border-t border-border/40 font-sans">
+                        <span>Vendor:</span>
+                        <span>{eq.vendorName}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between pt-3 border-t border-border/60 gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => handleOpenEdit(eq)}
+                      className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition"
+                      title="Edit Item"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(eq.id, eq.name)}
+                      className="p-1.5 rounded-lg border border-border hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition"
+                      title="Delete Item"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => handleService(eq.id, eq.name)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-xl bg-foreground text-background px-3 py-1.5 hover:opacity-90 transition"
+                  >
+                    <Wrench className="h-3.5 w-3.5 text-emerald" />
+                    <span>Log Service</span>
+                  </button>
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-3 border-t border-border/60 gap-2">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => handleOpenEdit(eq)}
-                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition"
-                    title="Edit Item"
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(eq.id, eq.name)}
-                    className="p-1.5 rounded-lg border border-border hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition"
-                    title="Delete Item"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => handleService(eq.id, eq.name)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-xl bg-foreground text-background px-3 py-1.5 hover:opacity-90 transition"
-                >
-                  <Wrench className="h-3.5 w-3.5 text-emerald" />
-                  <span>Log Service</span>
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Add / Edit Equipment Modal */}
       {(isAddModalOpen || editingEquipment) && (

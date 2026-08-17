@@ -182,104 +182,120 @@ function StaffManager() {
       </div>
 
       {/* Staff Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredStaff.map((s) => (
-          <div
-            key={s.id}
-            className="rounded-2xl border border-border bg-surface p-5 space-y-4 hover:border-foreground/40 transition shadow-2xs flex flex-col justify-between"
+      {filteredStaff.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center space-y-3">
+          <Users className="h-10 w-10 text-muted-foreground mx-auto" />
+          <h3 className="text-sm font-semibold text-foreground">No Staff Members Registered</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Add head coaches, personal trainers, and front desk managers to manage floor duty and payroll.
+          </p>
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-90 transition"
           >
-            <div className="space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-foreground text-background font-bold text-xs">
-                    {s.avatar || s.name.slice(0, 2).toUpperCase()}
+            <Plus className="h-4 w-4" /> Add First Staff Member
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredStaff.map((s) => (
+            <div
+              key={s.id}
+              className="rounded-2xl border border-border bg-surface p-5 space-y-4 hover:border-foreground/40 transition shadow-2xs flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-foreground text-background font-bold text-xs">
+                      {s.avatar || s.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">{s.name}</h3>
+                      <p className="text-xs font-medium text-emerald">{s.role}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">{s.name}</h3>
-                    <p className="text-xs font-medium text-emerald">{s.role}</p>
-                  </div>
+
+                  <button
+                    onClick={() =>
+                      toggleStaffStatus(
+                        s.id,
+                        s.status === "On Floor" ? "Off Duty" : "On Floor"
+                      )
+                    }
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition ${
+                      s.status === "On Floor"
+                        ? "bg-emerald-soft text-accent-foreground border-emerald/30"
+                        : "bg-muted text-muted-foreground border-border"
+                    }`}
+                  >
+                    {s.status}
+                  </button>
                 </div>
 
-                <button
-                  onClick={() =>
-                    toggleStaffStatus(
-                      s.id,
-                      s.status === "On Floor" ? "Off Duty" : "On Floor"
-                    )
-                  }
-                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition ${
-                    s.status === "On Floor"
-                      ? "bg-emerald-soft text-accent-foreground border-emerald/30"
-                      : "bg-muted text-muted-foreground border-border"
-                  }`}
-                >
-                  {s.status}
-                </button>
-              </div>
-
-              {/* Staff Details */}
-              <div className="rounded-xl border border-border bg-canvas/80 p-3 text-xs space-y-1.5">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Shift:
-                  </span>
-                  <span className="font-medium text-foreground truncate max-w-[170px]">{s.shift}</span>
-                </div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Contact:
-                  </span>
-                  <span className="font-medium text-foreground font-mono">{s.phone}</span>
-                </div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <DollarSign className="h-3.5 w-3.5 text-muted-foreground" /> Salary:
-                  </span>
-                  <span className="font-bold text-foreground font-mono">
-                    {settings.currencySymbol}{s.salary.toLocaleString("en-IN")} / mo
-                  </span>
-                </div>
-                {s.assignedClientsCount > 0 && (
-                  <div className="flex items-center justify-between text-muted-foreground pt-1 border-t border-border/40">
-                    <span>Active PT Clients:</span>
-                    <span className="font-semibold text-purple-600 dark:text-purple-400">
-                      {s.assignedClientsCount} Clients
+                {/* Staff Details */}
+                <div className="rounded-xl border border-border bg-canvas/80 p-3 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Shift:
+                    </span>
+                    <span className="font-medium text-foreground truncate max-w-[170px]">{s.shift}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Contact:
+                    </span>
+                    <span className="font-medium text-foreground font-mono">{s.phone}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <DollarSign className="h-3.5 w-3.5 text-muted-foreground" /> Salary:
+                    </span>
+                    <span className="font-bold text-foreground font-mono">
+                      {settings.currencySymbol}{s.salary.toLocaleString("en-IN")} / mo
                     </span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Actions Bar */}
-            <div className="flex items-center justify-between pt-3 border-t border-border gap-2">
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => handleOpenEdit(s)}
-                  className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition"
-                  title="Edit Staff Member"
-                >
-                  <Edit2 className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={() => handleDeleteStaff(s.id, s.name)}
-                  className="p-1.5 rounded-lg border border-border hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition"
-                  title="Delete Staff Member"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                  {s.assignedClientsCount > 0 && (
+                    <div className="flex items-center justify-between text-muted-foreground pt-1 border-t border-border/40">
+                      <span>Active PT Clients:</span>
+                      <span className="font-semibold text-purple-600 dark:text-purple-400">
+                        {s.assignedClientsCount} Clients
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <button
-                onClick={() => handleDisburseSalary(s)}
-                className="inline-flex items-center gap-1 text-xs font-semibold rounded-xl bg-foreground text-background px-3 py-1.5 hover:opacity-90 transition"
-              >
-                <DollarSign className="h-3.5 w-3.5 text-emerald" />
-                <span>Pay Salary</span>
-              </button>
+              {/* Actions Bar */}
+              <div className="flex items-center justify-between pt-3 border-t border-border gap-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleOpenEdit(s)}
+                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition"
+                    title="Edit Staff Member"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteStaff(s.id, s.name)}
+                    className="p-1.5 rounded-lg border border-border hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition"
+                    title="Delete Staff Member"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => handleDisburseSalary(s)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold rounded-xl bg-foreground text-background px-3 py-1.5 hover:opacity-90 transition"
+                >
+                  <DollarSign className="h-3.5 w-3.5 text-emerald" />
+                  <span>Pay Salary</span>
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Add / Edit Staff Modal */}
       {(isAddModalOpen || editingStaff) && (

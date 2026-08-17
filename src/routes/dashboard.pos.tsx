@@ -168,48 +168,58 @@ function POSProShop() {
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {filteredProducts.map((prod) => (
-              <div
-                key={prod.id}
-                onClick={() => addToCart(prod)}
-                className={`group cursor-pointer rounded-2xl border p-4 space-y-3 transition hover:shadow-md ${
-                  prod.stock <= 5
-                    ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500"
-                    : "border-border bg-surface hover:border-foreground/40"
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <span className="text-3xl">{prod.icon}</span>
-                  <span
-                    className={`rounded-md px-2 py-0.5 text-[10px] font-mono font-bold ${
-                      prod.stock <= 5
-                        ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {prod.stock} in stock
-                  </span>
-                </div>
+          {filteredProducts.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center space-y-3">
+              <ShoppingBag className="h-10 w-10 text-muted-foreground mx-auto" />
+              <h3 className="text-sm font-semibold text-foreground">Pro Shop Inventory Empty</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                No supplements, energy drinks, or apparel items currently listed in the front desk store.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {filteredProducts.map((prod) => (
+                <div
+                  key={prod.id}
+                  onClick={() => addToCart(prod)}
+                  className={`group cursor-pointer rounded-2xl border p-4 space-y-3 transition hover:shadow-md ${
+                    prod.stock <= 5
+                      ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500"
+                      : "border-border bg-surface hover:border-foreground/40"
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <span className="text-3xl">{prod.icon}</span>
+                    <span
+                      className={`rounded-md px-2 py-0.5 text-[10px] font-mono font-bold ${
+                        prod.stock <= 5
+                          ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {prod.stock} in stock
+                    </span>
+                  </div>
 
-                <div>
-                  <h4 className="text-xs font-bold text-foreground line-clamp-2 group-hover:text-emerald transition">
-                    {prod.name}
-                  </h4>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">SKU: {prod.sku}</p>
-                </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-foreground line-clamp-2 group-hover:text-emerald transition">
+                      {prod.name}
+                    </h4>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">SKU: {prod.sku}</p>
+                  </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                  <span className="font-mono font-bold text-sm text-foreground">
-                    {settings.currencySymbol}{prod.price.toLocaleString("en-IN")}
-                  </span>
-                  <button className="rounded-lg bg-foreground text-background p-1.5 text-xs font-semibold hover:opacity-90 transition">
-                    <Plus className="h-3.5 w-3.5" />
-                  </button>
+                  <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                    <span className="font-mono font-bold text-sm text-foreground">
+                      {settings.currencySymbol}{prod.price.toLocaleString("en-IN")}
+                    </span>
+                    <button className="rounded-lg bg-foreground text-background p-1.5 text-xs font-semibold hover:opacity-90 transition">
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Live Cart & Checkout Drawer (1 Col) */}

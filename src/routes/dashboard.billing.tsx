@@ -12,7 +12,9 @@ function Billing() {
 
   const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
   const currentMonthBill = activeMembersCount * settings.perMemberRate;
-  const estNextMonthBill = (activeMembersCount + 8) * settings.perMemberRate;
+  const estNextMonthBill = (activeMembersCount + 2) * settings.perMemberRate;
+
+  const currentMonthName = new Date().toLocaleString("default", { month: "long", year: "numeric" });
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
@@ -39,7 +41,7 @@ function Billing() {
             <span className="text-xs text-muted-foreground">/ month</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Calculated on {activeMembersCount} active/expiring members × {settings.currencySymbol}
+            Calculated on {activeMembersCount} active/expiring member(s) × {settings.currencySymbol}
             {settings.perMemberRate} rate
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-emerald">
@@ -55,7 +57,7 @@ function Billing() {
             {estNextMonthBill.toLocaleString("en-IN")}
           </p>
           <p className="text-xs text-muted-foreground">
-            Projected on ~{activeMembersCount + 8} active members
+            Projected on ~{activeMembersCount + 2} active members
           </p>
         </div>
       </div>
@@ -75,23 +77,20 @@ function Billing() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {[
-                ["1 May 2026", "April Usage · 148 active members", "₹1,480", "Paid"],
-                ["1 Apr 2026", "March Usage · 141 active members", "₹1,410", "Paid"],
-                ["1 Mar 2026", "February Usage · 132 active members", "₹1,320", "Paid"],
-                ["1 Feb 2026", "January Usage · 124 active members", "₹1,240", "Paid"],
-              ].map(([d, l, a, s]) => (
-                <tr key={d} className="hover:bg-muted/40 transition">
-                  <td className="px-5 py-3.5 text-muted-foreground font-mono">{d}</td>
-                  <td className="px-5 py-3.5 font-medium text-foreground">{l}</td>
-                  <td className="px-5 py-3.5 font-mono font-semibold">{a}</td>
-                  <td className="px-5 py-3.5 text-right">
-                    <span className="inline-flex rounded-full bg-emerald-soft px-2.5 py-0.5 text-xs text-accent-foreground font-semibold">
-                      {s}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              <tr className="hover:bg-muted/40 transition">
+                <td className="px-5 py-3.5 text-muted-foreground font-mono">1 {currentMonthName}</td>
+                <td className="px-5 py-3.5 font-medium text-foreground">
+                  Current Usage · {activeMembersCount} active member(s)
+                </td>
+                <td className="px-5 py-3.5 font-mono font-semibold">
+                  {settings.currencySymbol}{currentMonthBill.toLocaleString("en-IN")}
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  <span className="inline-flex rounded-full bg-emerald-soft px-2.5 py-0.5 text-xs text-accent-foreground font-semibold">
+                    Current
+                  </span>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>

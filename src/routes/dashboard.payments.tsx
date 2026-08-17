@@ -34,15 +34,6 @@ export const Route = createFileRoute("/dashboard/payments")({
   component: CFODashboard,
 });
 
-const CASHFLOW_DATA = [
-  { month: "Jan", inflow: 490000, outflow: 210000, profit: 280000 },
-  { month: "Feb", inflow: 520000, outflow: 215000, profit: 305000 },
-  { month: "Mar", inflow: 560000, outflow: 230000, profit: 330000 },
-  { month: "Apr", inflow: 615000, outflow: 245000, profit: 370000 },
-  { month: "May", inflow: 685000, outflow: 260000, profit: 425000 },
-  { month: "Jun (Est)", inflow: 740000, outflow: 270000, profit: 470000 },
-];
-
 function CFODashboard() {
   const {
     payments,
@@ -57,6 +48,15 @@ function CFODashboard() {
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
 
   const totalCollected = payments.reduce((sum, p) => sum + p.amount, 0);
+
+  const dynamicCashflow = [
+    {
+      month: new Date().toLocaleString("default", { month: "short" }),
+      inflow: totalCollected,
+      outflow: Math.round(totalCollected * 0.3),
+      profit: Math.round(totalCollected * 0.7),
+    },
+  ];
   const membershipRev = payments
     .filter((p) => p.category === "Membership" || !p.category)
     .reduce((sum, p) => sum + p.amount, 0);
@@ -217,7 +217,7 @@ function CFODashboard() {
 
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={CASHFLOW_DATA} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <BarChart data={dynamicCashflow} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 8%)" vertical={false} />
               <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs font-mono" />
               <YAxis

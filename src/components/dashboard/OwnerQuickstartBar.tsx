@@ -10,6 +10,9 @@ import {
   ShoppingBag,
   ArrowRight,
   ChevronDown,
+  UserPlus,
+  Send,
+  CreditCard,
 } from "lucide-react";
 import { useGymStore } from "../../lib/gym-store";
 import { toast } from "sonner";
@@ -20,12 +23,10 @@ export function OwnerQuickstartBar() {
     currentLocationId,
     switchLocation,
     members,
-    checkInMember,
-    openUPIQRModal,
     setIsAddMemberOpen,
+    setIsRecordPaymentOpen,
+    openUPIQRModal,
     sendAllReminders,
-    processPOSSale,
-    posProducts,
     settings,
   } = useGymStore();
 
@@ -33,23 +34,11 @@ export function OwnerQuickstartBar() {
   const [showGlossary, setShowGlossary] = useState(false);
 
   const currentLoc = locations.find((l) => l.id === currentLocationId) || locations[0];
+  const pendingDuesCount = members.filter((m) => m.due > 0).length;
 
-  const handleSimulateRush = () => {
-    // Check in 3 inactive members to simulate evening peak rush
-    const notInside = members.filter((m) => !m.isCurrentlyInside).slice(0, 3);
-    notInside.forEach((m) => checkInMember(m.id));
-    toast.success(`⚡ Simulated rush: Checked in 3 members to gym floor!`);
-  };
-
-  const handleSimulateWalkInPOS = () => {
-    if (posProducts.length > 0) {
-      processPOSSale({
-        memberName: "Walk-in Guest",
-        items: [{ productId: posProducts[0].id, name: posProducts[0].name, price: posProducts[0].price, quantity: 1 }],
-        paymentMethod: "UPI",
-      });
-      toast.success(`🛍️ Simulated Pro Shop Sale: Sold 1x ${posProducts[0].name} via UPI!`);
-    }
+  const handleBatchNudge = () => {
+    sendAllReminders();
+    toast.success(`Queued automated WhatsApp/SMS payment reminders for ${pendingDuesCount} member(s)!`);
   };
 
   return (
@@ -87,7 +76,7 @@ export function OwnerQuickstartBar() {
                     }`}
                   >
                     <span className="truncate">{loc.name}</span>
-                    <span className="text-[10px] opacity-80">{loc.memberCount} active</span>
+                    <span className="text-[10px] opacity-80">{members.length} active</span>
                   </button>
                 ))}
               </div>
@@ -100,33 +89,44 @@ export function OwnerQuickstartBar() {
           </div>
         </div>
 
-        {/* Guided Simulation Buttons for Demo / Testing */}
+        {/* Quick Direct Operations Action Dock */}
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={handleSimulateRush}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-medium hover:bg-muted transition"
-            title="Simulate 3 members checking in to floor"
+            onClick={() => setIsAddMemberOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-3.5 py-1.5 text-xs font-semibold hover:opacity-90 transition shadow-xs"
+            title="Enroll new member"
           >
-            <Zap className="h-3.5 w-3.5 text-amber-500" />
-            <span>Simulate Rush</span>
+            <UserPlus className="h-3.5 w-3.5" />
+            <span>Enroll Member</span>
           </button>
 
           <button
-            onClick={handleSimulateWalkInPOS}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-medium hover:bg-muted transition"
-            title="Simulate selling protein powder"
+            onClick={() => setIsRecordPaymentOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-semibold hover:bg-muted transition"
+            title="Record member fee payment"
           >
-            <ShoppingBag className="h-3.5 w-3.5 text-purple-500" />
-            <span>Simulate POS Sale</span>
+            <CreditCard className="h-3.5 w-3.5 text-purple-500" />
+            <span>Record Payment</span>
           </button>
 
           <button
-            onClick={() => openUPIQRModal(2800, "Walk-in Member", "Monthly Flex Pass")}
+            onClick={() => openUPIQRModal(settings.membershipPlans[0]?.price || 2800, "Walk-in Member", "Monthly Flex Pass")}
             className="inline-flex items-center gap-1.5 rounded-xl border border-emerald/40 bg-emerald-soft px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-emerald-soft/80 transition"
           >
             <QrCode className="h-3.5 w-3.5" />
             <span>Show UPI QR</span>
           </button>
+
+          {pendingDuesCount > 0 && (
+            <button
+              onClick={handleBatchNudge}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-warn/40 bg-warn/10 text-warn px-3 py-1.5 text-xs font-semibold hover:bg-warn/20 transition"
+              title="Queue automated WhatsApp reminders"
+            >
+              <Send className="h-3.5 w-3.5" />
+              <span>Nudge Dues ({pendingDuesCount})</span>
+            </button>
+          )}
 
           <button
             onClick={() => setShowGlossary((prev) => !prev)}
@@ -147,10 +147,7 @@ export function OwnerQuickstartBar() {
               Close ✕
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-muted-foreground">
-            <div className="p-2 rounded-lg bg-surface border border-border">
-              <b className="text-foreground">Floor Occupancy:</b> Number of members actively on the workout floor right now.
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-muted-foreground">
             <div className="p-2 rounded-lg bg-surface border border-border">
               <b className="text-foreground">MRR (Monthly Revenue):</b> Predictable recurring subscription fees collected every month.
             </div>

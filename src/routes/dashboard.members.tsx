@@ -35,7 +35,7 @@ function MembersManagement() {
   } = useGymStore();
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Inside" | MemberStatus>("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | MemberStatus>("All");
   const [viewMode, setViewMode] = useState<"cards" | "density">("cards");
 
   const filteredMembers = members.filter((m) => {
@@ -46,7 +46,6 @@ function MembersManagement() {
 
     if (!matchesSearch) return false;
     if (statusFilter === "All") return true;
-    if (statusFilter === "Inside") return m.isCurrentlyInside;
     return m.status === statusFilter;
   });
 
@@ -137,7 +136,7 @@ function MembersManagement() {
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {(["All", "Inside", "Active", "Expiring", "Expired", "Partial", "Frozen"] as const).map(
+          {(["All", "Active", "Expiring", "Expired", "Partial", "Frozen"] as const).map(
             (st) => (
               <button
                 key={st}
@@ -148,7 +147,7 @@ function MembersManagement() {
                     : "border-border bg-surface text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {st === "Inside" ? "⚡ Inside Gym" : st}
+                {st}
               </button>
             )
           )}
@@ -173,16 +172,8 @@ function MembersManagement() {
                   {/* Card Top: Avatar, Name, Status */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-foreground text-background font-bold text-sm">
-                          {m.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        {m.isCurrentlyInside && (
-                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald"></span>
-                          </span>
-                        )}
+                      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-foreground text-background font-bold text-sm">
+                        {m.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold tracking-tight text-foreground group-hover:text-emerald transition">
@@ -213,10 +204,10 @@ function MembersManagement() {
                     </div>
                   </div>
 
-                  {/* Card Biometrics: Attendance % & Last Visit */}
+                  {/* Card Membership Stats */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground text-[11px]">Attendance Velocity</span>
+                      <span className="text-muted-foreground text-[11px]">Member Retention Pacing</span>
                       <span className="font-mono font-semibold">{m.attendanceRate}%</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
@@ -226,8 +217,8 @@ function MembersManagement() {
                       />
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
-                      <span>Last check-in:</span>
-                      <span className="font-medium text-foreground">{m.lastVisit}</span>
+                      <span>Joined Gym:</span>
+                      <span className="font-medium text-foreground">{m.joinDate || "1 May 2026"}</span>
                     </div>
                   </div>
 

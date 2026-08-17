@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
-import { Route as DashboardAttendanceRouteImport } from './routes/dashboard.attendance'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
 import { Route as DashboardClassesRouteImport } from './routes/dashboard.classes'
 import { Route as DashboardEquipmentRouteImport } from './routes/dashboard.equipment'
@@ -46,11 +45,6 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAttendanceRoute = DashboardAttendanceRouteImport.update({
-  id: '/attendance',
-  path: '/attendance',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardBillingRoute = DashboardBillingRouteImport.update({
@@ -123,7 +117,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
-  '/dashboard/attendance': typeof DashboardAttendanceRoute
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/classes': typeof DashboardClassesRoute
   '/dashboard/equipment': typeof DashboardEquipmentRoute
@@ -142,7 +135,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
-  '/dashboard/attendance': typeof DashboardAttendanceRoute
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/classes': typeof DashboardClassesRoute
   '/dashboard/equipment': typeof DashboardEquipmentRoute
@@ -163,7 +155,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
-  '/dashboard/attendance': typeof DashboardAttendanceRoute
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/classes': typeof DashboardClassesRoute
   '/dashboard/equipment': typeof DashboardEquipmentRoute
@@ -185,7 +176,6 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/analytics'
-    | '/dashboard/attendance'
     | '/dashboard/billing'
     | '/dashboard/classes'
     | '/dashboard/equipment'
@@ -204,7 +194,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard/analytics'
-    | '/dashboard/attendance'
     | '/dashboard/billing'
     | '/dashboard/classes'
     | '/dashboard/equipment'
@@ -224,7 +213,6 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/analytics'
-    | '/dashboard/attendance'
     | '/dashboard/billing'
     | '/dashboard/classes'
     | '/dashboard/equipment'
@@ -274,13 +262,6 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/dashboard/analytics'
       preLoaderRoute: typeof DashboardAnalyticsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/attendance': {
-      id: '/dashboard/attendance'
-      path: '/attendance'
-      fullPath: '/dashboard/attendance'
-      preLoaderRoute: typeof DashboardAttendanceRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/billing': {
@@ -379,7 +360,6 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
-  DashboardAttendanceRoute: typeof DashboardAttendanceRoute
   DashboardBillingRoute: typeof DashboardBillingRoute
   DashboardClassesRoute: typeof DashboardClassesRoute
   DashboardEquipmentRoute: typeof DashboardEquipmentRoute
@@ -398,7 +378,6 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
-  DashboardAttendanceRoute: DashboardAttendanceRoute,
   DashboardBillingRoute: DashboardBillingRoute,
   DashboardClassesRoute: DashboardClassesRoute,
   DashboardEquipmentRoute: DashboardEquipmentRoute,

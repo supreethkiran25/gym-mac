@@ -99,63 +99,73 @@ function RemindersHub() {
 
       {/* Reminders Queue Table / Cards */}
       <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead className="border-b border-border bg-canvas text-left uppercase text-muted-foreground font-semibold tracking-wider">
-              <tr>
-                <th className="py-3 px-4">Member</th>
-                <th className="py-3 px-4">Reason / Trigger</th>
-                <th className="py-3 px-4">Channel</th>
-                <th className="py-3 px-4">Scheduled Slot</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredReminders.map((r) => (
-                <tr key={r.id} className="hover:bg-muted/40 transition">
-                  <td className="py-3.5 px-4 font-semibold text-foreground">{r.name}</td>
-                  <td className="py-3.5 px-4 font-medium text-foreground">{r.reason}</td>
-                  <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-canvas border border-border px-2.5 py-1 text-xs font-medium">
-                      {r.channel === "WhatsApp" && <MessageCircle className="h-3.5 w-3.5 text-emerald" />}
-                      {r.channel === "SMS" && <Smartphone className="h-3.5 w-3.5 text-blue-500" />}
-                      {r.channel === "Email" && <Mail className="h-3.5 w-3.5 text-amber-500" />}
-                      <span>{r.channel}</span>
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-muted-foreground">{r.time}</td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                        r.status === "Sent"
-                          ? "bg-emerald-soft text-accent-foreground"
-                          : "bg-warn/15 text-warn"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    {r.status === "Pending" ? (
-                      <button
-                        onClick={() => handleSendSingle(r)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold rounded-lg bg-foreground text-background px-3 py-1 hover:opacity-90 transition"
-                      >
-                        <Send className="h-3 w-3" />
-                        <span>Send Now</span>
-                      </button>
-                    ) : (
-                      <span className="text-emerald text-xs font-medium inline-flex items-center gap-1">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Sent
-                      </span>
-                    )}
-                  </td>
+        {filteredReminders.length === 0 ? (
+          <div className="p-12 text-center space-y-3">
+            <CheckCircle2 className="h-10 w-10 text-emerald mx-auto" />
+            <h3 className="text-sm font-semibold text-foreground">All Member Accounts Up to Date</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              There are no pending dues or expiring passes requiring notification right now.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="border-b border-border bg-canvas text-left uppercase text-muted-foreground font-semibold tracking-wider">
+                <tr>
+                  <th className="py-3 px-4">Member</th>
+                  <th className="py-3 px-4">Reason / Trigger</th>
+                  <th className="py-3 px-4">Channel</th>
+                  <th className="py-3 px-4">Scheduled Slot</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredReminders.map((r) => (
+                  <tr key={r.id} className="hover:bg-muted/40 transition">
+                    <td className="py-3.5 px-4 font-semibold text-foreground">{r.name}</td>
+                    <td className="py-3.5 px-4 font-medium text-foreground">{r.reason}</td>
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-canvas border border-border px-2.5 py-1 text-xs font-medium">
+                        {r.channel === "WhatsApp" && <MessageCircle className="h-3.5 w-3.5 text-emerald" />}
+                        {r.channel === "SMS" && <Smartphone className="h-3.5 w-3.5 text-blue-500" />}
+                        {r.channel === "Email" && <Mail className="h-3.5 w-3.5 text-amber-500" />}
+                        <span>{r.channel}</span>
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-muted-foreground">{r.time}</td>
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                          r.status === "Sent"
+                            ? "bg-emerald-soft text-accent-foreground"
+                            : "bg-warn/15 text-warn"
+                        }`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      {r.status === "Pending" ? (
+                        <button
+                          onClick={() => handleSendSingle(r)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold rounded-lg bg-foreground text-background px-3 py-1 hover:opacity-90 transition"
+                        >
+                          <Send className="h-3 w-3" />
+                          <span>Send Now</span>
+                        </button>
+                      ) : (
+                        <span className="text-emerald text-xs font-medium inline-flex items-center gap-1">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Sent
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

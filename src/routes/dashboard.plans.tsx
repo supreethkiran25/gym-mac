@@ -75,7 +75,7 @@ function MembershipPlansMatrix() {
         <div className="rounded-2xl border border-border bg-surface p-4 space-y-1">
           <span className="text-xs font-semibold text-muted-foreground">Upgrade Opportunities</span>
           <p className="text-2xl font-bold font-mono text-purple-600 dark:text-purple-400">
-            {settings.membershipPlans.reduce((s, p) => s + p.upgradeOpportunities, 0)}
+            {members.filter((m) => m.attendanceRate >= 70).length}
           </p>
           <p className="text-[11px] text-muted-foreground">High-frequency members</p>
         </div>
@@ -126,7 +126,7 @@ function MembershipPlansMatrix() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Upgrade Potential:</span>
                     <span className="font-mono font-semibold text-purple-600 dark:text-purple-400">
-                      {plan.upgradeOpportunities} candidates
+                      {members.filter((m) => m.plan === plan.name && m.attendanceRate >= 70).length} candidates
                     </span>
                   </div>
                 </div>

@@ -552,6 +552,9 @@ interface GymStoreContextType {
   updatePlan: (id: string, updates: Partial<MembershipPlan>) => void;
   deletePlan: (id: string) => void;
   // Classes
+  addClass: (classData: Omit<GymClass, "id" | "enrolledMembers">) => void;
+  updateClass: (id: string, updates: Partial<GymClass>) => void;
+  deleteClass: (id: string) => void;
   bookClass: (classId: string, memberId: string) => void;
   cancelClassBooking: (classId: string, memberId: string) => void;
   dismissInsight: (id: string) => void;
@@ -1306,7 +1309,27 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
+  const addClass = (classData: Omit<GymClass, "id" | "enrolledMembers">) => {
+    const newClass: GymClass = {
+      ...classData,
+      id: `class-${Date.now()}`,
+      enrolledMembers: [],
+    };
+    setClasses((prev) => [...prev, newClass]);
+  };
+
+  const updateClass = (id: string, updates: Partial<GymClass>) => {
+    setClasses((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+    );
+  };
+
+  const deleteClass = (id: string) => {
+    setClasses((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const bookClass = (classId: string, memberId: string) => {
+    const cls = classes.find((c) => c.id === classId);
     setClasses((prev) =>
       prev.map((c) => {
         if (c.id === classId && !c.enrolledMembers.includes(memberId)) {
@@ -1315,6 +1338,29 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return c;
       })
     );
+
+    // Also record event in member timeline
+    if (cls) {
+      setMembers((prev) =>
+        prev.map((m) => {
+          if (m.id === memberId) {
+            return {
+              ...m,
+              timeline: [
+                {
+                  id: `t-class-${Date.now()}`,
+                  type: "pt_session" as const,
+                  title: `Enrolled in Studio Session: ${cls.title} (${cls.time})`,
+                  timestamp: "Just now",
+                },
+                ...(m.timeline || []),
+              ],
+            };
+          }
+          return m;
+        })
+      );
+    }
   };
 
   const cancelClassBooking = (classId: string, memberId: string) => {
@@ -1645,6 +1691,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addPlan,
         updatePlan,
         deletePlan,
+        addClass,
+        updateClass,
+        deleteClass,
         bookClass,
         cancelClassBooking,
         dismissInsight,
