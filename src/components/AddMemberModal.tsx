@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, UserPlus, Calendar, Phone, Mail, CreditCard, Sparkles, Check } from "lucide-react";
+import { X, UserPlus, Calendar, Phone, Mail, CreditCard, Check } from "lucide-react";
 import { useGymStore, MemberStatus } from "../lib/gym-store";
 import { toast } from "sonner";
 
@@ -11,15 +11,20 @@ export function AddMemberModal() {
   const [email, setEmail] = useState("");
   const [selectedPlanId, setSelectedPlanId] = useState(settings.membershipPlans[0]?.id || "plan-1");
   const [paymentOption, setPaymentOption] = useState<"Full" | "Partial" | "Later">("Full");
-  const [partialDue, setPartialDue] = useState("1000");
+  const [initialPaidAmount, setInitialPaidAmount] = useState("2000");
   const [notes, setNotes] = useState("");
+  const [healthGoal, setHealthGoal] = useState("General Fitness");
 
   if (!isAddMemberOpen) return null;
 
   const currentPlan =
-    settings.membershipPlans.find((p) => p.id === selectedPlanId) || settings.membershipPlans[0];
+    settings.membershipPlans.find((p) => p.id === selectedPlanId) || settings.membershipPlans[0] || {
+      id: "default",
+      name: "Monthly Flex",
+      price: 3000,
+      durationMonths: 1,
+    };
 
-  // Calculate expiry
   const calculateExpiry = (durationMonths: number) => {
     const d = new Date();
     d.setMonth(d.getMonth() + durationMonths);
@@ -33,12 +38,20 @@ export function AddMemberModal() {
       return;
     }
 
-    const dueAmount =
-      paymentOption === "Full"
-        ? 0
-        : paymentOption === "Partial"
-        ? parseFloat(partialDue) || 0
-        : currentPlan.price;
+    const planPrice = currentPlan.price;
+    let initialPaid = 0;
+    let dueAmount = 0;
+
+    if (paymentOption === "Full") {
+      initialPaid = planPrice;
+      dueAmount = 0;
+    } else if (paymentOption === "Partial") {
+      initialPaid = parseFloat(initialPaidAmount) || 0;
+      dueAmount = Math.max(0, planPrice - initialPaid);
+    } else {
+      initialPaid = 0;
+      dueAmount = planPrice;
+    }
 
     const status: MemberStatus = dueAmount > 0 ? "Partial" : "Active";
     const today = new Date().toISOString().split("T")[0];
@@ -49,14 +62,16 @@ export function AddMemberModal() {
       phone: phone.trim(),
       email: email.trim(),
       plan: currentPlan.name,
+      planPrice,
       joinDate: today,
       expiry,
       status,
       due: dueAmount,
+      healthGoal,
       notes: notes.trim(),
     });
 
-    toast.success(`Member ${name} enrolled in ${currentPlan.name} successfully!`);
+    toast.success(`Enrolled ${name} in ${currentPlan.name}!`);
     setIsAddMemberOpen(false);
 
     // Reset Form
@@ -65,6 +80,7 @@ export function AddMemberModal() {
     setEmail("");
     setPaymentOption("Full");
     setNotes("");
+    setHealthGoal("General Fitness");
   };
 
   return (
@@ -80,8 +96,8 @@ export function AddMemberModal() {
               <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Add New Member</h2>
-              <p className="text-xs text-muted-foreground">Fast 2-step enrollment & access pass</p>
+              <h2 className="text-base font-semibold text-foreground">Enroll New Member</h2>
+              <p className="text-xs text-muted-foreground">Register membership and configure initial payment schedule</p>
             </div>
           </div>
           <button
@@ -93,146 +109,168 @@ export function AddMemberModal() {
         </div>
 
         {/* Streamlined Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
           {/* Member Name */}
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+            <label className="block font-semibold text-muted-foreground mb-1">
               Full Name *
             </label>
             <input
               type="text"
               required
-              autoFocus
-              placeholder="e.g. Aarav Sharma"
+              placeholder="e.g. Rahul Sharma"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 outline-none focus:border-emerald transition"
+              className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-xs text-foreground font-medium outline-none focus:border-emerald transition"
             />
           </div>
 
-          {/* Contact Details */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Phone & Email */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
-                Phone Number *
+              <label className="block font-semibold text-muted-foreground mb-1">
+                Phone Number (WhatsApp) *
               </label>
               <input
-                type="text"
+                type="tel"
                 required
                 placeholder="+91 98765 43210"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 outline-none focus:border-emerald transition"
+                className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-xs font-mono text-foreground outline-none focus:border-emerald transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+              <label className="block font-semibold text-muted-foreground mb-1">
                 Email Address
               </label>
               <input
                 type="email"
-                placeholder="aarav@example.com"
+                placeholder="rahul@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 outline-none focus:border-emerald transition"
+                className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-xs text-foreground outline-none focus:border-emerald transition"
               />
             </div>
           </div>
 
-          {/* Visual Membership Plan Selector (1-Click) */}
+          {/* Plan Selection */}
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-2">
-              Select Membership Package *
+            <label className="block font-semibold text-muted-foreground mb-1">
+              Membership Plan *
             </label>
-            <div className="grid grid-cols-2 gap-2.5">
-              {settings.membershipPlans.map((p) => {
-                const isSelected = selectedPlanId === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedPlanId(p.id)}
-                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition relative ${
-                      isSelected
-                        ? "border-emerald bg-emerald-soft/30 ring-1 ring-emerald"
-                        : "border-border bg-canvas hover:bg-muted/50"
-                    }`}
-                  >
-                    {isSelected && (
-                      <Check className="absolute top-2.5 right-2.5 h-3.5 w-3.5 text-emerald" />
-                    )}
-                    <span className="text-xs font-semibold text-foreground">{p.name}</span>
-                    <span className="text-sm font-mono font-bold text-accent-foreground mt-0.5">
-                      {settings.currencySymbol}
-                      {p.price.toLocaleString("en-IN")}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground mt-0.5">
-                      {p.durationMonths} month(s) validity
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <select
+              value={selectedPlanId}
+              onChange={(e) => setSelectedPlanId(e.target.value)}
+              className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-xs text-foreground font-semibold outline-none focus:border-emerald transition"
+            >
+              {settings.membershipPlans.map((plan) => (
+                <option key={plan.id} value={plan.id}>
+                  {plan.name} — {settings.currencySymbol}{plan.price.toLocaleString("en-IN")} ({plan.durationMonths} Mo)
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Payment Status Segmented Control (1-Click) */}
+          {/* Fitness Goal */}
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-2">
-              Payment Status
+            <label className="block font-semibold text-muted-foreground mb-1">
+              Fitness Goal & Primary Focus
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Hypertrophy, Strength, Weight Loss"
+              value={healthGoal}
+              onChange={(e) => setHealthGoal(e.target.value)}
+              className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-xs text-foreground outline-none focus:border-emerald transition"
+            />
+          </div>
+
+          {/* Payment Terms Option */}
+          <div className="space-y-2 pt-2 border-t border-border">
+            <label className="block font-semibold text-muted-foreground">
+              Initial Payment Terms
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {[
-                { id: "Full", label: "Paid in Full", desc: "No dues pending" },
-                { id: "Partial", label: "Partial Paid", desc: "Balance pending" },
-                { id: "Later", label: "Pay Later", desc: "Full due logged" },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setPaymentOption(opt.id as any)}
-                  className={`py-2 px-2.5 rounded-xl border text-center transition ${
-                    paymentOption === opt.id
-                      ? "border-foreground bg-foreground text-background font-semibold"
-                      : "border-border bg-canvas text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <p className="text-xs">{opt.label}</p>
-                  <p className="text-[10px] opacity-80 mt-0.5">{opt.desc}</p>
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={() => setPaymentOption("Full")}
+                className={`rounded-xl border p-2.5 text-center transition ${
+                  paymentOption === "Full"
+                    ? "border-emerald bg-emerald-soft text-accent-foreground font-semibold"
+                    : "border-border bg-canvas text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <div className="font-bold">Full Payment</div>
+                <div className="text-[10px] mt-0.5 opacity-80">
+                  {settings.currencySymbol}{currentPlan.price.toLocaleString("en-IN")}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentOption("Partial")}
+                className={`rounded-xl border p-2.5 text-center transition ${
+                  paymentOption === "Partial"
+                    ? "border-amber-500 bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
+                    : "border-border bg-canvas text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <div className="font-bold">Installment</div>
+                <div className="text-[10px] mt-0.5 opacity-80">Deposit now</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentOption("Later")}
+                className={`rounded-xl border p-2.5 text-center transition ${
+                  paymentOption === "Later"
+                    ? "border-rose-500 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold"
+                    : "border-border bg-canvas text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <div className="font-bold">Pay Later</div>
+                <div className="text-[10px] mt-0.5 opacity-80">Zero down</div>
+              </button>
             </div>
 
             {paymentOption === "Partial" && (
-              <div className="mt-3 rounded-xl border border-border bg-canvas p-3">
-                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
-                  Remaining Due Amount ({settings.currencySymbol})
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={currentPlan.price}
-                  value={partialDue}
-                  onChange={(e) => setPartialDue(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-mono font-semibold outline-none focus:border-emerald"
-                />
+              <div className="rounded-xl border border-border bg-canvas p-3 space-y-2 mt-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground font-semibold">Initial Deposit Amount ({settings.currencySymbol}):</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={currentPlan.price - 1}
+                    value={initialPaidAmount}
+                    onChange={(e) => setInitialPaidAmount(e.target.value)}
+                    className="w-28 rounded-lg border border-border bg-surface px-2.5 py-1 text-xs font-mono font-bold text-foreground text-right outline-none focus:border-emerald"
+                  />
+                </div>
+                <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+                  <span>Remaining Pending Due:</span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400">
+                    {settings.currencySymbol}{Math.max(0, currentPlan.price - (parseFloat(initialPaidAmount) || 0)).toLocaleString("en-IN")}
+                  </span>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Modal Actions */}
-          <div className="pt-3 flex justify-end gap-2 border-t border-border">
+          {/* Action Footer */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
             <button
               type="button"
               onClick={() => setIsAddMemberOpen(false)}
-              className="rounded-xl border border-border bg-canvas px-4 py-2 text-xs font-semibold hover:bg-muted transition"
+              className="rounded-xl border border-border px-4 py-2 text-xs font-semibold hover:bg-muted transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-foreground px-5 py-2 text-xs font-semibold text-background hover:opacity-90 transition"
+              className="rounded-xl bg-foreground text-background px-5 py-2 text-xs font-semibold hover:opacity-90 transition shadow-xs"
             >
-              Enroll & Issue Pass
+              Confirm Enrollment
             </button>
           </div>
         </form>

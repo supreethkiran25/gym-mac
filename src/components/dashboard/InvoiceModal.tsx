@@ -14,8 +14,9 @@ export function InvoiceModal() {
   if (!isInvoiceModalOpen || !activeInvoicePayment) return null;
 
   const inv = activeInvoicePayment;
-  const taxAmount = Math.round(inv.amount * 0.18);
-  const baseAmount = inv.amount - taxAmount;
+  const taxPercent = settings.taxRatePercent || 18;
+  const baseAmount = Math.round((inv.amount * 100) / (100 + taxPercent));
+  const taxAmount = inv.amount - baseAmount;
 
   const handlePrint = () => {
     window.print();
@@ -47,11 +48,11 @@ export function InvoiceModal() {
               onClick={handleShareWhatsApp}
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-muted transition"
             >
-              <Share2 className="h-3.5 w-3.5" /> WhatsApp
+              <Share2 className="h-3.5 w-3.5 text-emerald" /> WhatsApp
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-foreground text-background px-3 py-1.5 text-xs font-semibold hover:opacity-90 transition"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-foreground text-background px-3 py-1.5 text-xs font-semibold hover:opacity-90 transition shadow-xs"
             >
               <Printer className="h-3.5 w-3.5" /> Print / PDF
             </button>
@@ -68,21 +69,29 @@ export function InvoiceModal() {
         <div className="p-8 space-y-6 text-sm bg-white text-zinc-900">
           {/* Header */}
           <div className="flex items-start justify-between border-b border-zinc-200 pb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="grid h-8 w-8 place-items-center rounded bg-zinc-900 text-white font-serif font-bold text-base">
-                  R
+            <div className="flex items-start gap-3">
+              {settings.logoUrl ? (
+                <img
+                  src={settings.logoUrl}
+                  alt={settings.name}
+                  className="h-12 w-12 rounded-xl object-cover border border-zinc-200"
+                />
+              ) : (
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-zinc-900 text-white font-mono font-bold text-lg">
+                  PR
                 </div>
-                <h1 className="text-xl font-bold tracking-tight">{settings.name}</h1>
+              )}
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-zinc-950">{settings.name}</h1>
+                <p className="text-xs text-zinc-600 mt-0.5">{settings.address || settings.location}</p>
+                <p className="text-xs text-zinc-600">Phone: {settings.phone} · GSTIN: {settings.gstNumber || "Unregistered"}</p>
               </div>
-              <p className="text-xs text-zinc-500 mt-1">{settings.location}</p>
-              <p className="text-xs text-zinc-500">Phone: {settings.phone} · GSTIN: {settings.gstNumber}</p>
             </div>
             <div className="text-right">
               <span className="inline-block rounded bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1">
                 {inv.status === "Paid" ? "PAID IN FULL" : "PARTIAL PAYMENT"}
               </span>
-              <p className="text-xs font-mono font-bold mt-2 text-zinc-700">Invoice: {inv.invoiceNumber}</p>
+              <p className="text-xs font-mono font-bold mt-2 text-zinc-800">Invoice: {inv.invoiceNumber}</p>
               <p className="text-xs text-zinc-500">Date: {inv.date}</p>
             </div>
           </div>
@@ -93,66 +102,70 @@ export function InvoiceModal() {
               <p className="font-semibold text-zinc-500 uppercase tracking-wider">Billed To:</p>
               <p className="text-base font-bold text-zinc-900 mt-1">{inv.member}</p>
               <p className="text-zinc-600 mt-0.5">Category: {inv.category}</p>
+              {inv.installmentIndex && (
+                <p className="text-emerald-700 font-semibold mt-0.5">Installment #{inv.installmentIndex} of {inv.totalInstallments || 1}</p>
+              )}
             </div>
             <div className="text-right">
               <p className="font-semibold text-zinc-500 uppercase tracking-wider">Payment Details:</p>
               <p className="font-mono text-zinc-900 font-semibold mt-1">Method: {inv.method}</p>
-              <p className="text-zinc-500">Txn: Authenticated & Cleared</p>
+              <p className="text-zinc-500">Authorized & Recorded in PeakRep OS</p>
             </div>
           </div>
 
-          {/* Itemized Table */}
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-y border-zinc-200 bg-zinc-50 text-left text-zinc-600">
-                <th className="py-2.5 px-3">Description</th>
-                <th className="py-2.5 px-3">Category</th>
-                <th className="py-2.5 px-3 text-right">Taxable Value</th>
-                <th className="py-2.5 px-3 text-right">GST (18%)</th>
-                <th className="py-2.5 px-3 text-right">Total Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200">
-              <tr>
-                <td className="py-3 px-3 font-semibold text-zinc-900">
-                  {inv.notes || `${inv.category} Access & Training Package`}
-                </td>
-                <td className="py-3 px-3 text-zinc-600">{inv.category}</td>
-                <td className="py-3 px-3 text-right font-mono">
-                  {settings.currencySymbol}{baseAmount.toLocaleString("en-IN")}
-                </td>
-                <td className="py-3 px-3 text-right font-mono">
-                  {settings.currencySymbol}{taxAmount.toLocaleString("en-IN")}
-                </td>
-                <td className="py-3 px-3 text-right font-mono font-bold text-zinc-900">
-                  {settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          {/* Line Items Table */}
+          <div className="border border-zinc-200 rounded-xl overflow-hidden text-xs">
+            <table className="w-full text-left">
+              <thead className="bg-zinc-100 border-b border-zinc-200 text-zinc-600 font-semibold">
+                <tr>
+                  <th className="py-2.5 px-4">Description</th>
+                  <th className="py-2.5 px-4 text-right">Taxable Value</th>
+                  <th className="py-2.5 px-4 text-right">GST ({taxPercent}%)</th>
+                  <th className="py-2.5 px-4 text-right">Total ({settings.currencySymbol})</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200">
+                <tr>
+                  <td className="py-3 px-4">
+                    <p className="font-semibold text-zinc-900">{inv.category} Fee</p>
+                    <p className="text-[11px] text-zinc-500">{inv.notes || "Gym subscription & facility access"}</p>
+                  </td>
+                  <td className="py-3 px-4 text-right font-mono">{settings.currencySymbol}{baseAmount.toLocaleString("en-IN")}</td>
+                  <td className="py-3 px-4 text-right font-mono text-zinc-600">{settings.currencySymbol}{taxAmount.toLocaleString("en-IN")}</td>
+                  <td className="py-3 px-4 text-right font-mono font-bold text-zinc-900 text-sm">
+                    {settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-          {/* Grand Totals */}
-          <div className="flex justify-end pt-2">
-            <div className="w-64 space-y-1.5 text-xs text-right">
+          {/* Invoice Summary */}
+          <div className="flex justify-between items-end pt-4 border-t border-zinc-200 text-xs">
+            <div className="space-y-1 text-zinc-500">
+              <p className="font-semibold text-zinc-700">Terms & Conditions:</p>
+              <p>1. Membership fees are non-transferable and subject to gym rules.</p>
+              <p>2. Keep this receipt for tax deduction and verification purposes.</p>
+            </div>
+
+            <div className="w-48 space-y-1.5 text-right font-mono">
               <div className="flex justify-between text-zinc-600">
                 <span>Subtotal:</span>
-                <span className="font-mono">{settings.currencySymbol}{baseAmount.toLocaleString("en-IN")}</span>
+                <span>{settings.currencySymbol}{baseAmount.toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between text-zinc-600">
-                <span>CGST (9%) + SGST (9%):</span>
-                <span className="font-mono">{settings.currencySymbol}{taxAmount.toLocaleString("en-IN")}</span>
+                <span>GST ({taxPercent}%):</span>
+                <span>{settings.currencySymbol}{taxAmount.toLocaleString("en-IN")}</span>
               </div>
-              <div className="flex justify-between border-t border-zinc-200 pt-2 text-sm font-bold text-zinc-900">
+              <div className="flex justify-between text-sm font-bold text-zinc-900 border-t border-zinc-200 pt-1">
                 <span>Total Paid:</span>
-                <span className="font-mono">{settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}</span>
+                <span>{settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}</span>
               </div>
             </div>
           </div>
 
-          {/* Footer Terms */}
-          <div className="border-t border-zinc-200 pt-4 text-[11px] text-zinc-500 text-center">
-            <p>Thank you for choosing {settings.name}! Membership is non-transferable without front desk approval.</p>
-            <p className="mt-0.5">This is a computer generated invoice and does not require a physical signature.</p>
+          <div className="text-center text-[10px] text-zinc-400 pt-4 border-t border-zinc-100">
+            Powered by PEAKREP Gym Operating System · Generated on {new Date().toLocaleString()}
           </div>
         </div>
       </div>

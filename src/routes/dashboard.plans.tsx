@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   PauseCircle,
   TrendingUp,
-  Sparkles,
   ShieldCheck,
   Zap,
 } from "lucide-react";

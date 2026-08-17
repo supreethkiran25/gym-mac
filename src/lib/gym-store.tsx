@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 
 export type MemberStatus = "Active" | "Expiring" | "Expired" | "Partial" | "Frozen";
 
 export interface MemberTimelineEvent {
   id: string;
-  type: "registration" | "payment" | "attendance" | "upgrade" | "pt_session" | "freeze" | "pos_purchase" | "workout_assigned";
+  type: "registration" | "payment" | "attendance" | "upgrade" | "pt_session" | "freeze" | "workout_assigned" | "diet_assigned" | "locker_assigned" | "broadcast_sent";
   title: string;
   timestamp: string;
   amount?: number;
@@ -19,6 +19,18 @@ export interface MemberInvoice {
   plan: string;
   method: "UPI" | "Cash" | "Card" | "Bank";
   status: "Paid" | "Partial";
+  installmentInfo?: string;
+}
+
+export interface InstallmentRecord {
+  id: string;
+  amount: number;
+  date: string;
+  method: "UPI" | "Cash" | "Card" | "Bank";
+  invoiceNumber: string;
+  installmentNumber: number;
+  totalInstallments: number;
+  note?: string;
 }
 
 export interface Member {
@@ -26,24 +38,29 @@ export interface Member {
   name: string;
   phone: string;
   email: string;
-  plan: string; // e.g. "Monthly Flex", "Quarterly Pro", "Annual Elite", "Personal Training 1-on-1"
+  plan: string;
+  planPrice: number;
+  collectedAmount: number;
+  due: number; // strictly: planPrice - collectedAmount
   joinDate: string;
-  expiry: string; // e.g. "2026-06-15"
+  expiry: string;
   status: MemberStatus;
-  due: number;
   avatar?: string;
   avatarColor?: string;
   notes?: string;
-  attendanceRate: number; // percentage e.g. 88
-  lastVisit: string; // e.g. "Today, 7:15 AM"
+  attendanceRate: number;
+  lastVisit: string;
   isCurrentlyInside: boolean;
   checkInTime?: string;
   assignedTrainer?: string;
   healthGoal?: string;
   emergencyContact?: string;
   assignedWorkout?: string;
+  assignedWorkoutId?: string;
   assignedDiet?: string;
+  assignedDietId?: string;
   assignedLocker?: number;
+  installments: InstallmentRecord[];
   timeline: MemberTimelineEvent[];
   invoices: MemberInvoice[];
 }
@@ -55,21 +72,12 @@ export interface Payment {
   date: string;
   method: "UPI" | "Cash" | "Card" | "Bank";
   amount: number;
-  category: "Membership" | "Personal Training" | "Merchandise" | "Registration" | "Pro Shop";
-  status: "Paid" | "Partial" | "Overdue" | "Pending";
+  category: "Membership" | "Personal Training" | "Registration";
+  status: "Paid" | "Partial" | "Overdue";
   invoiceNumber: string;
+  installmentIndex?: number;
+  totalInstallments?: number;
   notes?: string;
-}
-
-export interface ReminderItem {
-  id: string;
-  memberId?: string;
-  name: string;
-  phone: string;
-  reason: string;
-  channel: "WhatsApp" | "SMS" | "Email";
-  time: string;
-  status: "Pending" | "Sent";
 }
 
 export interface MembershipPlan {
@@ -92,7 +100,7 @@ export interface StaffMember {
   phone: string;
   email: string;
   salary: number;
-  shift: string; // e.g. "Morning 6:00 AM - 2:00 PM"
+  shift: string;
   status: "On Floor" | "Off Duty" | "On Leave";
   avatar: string;
   assignedClientsCount: number;
@@ -106,49 +114,8 @@ export interface StaffMember {
   }[];
 }
 
-export interface GymClass {
-  id: string;
-  title: string;
-  trainer: string;
-  trainerId?: string;
-  time: string;
-  durationMinutes: number;
-  days: string[]; // e.g. ["Mon", "Wed", "Fri"]
-  capacity: number;
-  enrolledMembers: string[]; // member IDs
-  room: string;
-  category: "HIIT" | "Strength" | "Yoga" | "Spin" | "CrossFit";
-  intensity: "High" | "Medium" | "All Levels";
-}
-
-export interface GymEquipment {
-  id: string;
-  name: string;
-  category: "Cardio" | "Strength" | "Cables" | "Free Weights";
-  status: "Operational" | "Service Due" | "Under Repair";
-  lastServiced: string;
-  nextServiceDate: string;
-  serialNumber: string;
-  location: string;
-  usageCount: number;
-  modelNumber?: string;
-  warrantyExpiry?: string;
-  vendorName?: string;
-  notes?: string;
-}
-
-export interface SmartInsight {
-  id: string;
-  title: string;
-  description: string;
-  type: "warning" | "opportunity" | "info" | "alert";
-  metricChange: string;
-  actionLabel: string;
-  actionType: "nudge_expiring" | "assign_trainer" | "service_equipment" | "promote_pt" | "restock_pos" | "followup_leads";
-}
-
 // Lead CRM Model
-export type LeadStage = "Inquiry" | "Trial Scheduled" | "Trial Booked" | "Trial Completed" | "Offer Sent" | "Won" | "Lost";
+export type LeadStage = "Inquiry" | "Trial Scheduled" | "Trial Completed" | "Offer Sent" | "Won" | "Lost";
 
 export interface Lead {
   id: string;
@@ -165,76 +132,113 @@ export interface Lead {
   budget?: number;
 }
 
-// POS Product & Orders
-export interface POSProduct {
-  id: string;
-  name: string;
-  category: "Supplements" | "Beverages" | "Apparel" | "Accessories";
-  price: number;
-  costPrice: number;
-  stock: number;
-  sku: string;
-  icon: string;
-  unit: string;
-}
-
-export interface POSOrderItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-export interface POSOrder {
-  id: string;
-  orderNumber: string;
-  memberId?: string;
-  memberName: string;
-  items: POSOrderItem[];
-  totalAmount: number;
-  paymentMethod: "UPI" | "Cash" | "Card" | "Member Due";
-  date: string;
-}
-
 // Workouts & Diet Programs
+export interface WorkoutExercise {
+  id: string;
+  name: string;
+  sets: string | number;
+  reps: string;
+  weightTarget?: string;
+  restTime?: string;
+  instructions?: string;
+}
+
+export interface WorkoutRoutineDay {
+  day: string;
+  focus: string;
+  exercises: WorkoutExercise[];
+}
+
 export interface WorkoutProgram {
   id: string;
   title: string;
-  category: "Hypertrophy" | "Fat Loss" | "Strength & Power" | "Functional Mobility";
-  daysPerWeek: number;
+  category: "Strength" | "Hypertrophy" | "Fat Loss" | "Endurance" | "Functional";
   level: "Beginner" | "Intermediate" | "Advanced";
+  daysPerWeek: number;
+  durationWeeks: number;
   focus: string;
-  routine: {
-    day: string;
-    exercises: { name: string; sets: string; reps: string; rest: string }[];
-  }[];
+  routine: WorkoutRoutineDay[];
   assignedCount: number;
+  isArchived?: boolean;
+  createdAt: string;
+}
+
+export interface DietMeal {
+  time: string;
+  name: string;
+  items: string;
+  quantity?: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  instructions?: string;
 }
 
 export interface DietPlan {
   id: string;
   title: string;
-  category: "High Protein Muscle" | "Calorie Deficit Cut" | "Clean Bulk" | "Ketogenic Shred";
+  category: "Muscle Gain" | "Calorie Deficit" | "Clean Bulk" | "Ketogenic Shred" | "High Protein";
   calorieTarget: number;
   proteinGrams: number;
   carbsGrams: number;
   fatsGrams: number;
-  meals: { time: string; name: string; items: string[]; calories: number }[];
+  meals: DietMeal[];
   assignedCount: number;
+  isArchived?: boolean;
+  createdAt: string;
 }
 
 // Lockers
+export type LockerStatus = "Available" | "Occupied" | "Reserved" | "Under Maintenance" | "Expired";
+
+export interface LockerRepairLog {
+  id: string;
+  issue: string;
+  repairedAt: string;
+  repairedBy: string;
+  notes?: string;
+}
+
+export interface LockerHistoryItem {
+  id: string;
+  action: string;
+  timestamp: string;
+  details: string;
+}
+
 export interface Locker {
   id: string;
   number: number;
   section: "Men's Locker Room" | "Women's Locker Room" | "Executive VIP";
-  status: "Available" | "Occupied" | "Maintenance";
+  status: LockerStatus;
   assignedMemberId?: string;
   assignedMemberName?: string;
+  reservedFor?: string;
   expiresOn?: string;
+  maintenanceDate?: string;
+  maintenanceIssue?: string;
+  repairHistory: LockerRepairLog[];
+  history: LockerHistoryItem[];
 }
 
-// Multi-Location / Branch
+// Broadcast Communications
+export interface BroadcastMessage {
+  id: string;
+  title: string;
+  body: string;
+  category: "Announcement" | "Renewal Notice" | "Gym Closure" | "Class Update" | "Promotion" | "Urgent Alert";
+  recipientsType: "all" | "active" | "expiring" | "expired" | "partial_due" | "plan" | "individual";
+  targetPlanName?: string;
+  targetMemberId?: string;
+  recipientCount: number;
+  channels: ("WhatsApp" | "SMS" | "In-App" | "Push")[];
+  status: "Sent" | "Scheduled" | "Draft";
+  scheduledFor?: string;
+  sentAt?: string;
+  createdAt: string;
+}
+
 export interface GymLocation {
   id: string;
   name: string;
@@ -247,51 +251,40 @@ export interface GymLocation {
 
 export interface GymSettings {
   name: string;
+  ownerName: string;
   location: string;
+  address: string;
   phone: string;
   email: string;
+  logoUrl?: string;
   currencySymbol: string;
-  perMemberRate: number;
   operatingHours: string;
   gstNumber: string;
   upiId: string;
   invoicePrefix: string;
   taxRatePercent: number;
-  autoSendWhatsAppOnRenewal: boolean;
   membershipPlans: MembershipPlan[];
-  reminderTemplateWhatsApp: string;
-  reminderTemplateSMS: string;
-  welcomeTemplateWhatsApp: string;
+  socialLinks: {
+    instagram?: string;
+    facebook?: string;
+    website?: string;
+    googleMaps?: string;
+  };
+  broadcastTemplateRenewal: string;
+  broadcastTemplateDue: string;
+  broadcastTemplateWelcome: string;
 }
 
-// Mock Datasets
+// Default Datasets
 const DEFAULT_LOCATIONS: GymLocation[] = [
   {
     id: "loc-1",
-    name: "Iron House · Andheri West (Main)",
-    address: "Link Road, Andheri West, Mumbai",
-    phone: "+91 98765 43210",
+    name: "Gold's Gym · Mysore Main",
+    address: "Plot 42, BM Habitat Mall Road, Jayalakshmipuram, Mysuru, Karnataka 570012",
+    phone: "+91 821 241 5566",
     isMain: true,
-    memberCount: 148,
-    capacity: 80,
-  },
-  {
-    id: "loc-2",
-    name: "Iron House · Bandra Flagship",
-    address: "Pali Hill, Bandra West, Mumbai",
-    phone: "+91 98765 11223",
-    isMain: false,
-    memberCount: 112,
-    capacity: 65,
-  },
-  {
-    id: "loc-3",
-    name: "Iron House · Juhu Studio",
-    address: "JVPD Scheme, Juhu, Mumbai",
-    phone: "+91 98765 99887",
-    isMain: false,
-    memberCount: 76,
-    capacity: 50,
+    memberCount: 210,
+    capacity: 120,
   },
 ];
 
@@ -299,37 +292,37 @@ const DEFAULT_PLANS: MembershipPlan[] = [
   {
     id: "plan-1",
     name: "Monthly Flex",
-    price: 2800,
+    price: 3000,
     durationMonths: 1,
     type: "Standard",
-    perks: ["Full gym floor access", "Locker room & shower", "1 Free Trainer Assessment"],
-    activeCount: 28,
-    expiringCount: 8,
-    frozenCount: 2,
-    upgradeOpportunities: 14,
+    perks: ["Full gym floor access", "Locker room & shower", "1 Free Assessment"],
+    activeCount: 1,
+    expiringCount: 0,
+    frozenCount: 0,
+    upgradeOpportunities: 0,
   },
   {
     id: "plan-2",
     name: "Quarterly Pro",
-    price: 7500,
+    price: 8000,
     durationMonths: 3,
     type: "Standard",
-    perks: ["Full gym floor access", "Steam & Sauna access", "Diet chart consultation", "Locker storage"],
-    activeCount: 42,
-    expiringCount: 5,
-    frozenCount: 1,
-    upgradeOpportunities: 19,
+    perks: ["Full floor access", "Steam & Sauna access", "Diet consultation", "Locker storage"],
+    activeCount: 0,
+    expiringCount: 0,
+    frozenCount: 0,
+    upgradeOpportunities: 0,
   },
   {
     id: "plan-3",
     name: "Annual Elite",
-    price: 22000,
+    price: 24000,
     durationMonths: 12,
     type: "VIP Pass",
-    perks: ["All-hours unlimited access", "2 Free PT Sessions / month", "Nutrition consultations", "Free guest pass monthly", "Towel service"],
-    activeCount: 64,
-    expiringCount: 3,
-    frozenCount: 3,
+    perks: ["All-hours unlimited access", "2 Free PT Sessions / mo", "Custom Nutrition chart", "Free towel service"],
+    activeCount: 0,
+    expiringCount: 0,
+    frozenCount: 0,
     upgradeOpportunities: 0,
   },
   {
@@ -338,11 +331,11 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     price: 15000,
     durationMonths: 1,
     type: "PT Package",
-    perks: ["Dedicated Senior Coach", "Custom biometric tracking", "Weekly diet planning", "Post-workout recovery zone"],
-    activeCount: 18,
-    expiringCount: 2,
+    perks: ["Dedicated Senior Coach", "Custom biometric tracking", "Weekly diet adjust", "Recovery zone access"],
+    activeCount: 0,
+    expiringCount: 0,
     frozenCount: 0,
-    upgradeOpportunities: 6,
+    upgradeOpportunities: 0,
   },
 ];
 
@@ -351,75 +344,91 @@ const DEFAULT_MEMBERS: Member[] = [
     id: "m-kariya",
     name: "Kariya",
     phone: "+91 98765 43210",
-    email: "kariya@gymflow.com",
+    email: "kariya@peakrep.com",
     plan: "Monthly Flex",
+    planPrice: 3000,
+    collectedAmount: 3000,
+    due: 0,
     joinDate: "2026-05-01",
     expiry: "2026-06-01",
     status: "Active",
-    due: 0,
     attendanceRate: 100,
     lastVisit: "Today, 6:30 AM",
     isCurrentlyInside: true,
     checkInTime: "06:30 AM",
     assignedTrainer: "Head Coach",
-    healthGoal: "Strength & Muscle Building",
+    healthGoal: "Strength & Hypertrophy",
     emergencyContact: "+91 98765 00000",
     assignedWorkout: "Push-Pull-Legs Hypertrophy Split",
+    assignedWorkoutId: "wo-1",
     assignedDiet: "High Protein Muscle Fuel (2400 kcal)",
+    assignedDietId: "diet-1",
     assignedLocker: 1,
-    notes: "Primary active member.",
+    notes: "Founding active member.",
+    installments: [
+      {
+        id: "inst-1",
+        amount: 3000,
+        date: "2026-05-01",
+        method: "UPI",
+        invoiceNumber: "INV-2026-0001",
+        installmentNumber: 1,
+        totalInstallments: 1,
+        note: "Full Monthly Flex payment",
+      },
+    ],
     timeline: [
-      { id: "t-1", type: "attendance", title: "Checked in at Main Floor", timestamp: "Today, 6:30 AM" },
-      { id: "t-2", type: "payment", title: "Monthly Flex Membership ₹2,800 paid via UPI", timestamp: "May 01, 2026", amount: 2800 },
-      { id: "t-3", type: "registration", title: "Enrolled in Gym", timestamp: "May 01, 2026" },
+      { id: "t-1", type: "attendance", title: "Checked in at Main Floor Gate", timestamp: "Today, 6:30 AM" },
+      { id: "t-2", type: "payment", title: "Paid ₹3,000 for Monthly Flex Pass via UPI", timestamp: "May 01, 2026", amount: 3000 },
+      { id: "t-3", type: "registration", title: "Enrolled in Gold's Gym Mysore", timestamp: "May 01, 2026" },
     ],
     invoices: [
-      { id: "inv-kariya-1", invoiceNumber: "INV-2026-0001", date: "2026-05-01", amount: 2800, plan: "Monthly Flex", method: "UPI", status: "Paid" },
+      { id: "inv-kariya-1", invoiceNumber: "INV-2026-0001", date: "2026-05-01", amount: 3000, plan: "Monthly Flex", method: "UPI", status: "Paid", installmentInfo: "Single Full Payment" },
     ],
   },
 ];
-
-const DEFAULT_LEADS: Lead[] = [];
-
-const DEFAULT_POS_PRODUCTS: POSProduct[] = [];
 
 const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
   {
     id: "wo-1",
     title: "Push-Pull-Legs Hypertrophy Split",
     category: "Hypertrophy",
-    daysPerWeek: 6,
     level: "Intermediate",
-    focus: "Maximum muscle growth and progressive overload.",
+    daysPerWeek: 6,
+    durationWeeks: 8,
+    focus: "Progressive overload focused on muscle hypertrophy and foundational strength.",
     assignedCount: 1,
+    createdAt: "2026-05-01",
     routine: [
       {
-        day: "Push (Chest, Shoulders, Triceps)",
+        day: "Day 1: Push (Chest, Shoulders, Triceps)",
+        focus: "Horizontal & vertical pressing",
         exercises: [
-          { name: "Barbell Incline Bench Press", sets: "4", reps: "8-10", rest: "90s" },
-          { name: "Dumbbell Flat Press", sets: "3", reps: "10-12", rest: "75s" },
-          { name: "Standing Overhead DB Press", sets: "3", reps: "8-10", rest: "90s" },
-          { name: "Cable Lateral Raises", sets: "4", reps: "12-15", rest: "60s" },
-          { name: "Tricep Rope Pushdowns", sets: "3", reps: "12-15", rest: "60s" },
+          { id: "ex-1", name: "Incline Barbell Bench Press", sets: "4", reps: "8-10", weightTarget: "70-85 kg", restTime: "90s", instructions: "Touch upper chest, control 3-sec eccentric." },
+          { id: "ex-2", name: "Flat Dumbbell Press", sets: "3", reps: "10-12", weightTarget: "30 kg DBs", restTime: "75s", instructions: "Full stretch at bottom." },
+          { id: "ex-3", name: "Standing Overhead DB Press", sets: "3", reps: "8-10", weightTarget: "20 kg DBs", restTime: "90s", instructions: "Keep core locked." },
+          { id: "ex-4", name: "Cable Lateral Raises", sets: "4", reps: "12-15", weightTarget: "10 kg", restTime: "60s", instructions: "Pause at parallel." },
+          { id: "ex-5", name: "Tricep Rope Pushdowns", sets: "3", reps: "12-15", weightTarget: "25 kg", restTime: "60s", instructions: "Spread rope at full extension." },
         ],
       },
       {
-        day: "Pull (Back, Rear Delts, Biceps)",
+        day: "Day 2: Pull (Back, Rear Delts, Biceps)",
+        focus: "Vertical & horizontal pulling",
         exercises: [
-          { name: "Barbell Deadlift", sets: "4", reps: "6-8", rest: "120s" },
-          { name: "Lat Pulldown", sets: "3", reps: "10-12", rest: "75s" },
-          { name: "Cable Rows", sets: "3", reps: "10-12", rest: "75s" },
-          { name: "Face Pulls", sets: "4", reps: "15-20", rest: "60s" },
-          { name: "Bicep Curls", sets: "3", reps: "10-12", rest: "60s" },
+          { id: "ex-6", name: "Barbell Conventional Deadlift", sets: "4", reps: "6-8", weightTarget: "120 kg", restTime: "120s", instructions: "Brace core, neutral spine throughout." },
+          { id: "ex-7", name: "Wide Grip Lat Pulldown", sets: "3", reps: "10-12", weightTarget: "60 kg", restTime: "75s", instructions: "Pull to collarbone with elbow drive." },
+          { id: "ex-8", name: "Chest Supported Seated Cable Row", sets: "3", reps: "10-12", weightTarget: "55 kg", restTime: "75s", instructions: "Squeeze scapulae 1 sec." },
+          { id: "ex-9", name: "Incline DB Bicep Curls", sets: "3", reps: "10-12", weightTarget: "14 kg DBs", restTime: "60s", instructions: "Full supination at peak." },
         ],
       },
       {
-        day: "Legs (Quads, Hamstrings, Calves)",
+        day: "Day 3: Legs (Quads, Hamstrings, Calves)",
+        focus: "Lower body power and knee flexion",
         exercises: [
-          { name: "Barbell Back Squat", sets: "4", reps: "8-10", rest: "120s" },
-          { name: "Romanian Deadlift", sets: "3", reps: "10-12", rest: "90s" },
-          { name: "Leg Press", sets: "3", reps: "12-15", rest: "75s" },
-          { name: "Calf Raises", sets: "4", reps: "15-20", rest: "45s" },
+          { id: "ex-10", name: "Barbell Back Squat", sets: "4", reps: "8-10", weightTarget: "100 kg", restTime: "120s", instructions: "Hit parallel depth, drive through midfoot." },
+          { id: "ex-11", name: "Romanian Deadlift", sets: "3", reps: "10-12", weightTarget: "80 kg", restTime: "90s", instructions: "Hinge at hips, slight knee bend." },
+          { id: "ex-12", name: "Leg Press 45-Degree", sets: "3", reps: "12-15", weightTarget: "180 kg", restTime: "75s", instructions: "No lockout at top." },
+          { id: "ex-13", name: "Standing Calf Raises", sets: "4", reps: "15-20", weightTarget: "60 kg", restTime: "45s", instructions: "2-sec deep stretch at bottom." },
         ],
       },
     ],
@@ -430,16 +439,19 @@ const DEFAULT_DIET_PLANS: DietPlan[] = [
   {
     id: "diet-1",
     title: "High Protein Muscle Fuel (2400 kcal)",
-    category: "High Protein Muscle",
+    category: "High Protein",
     calorieTarget: 2400,
     proteinGrams: 180,
     carbsGrams: 240,
     fatsGrams: 65,
     assignedCount: 1,
+    createdAt: "2026-05-01",
     meals: [
-      { time: "07:30 AM", name: "Breakfast", items: ["4 Eggs", "2 Slices Toast", "1 Banana"], calories: 580 },
-      { time: "01:30 PM", name: "Lunch", items: ["200g Chicken/Paneer", "150g Rice", "Salad"], calories: 680 },
-      { time: "08:30 PM", name: "Dinner", items: ["180g Fish/Tofu", "2 Roti", "Vegetables"], calories: 700 },
+      { time: "07:30 AM", name: "Breakfast Fuel", items: "4 Whole Eggs, 2 Slices Whole Grain Toast, 1 Banana", quantity: "1 Plate", calories: 580, protein: 32, carbs: 54, fats: 22, instructions: "Scramble eggs in olive oil spray." },
+      { time: "11:00 AM", name: "Mid-Morning Snack", items: "Greek Yogurt, 30g Mixed Almonds & Walnuts, Honey", quantity: "200g bowl", calories: 340, protein: 22, carbs: 24, fats: 16, instructions: "Mix with cinnamon." },
+      { time: "01:30 PM", name: "Power Lunch", items: "Grilled Chicken Breast / Paneer, 150g Steamed Basmati Rice, Green Salad", quantity: "1 Large Bowl", calories: 680, protein: 55, carbs: 70, fats: 14, instructions: "Season with lemon and herbs." },
+      { time: "05:00 PM", name: "Pre-Workout Fuel", items: "1 Scoop Whey Protein Isolate, 1 Apple, 1 tbsp Peanut Butter", quantity: "1 Shake + Fruit", calories: 300, protein: 28, carbs: 32, fats: 8, instructions: "Consume 45 min before training." },
+      { time: "08:30 PM", name: "Post-Workout Dinner", items: "Grilled Fish Fillet / Soya Chunks, 2 Multigrain Rotis, Steamed Broccoli & Beans", quantity: "1 Plate", calories: 500, protein: 43, carbs: 60, fats: 11, instructions: "Light oil preparation." },
     ],
   },
 ];
@@ -452,40 +464,53 @@ const DEFAULT_LOCKERS: Locker[] = Array.from({ length: 24 }, (_, i) => {
     number: num,
     section: num <= 10 ? "Men's Locker Room" : num <= 20 ? "Women's Locker Room" : "Executive VIP",
     status: isKariya ? "Occupied" : "Available",
+    assignedMemberId: isKariya ? "m-kariya" : undefined,
     assignedMemberName: isKariya ? "Kariya" : undefined,
     expiresOn: isKariya ? "2026-06-01" : undefined,
+    repairHistory: [],
+    history: [
+      {
+        id: `h-${num}-init`,
+        action: "Initialized",
+        timestamp: "2026-05-01",
+        details: isKariya ? "Assigned to Kariya" : "Locker operational and available",
+      },
+    ],
   };
 });
 
 const DEFAULT_SETTINGS: GymSettings = {
-  name: "Iron House Fitness",
-  location: "Mumbai · Andheri West",
-  phone: "+91 98765 43210",
-  email: "support@ironhousegym.com",
+  name: "Gold's Gym Mysore",
+  ownerName: "Karan Johar",
+  location: "Mysuru · Jayalakshmipuram",
+  address: "Plot 42, BM Habitat Mall Road, Jayalakshmipuram, Mysuru, Karnataka 570012",
+  phone: "+91 821 241 5566",
+  email: "mysore@goldsgym.in",
+  logoUrl: "",
   currencySymbol: "₹",
-  perMemberRate: 10,
-  operatingHours: "5:30 AM – 11:00 PM (Daily)",
-  gstNumber: "27AAAC1234F1Z5",
-  upiId: "ironhousegym@icici",
-  invoicePrefix: "INV-2026-",
+  operatingHours: "5:30 AM – 10:30 PM (Mon-Sat), 6:00 AM – 2:00 PM (Sun)",
+  gstNumber: "29AABCU9603R1ZM",
+  upiId: "goldsgymmysore@icici",
+  invoicePrefix: "PEAK-2026-",
   taxRatePercent: 18,
-  autoSendWhatsAppOnRenewal: true,
   membershipPlans: DEFAULT_PLANS,
-  reminderTemplateWhatsApp:
-    "Hi {name}, your {gym} membership is {reason}. Total due: {due}. Please clear your dues via UPI link to continue training without interruption.",
-  reminderTemplateSMS:
-    "{gym} Alert: Dear {name}, your membership is {reason}. Outstanding: {due}. Kindly renew today.",
-  welcomeTemplateWhatsApp:
-    "Welcome to {gym}, {name}! Your {plan} pass is now active. Let's crush your fitness goals!",
+  socialLinks: {
+    instagram: "https://instagram.com/goldsgymmysore",
+    facebook: "https://facebook.com/goldsgymmysore",
+    website: "https://goldsgym.in",
+    googleMaps: "https://maps.google.com/?q=Gold's+Gym+Mysore",
+  },
+  broadcastTemplateRenewal:
+    "Hi {name}, your {gym} membership ({plan}) expires on {expiry}. Total renewal fee: {due}. Clear your renewal to continue uninterrupted training.",
+  broadcastTemplateDue:
+    "Dear {name}, an installment of {due} is pending for your {gym} membership. Kindly pay via our online link or at the front desk.",
+  broadcastTemplateWelcome:
+    "Welcome to {gym}, {name}! Your {plan} pass is now active. Let's reach your peak potential!",
 };
 
 const DEFAULT_STAFF: StaffMember[] = [];
-
-const DEFAULT_CLASSES: GymClass[] = [];
-
-const DEFAULT_EQUIPMENT: GymEquipment[] = [];
-
-const DEFAULT_INSIGHTS: SmartInsight[] = [];
+const DEFAULT_LEADS: Lead[] = [];
+const DEFAULT_BROADCASTS: BroadcastMessage[] = [];
 
 const DEFAULT_PAYMENTS: Payment[] = [
   {
@@ -494,15 +519,15 @@ const DEFAULT_PAYMENTS: Payment[] = [
     member: "Kariya",
     date: "2026-05-01",
     method: "UPI",
-    amount: 2800,
+    amount: 3000,
     category: "Membership",
     status: "Paid",
     invoiceNumber: "INV-2026-0001",
-    notes: "Monthly Flex membership fee",
+    installmentIndex: 1,
+    totalInstallments: 1,
+    notes: "Full Monthly Flex membership fee",
   },
 ];
-
-const DEFAULT_REMINDERS: ReminderItem[] = [];
 
 interface GymStoreContextType {
   theme: "dark" | "light";
@@ -510,31 +535,42 @@ interface GymStoreContextType {
   setTheme: (theme: "dark" | "light") => void;
   members: Member[];
   payments: Payment[];
-  reminders: ReminderItem[];
   staff: StaffMember[];
-  classes: GymClass[];
-  equipment: GymEquipment[];
-  insights: SmartInsight[];
   settings: GymSettings;
   leads: Lead[];
-  posProducts: POSProduct[];
-  posOrders: POSOrder[];
   workoutPrograms: WorkoutProgram[];
   dietPlans: DietPlan[];
   lockers: Locker[];
   locations: GymLocation[];
+  broadcasts: BroadcastMessage[];
   currentLocationId: string;
-  // Core Actions
-  addMember: (member: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside">) => void;
+  lastSaved: Date | null;
+  isSaved: boolean;
+  exportData: () => string;
+  importData: (jsonStr: string) => boolean;
+
+  // Core Member Actions
+  addMember: (member: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside" | "installments" | "collectedAmount">) => void;
   updateMember: (id: string, updates: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   checkInMember: (memberId: string) => void;
   checkOutMember: (memberId: string) => void;
-  renewMember: (memberId: string, durationMonths: number, planName?: string) => void;
+  renewMember: (memberId: string, durationMonths: number, planName?: string, paidAmount?: number, paymentMethod?: "UPI" | "Cash" | "Card" | "Bank") => void;
   toggleFreezeMember: (memberId: string) => void;
-  recordPayment: (payment: Omit<Payment, "id" | "invoiceNumber">) => void;
-  sendReminder: (id: string) => void;
-  sendAllReminders: () => void;
+
+  // Payment Engine Actions
+  recordPayment: (payment: {
+    memberId: string;
+    member: string;
+    date: string;
+    method: "UPI" | "Cash" | "Card" | "Bank";
+    amount: number;
+    category?: "Membership" | "Personal Training" | "Registration";
+    notes?: string;
+    installmentNumber?: number;
+    totalInstallments?: number;
+  }) => void;
+
   // Staff CRUD
   addStaff: (staffMember: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">) => void;
   updateStaff: (id: string, updates: Partial<StaffMember>) => void;
@@ -542,45 +578,58 @@ interface GymStoreContextType {
   payStaffSalary: (staffId: string) => void;
   toggleStaffStatus: (staffId: string, status: "On Floor" | "Off Duty" | "On Leave") => void;
   approveLeaveRequest: (staffId: string, leaveId: string) => void;
-  // Equipment CRUD
-  addEquipment: (equipment: Omit<GymEquipment, "id" | "usageCount">) => void;
-  updateEquipment: (id: string, updates: Partial<GymEquipment>) => void;
-  deleteEquipment: (id: string) => void;
-  serviceEquipment: (equipmentId: string) => void;
+
   // Plans CRUD
   addPlan: (plan: Omit<MembershipPlan, "id" | "activeCount" | "expiringCount" | "frozenCount" | "upgradeOpportunities">) => void;
   updatePlan: (id: string, updates: Partial<MembershipPlan>) => void;
   deletePlan: (id: string) => void;
-  // Classes
-  addClass: (classData: Omit<GymClass, "id" | "enrolledMembers">) => void;
-  updateClass: (id: string, updates: Partial<GymClass>) => void;
-  deleteClass: (id: string) => void;
-  bookClass: (classId: string, memberId: string) => void;
-  cancelClassBooking: (classId: string, memberId: string) => void;
-  dismissInsight: (id: string) => void;
-  executeInsightAction: (insight: SmartInsight) => void;
-  updateSettings: (newSettings: Partial<GymSettings>) => void;
-  resetToDefaultData: () => void;
+
   // Lead CRM Actions
   addLead: (lead: Omit<Lead, "id" | "createdAt">) => void;
   updateLeadStage: (leadId: string, stage: LeadStage) => void;
-  convertLeadToMember: (leadId: string, planName: string, due?: number) => void;
-  // POS Pro Shop Actions
-  processPOSSale: (sale: { memberId?: string; memberName: string; items: POSOrderItem[]; paymentMethod: "UPI" | "Cash" | "Card" | "Member Due" }) => void;
-  restockProduct: (productId: string, quantity: number) => void;
-  // Workout & Diet Actions
+  convertLeadToMember: (leadId: string, planName: string, initialPaid?: number, method?: "UPI" | "Cash" | "Card" | "Bank") => void;
+
+  // Workouts & Diets CRUD & Assignment
+  addWorkoutProgram: (program: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">) => void;
+  updateWorkoutProgram: (id: string, updates: Partial<WorkoutProgram>) => void;
+  duplicateWorkoutProgram: (id: string) => void;
+  deleteWorkoutProgram: (id: string) => void;
+  archiveWorkoutProgram: (id: string) => void;
   assignWorkoutToMember: (memberId: string, workoutId: string) => void;
+
+  addDietPlan: (diet: Omit<DietPlan, "id" | "assignedCount" | "createdAt">) => void;
+  updateDietPlan: (id: string, updates: Partial<DietPlan>) => void;
+  duplicateDietPlan: (id: string) => void;
+  deleteDietPlan: (id: string) => void;
+  archiveDietPlan: (id: string) => void;
   assignDietToMember: (memberId: string, dietId: string) => void;
-  // Locker Actions
-  assignLocker: (lockerNumber: number, memberId: string, memberName: string) => void;
+
+  assignProgramToMember: (memberId: string, workoutId?: string, dietId?: string, notes?: string) => void;
+
+  // Locker Operations & Maintenance Workflow
+  assignLocker: (lockerNumber: number, memberId: string, memberName: string, durationDays?: number) => void;
+  reserveLocker: (lockerNumber: number, reservedFor: string, note?: string) => void;
   releaseLocker: (lockerNumber: number) => void;
+  markLockerMaintenance: (lockerNumber: number, issue: string, date?: string) => void;
+  completeLockerRepair: (lockerNumber: number, repairNotes?: string, repairedBy?: string) => void;
+
+  // Broadcast Center Actions
+  sendBroadcastMessage: (broadcast: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => void;
+  saveDraftBroadcast: (broadcast: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => void;
+  deleteBroadcastMessage: (id: string) => void;
+
   // Multi-Location Actions
+  addLocation: (loc: Omit<GymLocation, "id">) => void;
+  updateLocation: (id: string, updates: Partial<GymLocation>) => void;
+  deleteLocation: (id: string) => void;
   switchLocation: (locationId: string) => void;
+
   // Dynamic UPI QR Modal
   isUPIQRModalOpen: boolean;
   setIsUPIQRModalOpen: (open: boolean) => void;
   upiQRPaymentDetails: { amount: number; memberName: string; note: string } | null;
   openUPIQRModal: (amount: number, memberName: string, note?: string) => void;
+
   // Modals & Panels UI State
   isAddMemberOpen: boolean;
   setIsAddMemberOpen: (open: boolean) => void;
@@ -606,208 +655,42 @@ interface GymStoreContextType {
   setActiveSettingsTab: (tab: string) => void;
   editingMember: Member | null;
   setEditingMember: (member: Member | null) => void;
+
+  // Settings Actions
+  updateSettings: (newSettings: Partial<GymSettings>) => void;
+  updateGymLogo: (logoBase64: string) => void;
+  removeGymLogo: () => void;
+  resetToDefaultData: () => void;
 }
 
 const GymContext = createContext<GymStoreContextType | null>(null);
 
-const STORAGE_KEY_V7 = "ironhouse_gym_flow_v7";
+const STORAGE_KEY_PEAKREP = "peakrep_gym_os_v9";
 
 export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Theme state: dark or light
-  const [theme, setThemeState] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "dark";
-    try {
-      const saved = localStorage.getItem("gym_flow_theme");
-      if (saved === "light" || saved === "dark") return saved;
-      return "dark"; // Default to sleek dark mode
-    } catch {
-      return "dark";
-    }
-  });
+  const isHydratedRef = useRef(false);
 
-  const setTheme = (newTheme: "dark" | "light") => {
-    setThemeState(newTheme);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("gym_flow_theme", newTheme);
-      if (newTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  };
+  // Theme state
+  const [theme, setThemeState] = useState<"dark" | "light">("dark");
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
+  const [members, setMembers] = useState<Member[]>(DEFAULT_MEMBERS);
+  const [payments, setPayments] = useState<Payment[]>(DEFAULT_PAYMENTS);
+  const [staff, setStaff] = useState<StaffMember[]>(DEFAULT_STAFF);
+  const [settings, setSettings] = useState<GymSettings>(DEFAULT_SETTINGS);
+  const [leads, setLeads] = useState<Lead[]>(DEFAULT_LEADS);
+  const [workoutPrograms, setWorkoutPrograms] = useState<WorkoutProgram[]>(DEFAULT_WORKOUT_PROGRAMS);
+  const [dietPlans, setDietPlans] = useState<DietPlan[]>(DEFAULT_DIET_PLANS);
+  const [lockers, setLockers] = useState<Locker[]>(DEFAULT_LOCKERS);
+  const [broadcasts, setBroadcasts] = useState<BroadcastMessage[]>(DEFAULT_BROADCASTS);
+  const [locations, setLocations] = useState<GymLocation[]>(DEFAULT_LOCATIONS);
+  const [currentLocationId, setCurrentLocationId] = useState<string>("loc-1");
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  }, [theme]);
-
-  const [members, setMembers] = useState<Member[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_MEMBERS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_members`);
-      return saved ? JSON.parse(saved) : DEFAULT_MEMBERS;
-    } catch {
-      return DEFAULT_MEMBERS;
-    }
-  });
-
-  const [payments, setPayments] = useState<Payment[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_PAYMENTS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_payments`);
-      return saved ? JSON.parse(saved) : DEFAULT_PAYMENTS;
-    } catch {
-      return DEFAULT_PAYMENTS;
-    }
-  });
-
-  const [reminders, setReminders] = useState<ReminderItem[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_REMINDERS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_reminders`);
-      return saved ? JSON.parse(saved) : DEFAULT_REMINDERS;
-    } catch {
-      return DEFAULT_REMINDERS;
-    }
-  });
-
-  const [staff, setStaff] = useState<StaffMember[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_STAFF;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_staff`);
-      return saved ? JSON.parse(saved) : DEFAULT_STAFF;
-    } catch {
-      return DEFAULT_STAFF;
-    }
-  });
-
-  const [classes, setClasses] = useState<GymClass[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_CLASSES;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_classes`);
-      return saved ? JSON.parse(saved) : DEFAULT_CLASSES;
-    } catch {
-      return DEFAULT_CLASSES;
-    }
-  });
-
-  const [equipment, setEquipment] = useState<GymEquipment[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_EQUIPMENT;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_equipment`);
-      return saved ? JSON.parse(saved) : DEFAULT_EQUIPMENT;
-    } catch {
-      return DEFAULT_EQUIPMENT;
-    }
-  });
-
-  const [insights, setInsights] = useState<SmartInsight[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_INSIGHTS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_insights`);
-      return saved ? JSON.parse(saved) : DEFAULT_INSIGHTS;
-    } catch {
-      return DEFAULT_INSIGHTS;
-    }
-  });
-
-  const [settings, setSettings] = useState<GymSettings>(() => {
-    if (typeof window === "undefined") return DEFAULT_SETTINGS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_settings`);
-      return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
-    } catch {
-      return DEFAULT_SETTINGS;
-    }
-  });
-
-  const [leads, setLeads] = useState<Lead[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_LEADS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_leads`);
-      return saved ? JSON.parse(saved) : DEFAULT_LEADS;
-    } catch {
-      return DEFAULT_LEADS;
-    }
-  });
-
-  const [posProducts, setPOSProducts] = useState<POSProduct[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_POS_PRODUCTS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_pos_products`);
-      return saved ? JSON.parse(saved) : DEFAULT_POS_PRODUCTS;
-    } catch {
-      return DEFAULT_POS_PRODUCTS;
-    }
-  });
-
-  const [posOrders, setPOSOrders] = useState<POSOrder[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_pos_orders`);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [workoutPrograms, setWorkoutPrograms] = useState<WorkoutProgram[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_WORKOUT_PROGRAMS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_workout_programs`);
-      return saved ? JSON.parse(saved) : DEFAULT_WORKOUT_PROGRAMS;
-    } catch {
-      return DEFAULT_WORKOUT_PROGRAMS;
-    }
-  });
-
-  const [dietPlans, setDietPlans] = useState<DietPlan[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_DIET_PLANS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_diet_plans`);
-      return saved ? JSON.parse(saved) : DEFAULT_DIET_PLANS;
-    } catch {
-      return DEFAULT_DIET_PLANS;
-    }
-  });
-
-  const [lockers, setLockers] = useState<Locker[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_LOCKERS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_lockers`);
-      return saved ? JSON.parse(saved) : DEFAULT_LOCKERS;
-    } catch {
-      return DEFAULT_LOCKERS;
-    }
-  });
-
-  const [locations, setLocations] = useState<GymLocation[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_LOCATIONS;
-    try {
-      const saved = localStorage.getItem(`${STORAGE_KEY_V7}_locations`);
-      return saved ? JSON.parse(saved) : DEFAULT_LOCATIONS;
-    } catch {
-      return DEFAULT_LOCATIONS;
-    }
-  });
-
-  const [currentLocationId, setCurrentLocationId] = useState("loc-1");
-
-  // Dynamic UPI QR Modal state
-  const [isUPIQRModalOpen, setIsUPIQRModalOpen] = useState(false);
-  const [upiQRPaymentDetails, setUpiQRPaymentDetails] = useState<{ amount: number; memberName: string; note: string } | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSaved, setIsSaved] = useState<boolean>(true);
 
   // Modals & Panels UI State
+  const [isUPIQRModalOpen, setIsUPIQRModalOpen] = useState(false);
+  const [upiQRPaymentDetails, setUpiQRPaymentDetails] = useState<{ amount: number; memberName: string; note: string } | null>(null);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [paymentForMember, setPaymentForMember] = useState<Member | null>(null);
@@ -821,66 +704,144 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [editingMember, setEditingMember] = useState<Member | null>(null);
 
-  // Sync to LocalStorage
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_members`, JSON.stringify(members));
-  }, [members]);
+  // Safe Storage persistence helper
+  const safePersist = (key: string, data: any) => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(key, typeof data === "string" ? data : JSON.stringify(data));
+      setLastSaved(new Date());
+      setIsSaved(true);
+    } catch (err) {
+      console.warn(`[PeakRep Storage Sync Error] Failed to persist key "${key}":`, err);
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_payments`, JSON.stringify(payments));
-  }, [payments]);
+  // Safe Storage loader helper
+  const safeLoad = <T,>(key: string, fallback: T): T => {
+    if (typeof window === "undefined") return fallback;
+    try {
+      const item = localStorage.getItem(key);
+      if (item !== null && item !== undefined && item !== "") {
+        return JSON.parse(item);
+      }
+    } catch (e) {
+      console.warn(`[PeakRep Storage Load Error for ${key}]:`, e);
+    }
+    return fallback;
+  };
 
+  // Initial Client Hydration from LocalStorage
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_reminders`, JSON.stringify(reminders));
-  }, [reminders]);
+    if (typeof window === "undefined") return;
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_staff`, JSON.stringify(staff));
-  }, [staff]);
+    try {
+      const savedTheme = localStorage.getItem("peakrep_theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setThemeState(savedTheme);
+        if (savedTheme === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+      } else {
+        document.documentElement.classList.add("dark");
+      }
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_classes`, JSON.stringify(classes));
-  }, [classes]);
+      const loadedMembers = safeLoad(`${STORAGE_KEY_PEAKREP}_members`, DEFAULT_MEMBERS);
+      const loadedPayments = safeLoad(`${STORAGE_KEY_PEAKREP}_payments`, DEFAULT_PAYMENTS);
+      const loadedStaff = safeLoad(`${STORAGE_KEY_PEAKREP}_staff`, DEFAULT_STAFF);
+      const loadedSettings = safeLoad(`${STORAGE_KEY_PEAKREP}_settings`, DEFAULT_SETTINGS);
+      const loadedLeads = safeLoad(`${STORAGE_KEY_PEAKREP}_leads`, DEFAULT_LEADS);
+      const loadedWorkouts = safeLoad(`${STORAGE_KEY_PEAKREP}_workout_programs`, DEFAULT_WORKOUT_PROGRAMS);
+      const loadedDiets = safeLoad(`${STORAGE_KEY_PEAKREP}_diet_plans`, DEFAULT_DIET_PLANS);
+      const loadedLockers = safeLoad(`${STORAGE_KEY_PEAKREP}_lockers`, DEFAULT_LOCKERS);
+      const loadedBroadcasts = safeLoad(`${STORAGE_KEY_PEAKREP}_broadcasts`, DEFAULT_BROADCASTS);
+      const loadedLocations = safeLoad(`${STORAGE_KEY_PEAKREP}_locations`, DEFAULT_LOCATIONS);
+      const loadedLocId = localStorage.getItem(`${STORAGE_KEY_PEAKREP}_current_loc`) || "loc-1";
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_equipment`, JSON.stringify(equipment));
-  }, [equipment]);
+      setMembers(loadedMembers);
+      setPayments(loadedPayments);
+      setStaff(loadedStaff);
+      setSettings(loadedSettings);
+      setLeads(loadedLeads);
+      setWorkoutPrograms(loadedWorkouts);
+      setDietPlans(loadedDiets);
+      setLockers(loadedLockers);
+      setBroadcasts(loadedBroadcasts);
+      setLocations(loadedLocations);
+      setCurrentLocationId(loadedLocId);
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_insights`, JSON.stringify(insights));
-  }, [insights]);
+      setLastSaved(new Date());
+    } catch (err) {
+      console.error("[PeakRep Hydration Error]:", err);
+    } finally {
+      isHydratedRef.current = true;
+    }
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_settings`, JSON.stringify(settings));
-  }, [settings]);
+  const setTheme = (newTheme: "dark" | "light") => {
+    setThemeState(newTheme);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("peakrep_theme", newTheme);
+        if (newTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_leads`, JSON.stringify(leads));
-  }, [leads]);
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_pos_products`, JSON.stringify(posProducts));
-  }, [posProducts]);
+  // Guarded sync to LocalStorage (only writes AFTER client hydration has loaded persisted state)
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_members`, members); }, [members]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_payments`, payments); }, [payments]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_staff`, staff); }, [staff]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_settings`, settings); }, [settings]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_leads`, leads); }, [leads]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, workoutPrograms); }, [workoutPrograms]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, dietPlans); }, [dietPlans]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, lockers); }, [lockers]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, broadcasts); }, [broadcasts]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_locations`, locations); }, [locations]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, currentLocationId); }, [currentLocationId]);
 
+  // Live Cross-Tab Multi-Window Synchronization
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_pos_orders`, JSON.stringify(posOrders));
-  }, [posOrders]);
+    if (typeof window === "undefined") return;
+    const handleStorageChange = (e: StorageEvent) => {
+      if (!e.key || !e.newValue) return;
+      try {
+        if (e.key === `${STORAGE_KEY_PEAKREP}_members`) setMembers(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_payments`) setPayments(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_staff`) setStaff(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_settings`) setSettings(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_leads`) setLeads(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_workout_programs`) setWorkoutPrograms(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_diet_plans`) setDietPlans(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_lockers`) setLockers(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_broadcasts`) setBroadcasts(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_locations`) setLocations(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_current_loc`) setCurrentLocationId(e.newValue);
+        else if (e.key === "peakrep_theme") {
+          if (e.newValue === "light" || e.newValue === "dark") {
+            setThemeState(e.newValue);
+            if (e.newValue === "dark") document.documentElement.classList.add("dark");
+            else document.documentElement.classList.remove("dark");
+          }
+        }
+        setLastSaved(new Date());
+      } catch (err) {
+        console.warn("[PeakRep Cross-Tab Storage Parse Warning]:", err);
+      }
+    };
 
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_workout_programs`, JSON.stringify(workoutPrograms));
-  }, [workoutPrograms]);
-
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_diet_plans`, JSON.stringify(dietPlans));
-  }, [dietPlans]);
-
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_lockers`, JSON.stringify(lockers));
-  }, [lockers]);
-
-  useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY_V7}_locations`, JSON.stringify(locations));
-  }, [locations]);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   // Keep selectedMember360 synchronized with members list
   useEffect(() => {
@@ -902,6 +863,87 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Export & Import Database Snapshot
+  const exportData = (): string => {
+    const payload = {
+      system: "PEAKREP GYM OS",
+      version: "9.0",
+      exportedAt: new Date().toISOString(),
+      theme,
+      currentLocationId,
+      settings,
+      members,
+      payments,
+      staff,
+      leads,
+      workoutPrograms,
+      dietPlans,
+      lockers,
+      broadcasts,
+      locations,
+    };
+    return JSON.stringify(payload, null, 2);
+  };
+
+  const importData = (jsonStr: string): boolean => {
+    try {
+      const data = JSON.parse(jsonStr);
+      if (data.members && Array.isArray(data.members)) {
+        setMembers(data.members);
+        safePersist(`${STORAGE_KEY_PEAKREP}_members`, data.members);
+      }
+      if (data.payments && Array.isArray(data.payments)) {
+        setPayments(data.payments);
+        safePersist(`${STORAGE_KEY_PEAKREP}_payments`, data.payments);
+      }
+      if (data.staff && Array.isArray(data.staff)) {
+        setStaff(data.staff);
+        safePersist(`${STORAGE_KEY_PEAKREP}_staff`, data.staff);
+      }
+      if (data.settings && typeof data.settings === "object") {
+        setSettings(data.settings);
+        safePersist(`${STORAGE_KEY_PEAKREP}_settings`, data.settings);
+      }
+      if (data.leads && Array.isArray(data.leads)) {
+        setLeads(data.leads);
+        safePersist(`${STORAGE_KEY_PEAKREP}_leads`, data.leads);
+      }
+      if (data.workoutPrograms && Array.isArray(data.workoutPrograms)) {
+        setWorkoutPrograms(data.workoutPrograms);
+        safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, data.workoutPrograms);
+      }
+      if (data.dietPlans && Array.isArray(data.dietPlans)) {
+        setDietPlans(data.dietPlans);
+        safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, data.dietPlans);
+      }
+      if (data.lockers && Array.isArray(data.lockers)) {
+        setLockers(data.lockers);
+        safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, data.lockers);
+      }
+      if (data.broadcasts && Array.isArray(data.broadcasts)) {
+        setBroadcasts(data.broadcasts);
+        safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, data.broadcasts);
+      }
+      if (data.locations && Array.isArray(data.locations)) {
+        setLocations(data.locations);
+        safePersist(`${STORAGE_KEY_PEAKREP}_locations`, data.locations);
+      }
+      if (data.currentLocationId) {
+        setCurrentLocationId(data.currentLocationId);
+        safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, data.currentLocationId);
+      }
+      if (data.theme && (data.theme === "dark" || data.theme === "light")) {
+        setTheme(data.theme);
+      }
+      setLastSaved(new Date());
+      setIsSaved(true);
+      return true;
+    } catch (err) {
+      console.error("[PeakRep Import Failed]:", err);
+      return false;
+    }
+  };
+
   const openUPIQRModal = (amount: number, memberName: string, note?: string) => {
     setUpiQRPaymentDetails({
       amount,
@@ -912,76 +954,116 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Action: Add Member
-  const addMember = (memberData: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside">) => {
+  const addMember = (memberData: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside" | "installments" | "collectedAmount">) => {
     const newId = `m-${Date.now()}`;
-    const invoiceNum = `${settings.invoicePrefix || "INV-2026-"}${Math.floor(100 + Math.random() * 900)}`;
+    const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
     const today = new Date().toISOString().split("T")[0];
+
+    const planObj = settings.membershipPlans.find((p) => p.name === memberData.plan);
+    const planPrice = memberData.planPrice || planObj?.price || 3000;
+    const initialPaid = Math.max(0, planPrice - (memberData.due || 0));
+    const pendingDue = Math.max(0, planPrice - initialPaid);
+
+    const initialInstallments: InstallmentRecord[] = initialPaid > 0 ? [
+      {
+        id: `inst-${Date.now()}`,
+        amount: initialPaid,
+        date: today,
+        method: "UPI",
+        invoiceNumber: invoiceNum,
+        installmentNumber: 1,
+        totalInstallments: pendingDue > 0 ? 2 : 1,
+        note: pendingDue > 0 ? "Initial Enrollment Deposit" : "Full Membership Fee",
+      },
+    ] : [];
 
     const newMember: Member = {
       ...memberData,
       id: newId,
+      planPrice,
+      collectedAmount: initialPaid,
+      due: pendingDue,
       attendanceRate: 100,
       lastVisit: "Joined today",
       isCurrentlyInside: false,
+      installments: initialInstallments,
       timeline: [
         {
           id: `t-${Date.now()}`,
           type: "registration",
-          title: `Registered for ${memberData.plan} Membership`,
+          title: `Enrolled in ${memberData.plan} Membership`,
           timestamp: "Just now",
         },
       ],
-      invoices:
-        memberData.due === 0
-          ? [
-            {
-              id: `inv-${Date.now()}`,
-              invoiceNumber: invoiceNum,
-              date: today,
-              amount: settings.membershipPlans.find((p) => p.name === memberData.plan)?.price || 2800,
-              plan: memberData.plan,
-              method: "UPI",
-              status: "Paid",
-            },
-          ]
-          : [],
+      invoices: initialPaid > 0 ? [
+        {
+          id: `inv-${Date.now()}`,
+          invoiceNumber: invoiceNum,
+          date: today,
+          amount: initialPaid,
+          plan: memberData.plan,
+          method: "UPI",
+          status: pendingDue === 0 ? "Paid" : "Partial",
+          installmentInfo: pendingDue > 0 ? `Installment 1 of 2 (Due: ${settings.currencySymbol}${pendingDue})` : "Full Paid",
+        },
+      ] : [],
     };
 
-    setMembers((prev) => [newMember, ...prev]);
+    setMembers((prev) => {
+      const updated = [newMember, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
 
-    if (newMember.due > 0) {
-      const newReminder: ReminderItem = {
-        id: `r-${Date.now()}`,
-        memberId: newMember.id,
-        name: newMember.name,
-        phone: newMember.phone,
-        reason: `Pending due ${settings.currencySymbol}${newMember.due}`,
-        channel: "WhatsApp",
-        time: "Today, 9:00 AM",
-        status: "Pending",
+    if (initialPaid > 0) {
+      const newPayment: Payment = {
+        id: `p-${Date.now()}`,
+        memberId: newId,
+        member: newMember.name,
+        date: today,
+        method: "UPI",
+        amount: initialPaid,
+        category: "Membership",
+        status: pendingDue === 0 ? "Paid" : "Partial",
+        invoiceNumber: invoiceNum,
+        installmentIndex: 1,
+        totalInstallments: pendingDue > 0 ? 2 : 1,
+        notes: `Enrollment fee for ${newMember.plan}`,
       };
-      setReminders((prev) => [newReminder, ...prev]);
+      setPayments((prev) => {
+        const updated = [newPayment, ...prev];
+        safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+        return updated;
+      });
     }
   };
 
   const updateMember = (id: string, updates: Partial<Member>) => {
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === id) {
-          const updated = { ...m, ...updates };
-          if (updated.due === 0 && (updated.status === "Partial" || updated.status === "Expired")) {
-            updated.status = "Active";
+          const item = { ...m, ...updates };
+          if (item.planPrice !== undefined && item.collectedAmount !== undefined) {
+            item.due = Math.max(0, item.planPrice - item.collectedAmount);
           }
-          return updated;
+          if (item.due === 0 && (item.status === "Partial" || item.status === "Expired")) {
+            item.status = "Active";
+          }
+          return item;
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
   };
 
   const deleteMember = (id: string) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id));
-    setReminders((prev) => prev.filter((r) => r.memberId !== id));
+    setMembers((prev) => {
+      const updated = prev.filter((m) => m.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
     if (selectedMember360?.id === id) {
       setIsMember360Open(false);
       setSelectedMember360(null);
@@ -990,8 +1072,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const checkInMember = (memberId: string) => {
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === memberId) {
           return {
             ...m,
@@ -1001,8 +1083,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "attendance",
-                title: `Checked in at floor gate (${timeNow})`,
+                type: "attendance" as const,
+                title: `Checked in at floor turnstile (${timeNow})`,
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -1010,14 +1092,16 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
   };
 
   const checkOutMember = (memberId: string) => {
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === memberId) {
           return {
             ...m,
@@ -1025,7 +1109,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "attendance",
+                type: "attendance" as const,
                 title: `Checked out (${timeNow})`,
                 timestamp: "Just now",
               },
@@ -1034,34 +1118,59 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
   };
 
-  const renewMember = (memberId: string, durationMonths: number, planName?: string) => {
+  const renewMember = (
+    memberId: string,
+    durationMonths: number,
+    planName?: string,
+    paidAmount?: number,
+    paymentMethod: "UPI" | "Cash" | "Card" | "Bank" = "UPI"
+  ) => {
     const today = new Date();
     today.setMonth(today.getMonth() + durationMonths);
     const newExpiry = today.toISOString().split("T")[0];
-    const invoiceNum = `${settings.invoicePrefix || "INV-2026-"}${Math.floor(100 + Math.random() * 900)}`;
+    const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
 
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === memberId) {
           const selectedPlan = planName || m.plan;
-          const planPrice = settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 2800;
+          const planPrice = settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
+          const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
+          const remainingDue = Math.max(0, planPrice - actualPaid);
+
+          const newInstallment: InstallmentRecord = {
+            id: `inst-${Date.now()}`,
+            amount: actualPaid,
+            date: new Date().toISOString().split("T")[0],
+            method: paymentMethod,
+            invoiceNumber: invoiceNum,
+            installmentNumber: m.installments.length + 1,
+            totalInstallments: remainingDue > 0 ? m.installments.length + 2 : m.installments.length + 1,
+            note: `Renewal for ${selectedPlan} (${durationMonths} mos)`,
+          };
+
           return {
             ...m,
             plan: selectedPlan,
+            planPrice: m.planPrice + planPrice,
+            collectedAmount: m.collectedAmount + actualPaid,
+            due: remainingDue,
             expiry: newExpiry,
-            status: "Active",
-            due: 0,
+            status: remainingDue === 0 ? ("Active" as MemberStatus) : ("Partial" as MemberStatus),
+            installments: [newInstallment, ...m.installments],
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "upgrade",
-                title: `Renewed ${selectedPlan} membership for ${durationMonths} month(s)`,
+                type: "upgrade" as const,
+                title: `Renewed ${selectedPlan} membership (${durationMonths} month pass)`,
                 timestamp: "Just now",
-                amount: planPrice,
+                amount: actualPaid,
               },
               ...m.timeline,
             ],
@@ -1070,23 +1179,52 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 id: `inv-${Date.now()}`,
                 invoiceNumber: invoiceNum,
                 date: new Date().toISOString().split("T")[0],
-                amount: planPrice,
+                amount: actualPaid,
                 plan: selectedPlan,
-                method: "UPI",
-                status: "Paid",
+                method: paymentMethod,
+                status: remainingDue === 0 ? ("Paid" as const) : ("Partial" as const),
+                installmentInfo: remainingDue > 0 ? `Installment payment (Due: ${settings.currencySymbol}${remainingDue})` : "Full Paid",
               },
               ...m.invoices,
             ],
           };
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+
+    const m = members.find((x) => x.id === memberId);
+    const selectedPlan = planName || m?.plan || "Membership";
+    const planPrice = settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
+    const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
+
+    if (actualPaid > 0) {
+      const paymentEntry: Payment = {
+        id: `p-${Date.now()}`,
+        memberId,
+        member: m?.name || "Member",
+        date: new Date().toISOString().split("T")[0],
+        method: paymentMethod,
+        amount: actualPaid,
+        category: "Membership",
+        status: planPrice - actualPaid === 0 ? "Paid" : "Partial",
+        invoiceNumber: invoiceNum,
+        installmentIndex: (m?.installments?.length || 0) + 1,
+        notes: `Renewal fee for ${selectedPlan}`,
+      };
+      setPayments((prev) => {
+        const updated = [paymentEntry, ...prev];
+        safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+        return updated;
+      });
+    }
   };
 
   const toggleFreezeMember = (memberId: string) => {
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === memberId) {
           const newStatus: MemberStatus = m.status === "Frozen" ? "Active" : "Frozen";
           return {
@@ -1095,8 +1233,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "freeze",
-                title: newStatus === "Frozen" ? "Membership paused/frozen" : "Membership resumed/active",
+                type: "freeze" as const,
+                title: newStatus === "Frozen" ? "Membership paused / frozen" : "Membership resumed / active",
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -1104,68 +1242,105 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
   };
 
-  const recordPayment = (paymentData: Omit<Payment, "id" | "invoiceNumber">) => {
-    const invoiceNumber = `${settings.invoicePrefix || "INV-2026-"}${Math.floor(100 + Math.random() * 900)}`;
+  // Rebuilt Payment Engine
+  const recordPayment = (paymentData: {
+    memberId: string;
+    member: string;
+    date: string;
+    method: "UPI" | "Cash" | "Card" | "Bank";
+    amount: number;
+    category?: "Membership" | "Personal Training" | "Registration";
+    notes?: string;
+    installmentNumber?: number;
+    totalInstallments?: number;
+  }) => {
+    const invoiceNumber = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newPayment: Payment = {
-      ...paymentData,
       id: `p-${Date.now()}`,
+      memberId: paymentData.memberId,
+      member: paymentData.member,
+      date: paymentData.date,
+      method: paymentData.method,
+      amount: paymentData.amount,
+      category: paymentData.category || "Membership",
+      status: "Paid",
       invoiceNumber,
+      installmentIndex: paymentData.installmentNumber,
+      totalInstallments: paymentData.totalInstallments,
+      notes: paymentData.notes,
     };
-    setPayments((prev) => [newPayment, ...prev]);
 
-    if (paymentData.memberId || paymentData.member) {
-      setMembers((prev) =>
-        prev.map((m) => {
-          if (m.id === paymentData.memberId || m.name.toLowerCase() === paymentData.member.toLowerCase()) {
-            const newDue = Math.max(0, m.due - paymentData.amount);
-            const newStatus: MemberStatus =
-              newDue === 0 ? (m.status === "Partial" || m.status === "Expired" ? "Active" : m.status) : "Partial";
-            return {
-              ...m,
-              due: newDue,
-              status: newStatus,
-              timeline: [
-                {
-                  id: `t-${Date.now()}`,
-                  type: "payment",
-                  title: `Logged payment of ${settings.currencySymbol}${paymentData.amount} via ${paymentData.method}`,
-                  timestamp: "Just now",
-                  amount: paymentData.amount,
-                },
-                ...m.timeline,
-              ],
-              invoices: [
-                {
-                  id: `inv-${Date.now()}`,
-                  invoiceNumber,
-                  date: paymentData.date,
-                  amount: paymentData.amount,
-                  plan: m.plan,
-                  method: paymentData.method,
-                  status: newDue === 0 ? "Paid" : "Partial",
-                },
-                ...m.invoices,
-              ],
-            };
-          }
-          return m;
-        })
-      );
-    }
-  };
+    setPayments((prev) => {
+      const updated = [newPayment, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+      return updated;
+    });
 
-  const sendReminder = (id: string) => {
-    setReminders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: "Sent" as const } : r))
-    );
-  };
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
+        if (m.id === paymentData.memberId || m.name.toLowerCase() === paymentData.member.toLowerCase()) {
+          const newCollected = m.collectedAmount + paymentData.amount;
+          const newDue = Math.max(0, m.planPrice - newCollected);
+          const newStatus: MemberStatus = newDue === 0 ? "Active" : "Partial";
 
-  const sendAllReminders = () => {
-    setReminders((prev) => prev.map((r) => ({ ...r, status: "Sent" as const })));
+          const currentInstallmentCount = (m.installments?.length || 0) + 1;
+          const estTotalInstallments = paymentData.totalInstallments || (newDue > 0 ? currentInstallmentCount + 1 : currentInstallmentCount);
+
+          const newInstallmentRecord: InstallmentRecord = {
+            id: `inst-${Date.now()}`,
+            amount: paymentData.amount,
+            date: paymentData.date,
+            method: paymentData.method,
+            invoiceNumber,
+            installmentNumber: paymentData.installmentNumber || currentInstallmentCount,
+            totalInstallments: estTotalInstallments,
+            note: paymentData.notes || `Installment ${currentInstallmentCount} of ${estTotalInstallments}`,
+          };
+
+          return {
+            ...m,
+            collectedAmount: newCollected,
+            due: newDue,
+            status: newStatus,
+            installments: [newInstallmentRecord, ...(m.installments || [])],
+            timeline: [
+              {
+                id: `t-${Date.now()}`,
+                type: "payment" as const,
+                title: `Recorded payment of ${settings.currencySymbol}${paymentData.amount.toLocaleString("en-IN")} via ${paymentData.method}`,
+                timestamp: "Just now",
+                amount: paymentData.amount,
+                note: newDue > 0 ? `Remaining Due: ${settings.currencySymbol}${newDue.toLocaleString("en-IN")}` : "Full Balance Cleared",
+              },
+              ...m.timeline,
+            ],
+            invoices: [
+              {
+                id: `inv-${Date.now()}`,
+                invoiceNumber,
+                date: paymentData.date,
+                amount: paymentData.amount,
+                plan: m.plan,
+                method: paymentData.method,
+                status: newDue === 0 ? ("Paid" as const) : ("Partial" as const),
+                installmentInfo: `Installment #${paymentData.installmentNumber || currentInstallmentCount} (${newDue === 0 ? "Fully Cleared" : `Due: ${settings.currencySymbol}${newDue}`})`,
+              },
+              ...m.invoices,
+            ],
+          };
+        }
+        return m;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
   };
 
   // Staff CRUD
@@ -1183,17 +1358,27 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       assignedClientsCount: 0,
       leaveRecords: [],
     };
-    setStaff((prev) => [...prev, newStaff]);
+    setStaff((prev) => {
+      const updated = [...prev, newStaff];
+      safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
+      return updated;
+    });
   };
 
   const updateStaff = (id: string, updates: Partial<StaffMember>) => {
-    setStaff((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
-    );
+    setStaff((prev) => {
+      const updated = prev.map((s) => (s.id === id ? { ...s, ...updates } : s));
+      safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
+      return updated;
+    });
   };
 
   const deleteStaff = (id: string) => {
-    setStaff((prev) => prev.filter((s) => s.id !== id));
+    setStaff((prev) => {
+      const updated = prev.filter((s) => s.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
+      return updated;
+    });
   };
 
   const payStaffSalary = (staffId: string) => {
@@ -1211,18 +1396,24 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       invoiceNumber: `PAY-${Date.now().toString().slice(-4)}`,
       notes: `Monthly payroll compensation for ${targetStaff.name} (${targetStaff.role})`,
     };
-    setPayments((prev) => [paymentEntry, ...prev]);
+    setPayments((prev) => {
+      const updated = [paymentEntry, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+      return updated;
+    });
   };
 
   const toggleStaffStatus = (staffId: string, status: "On Floor" | "Off Duty" | "On Leave") => {
-    setStaff((prev) =>
-      prev.map((s) => (s.id === staffId ? { ...s, status } : s))
-    );
+    setStaff((prev) => {
+      const updated = prev.map((s) => (s.id === staffId ? { ...s, status } : s));
+      safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
+      return updated;
+    });
   };
 
   const approveLeaveRequest = (staffId: string, leaveId: string) => {
-    setStaff((prev) =>
-      prev.map((s) => {
+    setStaff((prev) => {
+      const updated = prev.map((s) => {
         if (s.id === staffId) {
           return {
             ...s,
@@ -1232,49 +1423,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         }
         return s;
-      })
-    );
-  };
-
-  // Equipment CRUD
-  const addEquipment = (eqData: Omit<GymEquipment, "id" | "usageCount">) => {
-    const newEquipment: GymEquipment = {
-      ...eqData,
-      id: `eq-${Date.now()}`,
-      usageCount: 0,
-    };
-    setEquipment((prev) => [newEquipment, ...prev]);
-  };
-
-  const updateEquipment = (id: string, updates: Partial<GymEquipment>) => {
-    setEquipment((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
-    );
-  };
-
-  const deleteEquipment = (id: string) => {
-    setEquipment((prev) => prev.filter((e) => e.id !== id));
-  };
-
-  const serviceEquipment = (equipmentId: string) => {
-    const today = new Date().toISOString().split("T")[0];
-    const nextDate = new Date();
-    nextDate.setMonth(nextDate.getMonth() + 3);
-    const nextServiceDate = nextDate.toISOString().split("T")[0];
-
-    setEquipment((prev) =>
-      prev.map((e) =>
-        e.id === equipmentId
-          ? {
-            ...e,
-            status: "Operational",
-            lastServiced: today,
-            nextServiceDate,
-            usageCount: e.usageCount + 50,
-          }
-          : e
-      )
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
+      return updated;
+    });
   };
 
   // Plans CRUD
@@ -1287,363 +1439,635 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       frozenCount: 0,
       upgradeOpportunities: 0,
     };
-    setSettings((prev) => ({
-      ...prev,
-      membershipPlans: [...prev.membershipPlans, newPlan],
-    }));
+    setSettings((prev) => {
+      const updated = {
+        ...prev,
+        membershipPlans: [...prev.membershipPlans, newPlan],
+      };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
   };
 
   const updatePlan = (id: string, updates: Partial<MembershipPlan>) => {
-    setSettings((prev) => ({
-      ...prev,
-      membershipPlans: prev.membershipPlans.map((p) =>
-        p.id === id ? { ...p, ...updates } : p
-      ),
-    }));
+    setSettings((prev) => {
+      const updated = {
+        ...prev,
+        membershipPlans: prev.membershipPlans.map((p) =>
+          p.id === id ? { ...p, ...updates } : p
+        ),
+      };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
   };
 
   const deletePlan = (id: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      membershipPlans: prev.membershipPlans.filter((p) => p.id !== id),
-    }));
+    setSettings((prev) => {
+      const updated = {
+        ...prev,
+        membershipPlans: prev.membershipPlans.filter((p) => p.id !== id),
+      };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
   };
 
-  const addClass = (classData: Omit<GymClass, "id" | "enrolledMembers">) => {
-    const newClass: GymClass = {
-      ...classData,
-      id: `class-${Date.now()}`,
-      enrolledMembers: [],
-    };
-    setClasses((prev) => [...prev, newClass]);
-  };
-
-  const updateClass = (id: string, updates: Partial<GymClass>) => {
-    setClasses((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
-    );
-  };
-
-  const deleteClass = (id: string) => {
-    setClasses((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  const bookClass = (classId: string, memberId: string) => {
-    const cls = classes.find((c) => c.id === classId);
-    setClasses((prev) =>
-      prev.map((c) => {
-        if (c.id === classId && !c.enrolledMembers.includes(memberId)) {
-          return { ...c, enrolledMembers: [...c.enrolledMembers, memberId] };
-        }
-        return c;
-      })
-    );
-
-    // Also record event in member timeline
-    if (cls) {
-      setMembers((prev) =>
-        prev.map((m) => {
-          if (m.id === memberId) {
-            return {
-              ...m,
-              timeline: [
-                {
-                  id: `t-class-${Date.now()}`,
-                  type: "pt_session" as const,
-                  title: `Enrolled in Studio Session: ${cls.title} (${cls.time})`,
-                  timestamp: "Just now",
-                },
-                ...(m.timeline || []),
-              ],
-            };
-          }
-          return m;
-        })
-      );
-    }
-  };
-
-  const cancelClassBooking = (classId: string, memberId: string) => {
-    setClasses((prev) =>
-      prev.map((c) => {
-        if (c.id === classId) {
-          return { ...c, enrolledMembers: c.enrolledMembers.filter((id) => id !== memberId) };
-        }
-        return c;
-      })
-    );
-  };
-
-  const dismissInsight = (id: string) => {
-    setInsights((prev) => prev.filter((i) => i.id !== id));
-  };
-
-  const executeInsightAction = (insight: SmartInsight) => {
-    switch (insight.actionType) {
-      case "nudge_expiring":
-        sendAllReminders();
-        break;
-      case "assign_trainer":
-        if (staff.length > 2) {
-          toggleStaffStatus(staff[2].id, "On Floor");
-        }
-        break;
-      case "service_equipment":
-        if (equipment.length > 0) {
-          serviceEquipment(equipment[0].id);
-        }
-        break;
-      case "promote_pt":
-        setIsAddMemberOpen(true);
-        break;
-      case "restock_pos":
-        setPOSProducts((prev) =>
-          prev.map((p) => (p.stock < 10 ? { ...p, stock: p.stock + 20 } : p))
-        );
-        break;
-    }
-  };
-
-  // Lead Actions
+  // Lead CRM Actions
   const addLead = (leadData: Omit<Lead, "id" | "createdAt">) => {
     const newLead: Lead = {
       ...leadData,
       id: `lead-${Date.now()}`,
       createdAt: new Date().toISOString().split("T")[0],
     };
-    setLeads((prev) => [newLead, ...prev]);
+    setLeads((prev) => {
+      const updated = [newLead, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_leads`, updated);
+      return updated;
+    });
   };
 
   const updateLeadStage = (leadId: string, stage: LeadStage) => {
-    setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, stage } : l))
-    );
+    setLeads((prev) => {
+      const updated = prev.map((l) => (l.id === leadId ? { ...l, stage } : l));
+      safePersist(`${STORAGE_KEY_PEAKREP}_leads`, updated);
+      return updated;
+    });
   };
 
-  const convertLeadToMember = (leadId: string, planName: string, due: number = 0) => {
+  const convertLeadToMember = (
+    leadId: string,
+    planName: string,
+    initialPaid: number = 0,
+    method: "UPI" | "Cash" | "Card" | "Bank" = "UPI"
+  ) => {
     const targetLead = leads.find((l) => l.id === leadId);
     if (!targetLead) return;
+
+    const planObj = settings.membershipPlans.find((p) => p.name === planName);
+    const planPrice = planObj?.price || 3000;
+    const due = Math.max(0, planPrice - initialPaid);
 
     addMember({
       name: targetLead.name,
       phone: targetLead.phone,
       email: targetLead.email,
       plan: planName,
+      planPrice,
+      due,
       joinDate: new Date().toISOString().split("T")[0],
       expiry: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split("T")[0],
-      status: due > 0 ? "Partial" : "Active",
-      due,
+      status: due === 0 ? "Active" : "Partial",
       healthGoal: targetLead.fitnessGoal,
-      notes: `Converted from ${targetLead.source} lead. ${targetLead.notes}`,
+      notes: `Converted from ${targetLead.source} inquiry. ${targetLead.notes}`,
     });
 
     updateLeadStage(leadId, "Won");
   };
 
-  // POS Actions
-  const processPOSSale = (sale: { memberId?: string; memberName: string; items: POSOrderItem[]; paymentMethod: "UPI" | "Cash" | "Card" | "Member Due" }) => {
-    const orderNum = `ORD-${Date.now().toString().slice(-4)}`;
-    const totalAmount = sale.items.reduce((s, it) => s + it.price * it.quantity, 0);
-
-    const newOrder: POSOrder = {
-      id: `pos-ord-${Date.now()}`,
-      orderNumber: orderNum,
-      memberId: sale.memberId,
-      memberName: sale.memberName,
-      items: sale.items,
-      totalAmount,
-      paymentMethod: sale.paymentMethod,
-      date: new Date().toISOString().split("T")[0],
+  // Workout Builder & Management
+  const addWorkoutProgram = (progData: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">) => {
+    const newProg: WorkoutProgram = {
+      ...progData,
+      id: `wo-${Date.now()}`,
+      assignedCount: 0,
+      createdAt: new Date().toISOString().split("T")[0],
     };
-
-    setPOSOrders((prev) => [newOrder, ...prev]);
-
-    // Decrement stock
-    setPOSProducts((prev) =>
-      prev.map((prod) => {
-        const itemInSale = sale.items.find((it) => it.productId === prod.id);
-        if (itemInSale) {
-          return { ...prod, stock: Math.max(0, prod.stock - itemInSale.quantity) };
-        }
-        return prod;
-      })
-    );
-
-    // Record to financial ledger
-    const newPayment: Payment = {
-      id: `p-${Date.now()}`,
-      memberId: sale.memberId,
-      member: sale.memberName,
-      date: new Date().toISOString().split("T")[0],
-      method: sale.paymentMethod === "Member Due" ? "UPI" : sale.paymentMethod,
-      amount: totalAmount,
-      category: "Pro Shop",
-      status: sale.paymentMethod === "Member Due" ? "Partial" : "Paid",
-      invoiceNumber: `INV-POS-${Date.now().toString().slice(-4)}`,
-      notes: `Pro Shop sale (${sale.items.map((i) => `${i.quantity}x ${i.name}`).join(", ")})`,
-    };
-    setPayments((prev) => [newPayment, ...prev]);
-
-    // If assigned to a member, add timeline entry
-    if (sale.memberId) {
-      setMembers((prev) =>
-        prev.map((m) => {
-          if (m.id === sale.memberId) {
-            const addedDue = sale.paymentMethod === "Member Due" ? totalAmount : 0;
-            return {
-              ...m,
-              due: m.due + addedDue,
-              status: addedDue > 0 ? "Partial" : m.status,
-              timeline: [
-                {
-                  id: `t-${Date.now()}`,
-                  type: "pos_purchase",
-                  title: `Purchased Pro Shop items (${settings.currencySymbol}${totalAmount})`,
-                  timestamp: "Just now",
-                  amount: totalAmount,
-                },
-                ...m.timeline,
-              ],
-            };
-          }
-          return m;
-        })
-      );
-    }
+    setWorkoutPrograms((prev) => {
+      const updated = [newProg, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
+      return updated;
+    });
   };
 
-  const restockProduct = (productId: string, quantity: number) => {
-    setPOSProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, stock: p.stock + quantity } : p))
-    );
+  const updateWorkoutProgram = (id: string, updates: Partial<WorkoutProgram>) => {
+    setWorkoutPrograms((prev) => {
+      const updated = prev.map((w) => (w.id === id ? { ...w, ...updates } : w));
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
+      return updated;
+    });
   };
 
-  // Workout & Diet Actions
+  const duplicateWorkoutProgram = (id: string) => {
+    const existing = workoutPrograms.find((w) => w.id === id);
+    if (!existing) return;
+    const duplicated: WorkoutProgram = {
+      ...existing,
+      id: `wo-${Date.now()}`,
+      title: `${existing.title} (Copy)`,
+      assignedCount: 0,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setWorkoutPrograms((prev) => {
+      const updated = [duplicated, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
+      return updated;
+    });
+  };
+
+  const deleteWorkoutProgram = (id: string) => {
+    setWorkoutPrograms((prev) => {
+      const updated = prev.filter((w) => w.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
+      return updated;
+    });
+  };
+
+  const archiveWorkoutProgram = (id: string) => {
+    setWorkoutPrograms((prev) => {
+      const updated = prev.map((w) => (w.id === id ? { ...w, isArchived: !w.isArchived } : w));
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
+      return updated;
+    });
+  };
+
   const assignWorkoutToMember = (memberId: string, workoutId: string) => {
     const workout = workoutPrograms.find((w) => w.id === workoutId);
     if (!workout) return;
 
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === memberId) {
           return {
             ...m,
             assignedWorkout: workout.title,
+            assignedWorkoutId: workout.id,
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "workout_assigned",
+                type: "workout_assigned" as const,
                 title: `Assigned Workout Split: ${workout.title}`,
                 timestamp: "Just now",
+                note: `${workout.daysPerWeek} Days/Week • ${workout.level}`,
               },
               ...m.timeline,
             ],
           };
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+
+    setWorkoutPrograms((prev) => {
+      const updated = prev.map((w) => (w.id === workoutId ? { ...w, assignedCount: w.assignedCount + 1 } : w));
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
+      return updated;
+    });
+  };
+
+  // Diet Builder & Management
+  const addDietPlan = (dietData: Omit<DietPlan, "id" | "assignedCount" | "createdAt">) => {
+    const newDiet: DietPlan = {
+      ...dietData,
+      id: `diet-${Date.now()}`,
+      assignedCount: 0,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setDietPlans((prev) => {
+      const updated = [newDiet, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
+      return updated;
+    });
+  };
+
+  const updateDietPlan = (id: string, updates: Partial<DietPlan>) => {
+    setDietPlans((prev) => {
+      const updated = prev.map((d) => (d.id === id ? { ...d, ...updates } : d));
+      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
+      return updated;
+    });
+  };
+
+  const duplicateDietPlan = (id: string) => {
+    const existing = dietPlans.find((d) => d.id === id);
+    if (!existing) return;
+    const duplicated: DietPlan = {
+      ...existing,
+      id: `diet-${Date.now()}`,
+      title: `${existing.title} (Copy)`,
+      assignedCount: 0,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setDietPlans((prev) => {
+      const updated = [duplicated, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
+      return updated;
+    });
+  };
+
+  const deleteDietPlan = (id: string) => {
+    setDietPlans((prev) => {
+      const updated = prev.filter((d) => d.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
+      return updated;
+    });
+  };
+
+  const archiveDietPlan = (id: string) => {
+    setDietPlans((prev) => {
+      const updated = prev.map((d) => (d.id === id ? { ...d, isArchived: !d.isArchived } : d));
+      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
+      return updated;
+    });
   };
 
   const assignDietToMember = (memberId: string, dietId: string) => {
     const diet = dietPlans.find((d) => d.id === dietId);
     if (!diet) return;
 
-    setMembers((prev) =>
-      prev.map((m) => {
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
         if (m.id === memberId) {
           return {
             ...m,
             assignedDiet: diet.title,
+            assignedDietId: diet.id,
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "workout_assigned",
+                type: "diet_assigned" as const,
                 title: `Assigned Nutrition Plan: ${diet.title}`,
                 timestamp: "Just now",
+                note: `${diet.calorieTarget} kcal • ${diet.proteinGrams}g Protein`,
               },
               ...m.timeline,
             ],
           };
         }
         return m;
-      })
-    );
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+
+    setDietPlans((prev) => {
+      const updated = prev.map((d) => (d.id === dietId ? { ...d, assignedCount: d.assignedCount + 1 } : d));
+      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
+      return updated;
+    });
   };
 
-  // Locker Actions
-  const assignLocker = (lockerNumber: number, memberId: string, memberName: string) => {
-    const expiresOn = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split("T")[0];
-    setLockers((prev) =>
-      prev.map((l) =>
+  const assignProgramToMember = (memberId: string, workoutId?: string, dietId?: string, notes?: string) => {
+    if (workoutId) assignWorkoutToMember(memberId, workoutId);
+    if (dietId) assignDietToMember(memberId, dietId);
+  };
+
+  // Locker Operations & Maintenance Workflow
+  const assignLocker = (lockerNumber: number, memberId: string, memberName: string, durationDays: number = 30) => {
+    const expiresOn = new Date(Date.now() + durationDays * 24 * 3600 * 1000).toISOString().split("T")[0];
+    const timestamp = new Date().toISOString().split("T")[0];
+
+    setLockers((prev) => {
+      const updated = prev.map((l) =>
         l.number === lockerNumber
           ? {
             ...l,
-            status: "Occupied",
+            status: "Occupied" as LockerStatus,
             assignedMemberId: memberId,
             assignedMemberName: memberName,
+            reservedFor: undefined,
+            maintenanceDate: undefined,
+            maintenanceIssue: undefined,
             expiresOn,
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Assigned",
+                timestamp,
+                details: `Assigned to ${memberName} (Expires: ${expiresOn})`,
+              },
+              ...l.history,
+            ],
           }
           : l
-      )
-    );
+      );
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
 
-    setMembers((prev) =>
-      prev.map((m) => (m.id === memberId ? { ...m, assignedLocker: lockerNumber } : m))
-    );
+    setMembers((prev) => {
+      const updated = prev.map((m) => (m.id === memberId ? { ...m, assignedLocker: lockerNumber } : m));
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+  };
+
+  const reserveLocker = (lockerNumber: number, reservedFor: string, note?: string) => {
+    const timestamp = new Date().toISOString().split("T")[0];
+    setLockers((prev) => {
+      const updated = prev.map((l) =>
+        l.number === lockerNumber
+          ? {
+            ...l,
+            status: "Reserved" as LockerStatus,
+            reservedFor,
+            assignedMemberId: undefined,
+            assignedMemberName: undefined,
+            expiresOn: undefined,
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Reserved",
+                timestamp,
+                details: `Reserved for ${reservedFor}${note ? ` (${note})` : ""}`,
+              },
+              ...l.history,
+            ],
+          }
+          : l
+      );
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
   };
 
   const releaseLocker = (lockerNumber: number) => {
     const targetLocker = lockers.find((l) => l.number === lockerNumber);
+    const timestamp = new Date().toISOString().split("T")[0];
+
     if (targetLocker?.assignedMemberId) {
-      setMembers((prev) =>
-        prev.map((m) =>
+      setMembers((prev) => {
+        const updated = prev.map((m) =>
           m.id === targetLocker.assignedMemberId ? { ...m, assignedLocker: undefined } : m
-        )
-      );
+        );
+        safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+        return updated;
+      });
     }
 
-    setLockers((prev) =>
-      prev.map((l) =>
+    setLockers((prev) => {
+      const updated = prev.map((l) =>
         l.number === lockerNumber
           ? {
             ...l,
-            status: "Available",
+            status: "Available" as LockerStatus,
             assignedMemberId: undefined,
             assignedMemberName: undefined,
+            reservedFor: undefined,
             expiresOn: undefined,
+            maintenanceDate: undefined,
+            maintenanceIssue: undefined,
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Released",
+                timestamp,
+                details: `Released by staff. Returned to Available.`,
+              },
+              ...l.history,
+            ],
           }
           : l
-      )
-    );
+      );
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
   };
 
-  // Multi-Location Actions
-  const switchLocation = (locationId: string) => {
-    setCurrentLocationId(locationId);
-    const targetLoc = locations.find((l) => l.id === locationId);
-    if (targetLoc) {
-      setSettings((prev) => ({
-        ...prev,
-        name: targetLoc.name.split(" · ")[0],
-        location: targetLoc.name.split(" · ")[1] || prev.location,
-      }));
+  const markLockerMaintenance = (lockerNumber: number, issue: string, date?: string) => {
+    const maintenanceDate = date || new Date().toISOString().split("T")[0];
+
+    setLockers((prev) => {
+      const updated = prev.map((l) =>
+        l.number === lockerNumber
+          ? {
+            ...l,
+            status: "Under Maintenance" as LockerStatus,
+            maintenanceDate,
+            maintenanceIssue: issue,
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Maintenance Reported",
+                timestamp: maintenanceDate,
+                details: `Issue: ${issue}`,
+              },
+              ...l.history,
+            ],
+          }
+          : l
+      );
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
+  };
+
+  const completeLockerRepair = (lockerNumber: number, repairNotes?: string, repairedBy: string = "Duty Staff") => {
+    const timestamp = new Date().toISOString().split("T")[0];
+
+    setLockers((prev) => {
+      const updated = prev.map((l) => {
+        if (l.number === lockerNumber) {
+          const repairEntry: LockerRepairLog = {
+            id: `rep-${Date.now()}`,
+            issue: l.maintenanceIssue || "General Maintenance",
+            repairedAt: timestamp,
+            repairedBy,
+            notes: repairNotes || "Repaired and sanitized. Returned to operational status.",
+          };
+
+          return {
+            ...l,
+            status: "Available" as LockerStatus,
+            maintenanceDate: undefined,
+            maintenanceIssue: undefined,
+            repairHistory: [repairEntry, ...l.repairHistory],
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Repaired & Restored",
+                timestamp,
+                details: `Repaired by ${repairedBy}. Issue resolved. Automatically restored to Available.`,
+              },
+              ...l.history,
+            ],
+          };
+        }
+        return l;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
+  };
+
+  // Broadcast Messaging Center
+  const sendBroadcastMessage = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
+    const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const todayStr = new Date().toISOString().split("T")[0];
+    const newBroadcast: BroadcastMessage = {
+      ...broadcastData,
+      id: `bc-${Date.now()}`,
+      status: "Sent",
+      sentAt: `${todayStr}, ${nowStr}`,
+      createdAt: todayStr,
+    };
+
+    setBroadcasts((prev) => {
+      const updated = [newBroadcast, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, updated);
+      return updated;
+    });
+
+    let targetMembers = members;
+    if (broadcastData.recipientsType === "active") targetMembers = members.filter((m) => m.status === "Active");
+    else if (broadcastData.recipientsType === "expiring") targetMembers = members.filter((m) => m.status === "Expiring");
+    else if (broadcastData.recipientsType === "expired") targetMembers = members.filter((m) => m.status === "Expired");
+    else if (broadcastData.recipientsType === "partial_due") targetMembers = members.filter((m) => m.due > 0);
+    else if (broadcastData.recipientsType === "plan" && broadcastData.targetPlanName) {
+      targetMembers = members.filter((m) => m.plan === broadcastData.targetPlanName);
+    } else if (broadcastData.recipientsType === "individual" && broadcastData.targetMemberId) {
+      targetMembers = members.filter((m) => m.id === broadcastData.targetMemberId);
+    }
+
+    const memberIds = targetMembers.map((m) => m.id);
+    if (memberIds.length > 0) {
+      setMembers((prev) => {
+        const updated = prev.map((m) => {
+          if (memberIds.includes(m.id)) {
+            return {
+              ...m,
+              timeline: [
+                {
+                  id: `t-bc-${Date.now()}`,
+                  type: "broadcast_sent" as const,
+                  title: `Broadcast: ${broadcastData.title}`,
+                  timestamp: "Just now",
+                  note: `Sent via ${broadcastData.channels.join(", ")}`,
+                },
+                ...m.timeline,
+              ],
+            };
+          }
+          return m;
+        });
+        safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+        return updated;
+      });
     }
   };
 
+  const saveDraftBroadcast = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const draft: BroadcastMessage = {
+      ...broadcastData,
+      id: `bc-${Date.now()}`,
+      status: "Draft",
+      createdAt: todayStr,
+    };
+    setBroadcasts((prev) => {
+      const updated = [draft, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, updated);
+      return updated;
+    });
+  };
+
+  const deleteBroadcastMessage = (id: string) => {
+    setBroadcasts((prev) => {
+      const updated = prev.filter((b) => b.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, updated);
+      return updated;
+    });
+  };
+
+  // Multi-Location Actions
+  const addLocation = (locData: Omit<GymLocation, "id">) => {
+    const newLoc: GymLocation = {
+      ...locData,
+      id: `loc-${Date.now()}`,
+    };
+    setLocations((prev) => {
+      const updated = [...prev, newLoc];
+      safePersist(`${STORAGE_KEY_PEAKREP}_locations`, updated);
+      return updated;
+    });
+  };
+
+  const updateLocation = (id: string, updates: Partial<GymLocation>) => {
+    setLocations((prev) => {
+      const updated = prev.map((l) => (l.id === id ? { ...l, ...updates } : l));
+      safePersist(`${STORAGE_KEY_PEAKREP}_locations`, updated);
+      return updated;
+    });
+  };
+
+  const deleteLocation = (id: string) => {
+    setLocations((prev) => {
+      const updated = prev.filter((l) => l.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_locations`, updated);
+      return updated;
+    });
+  };
+
+  const switchLocation = (locationId: string) => {
+    setCurrentLocationId(locationId);
+    safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, locationId);
+    const targetLoc = locations.find((l) => l.id === locationId);
+    if (targetLoc) {
+      setSettings((prev) => {
+        const updated = {
+          ...prev,
+          name: targetLoc.name.split(" · ")[0],
+          location: targetLoc.name.split(" · ")[1] || prev.location,
+          address: targetLoc.address || prev.address,
+          phone: targetLoc.phone || prev.phone,
+        };
+        safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+        return updated;
+      });
+    }
+  };
+
+  // Settings Actions
   const updateSettings = (newSettings: Partial<GymSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
+    setSettings((prev) => {
+      const updated = { ...prev, ...newSettings };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
+  };
+
+  const updateGymLogo = (logoBase64: string) => {
+    setSettings((prev) => {
+      const updated = { ...prev, logoUrl: logoBase64 };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
+  };
+
+  const removeGymLogo = () => {
+    setSettings((prev) => {
+      const updated = { ...prev, logoUrl: "" };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
   };
 
   const resetToDefaultData = () => {
     setMembers(DEFAULT_MEMBERS);
     setPayments(DEFAULT_PAYMENTS);
     setStaff(DEFAULT_STAFF);
-    setEquipment(DEFAULT_EQUIPMENT);
     setSettings(DEFAULT_SETTINGS);
     setLeads(DEFAULT_LEADS);
-    setPOSProducts(DEFAULT_POS_PRODUCTS);
+    setWorkoutPrograms(DEFAULT_WORKOUT_PROGRAMS);
+    setDietPlans(DEFAULT_DIET_PLANS);
     setLockers(DEFAULT_LOCKERS);
+    setBroadcasts(DEFAULT_BROADCASTS);
+    setLocations(DEFAULT_LOCATIONS);
+    setCurrentLocationId("loc-1");
+
+    safePersist(`${STORAGE_KEY_PEAKREP}_members`, DEFAULT_MEMBERS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_payments`, DEFAULT_PAYMENTS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_staff`, DEFAULT_STAFF);
+    safePersist(`${STORAGE_KEY_PEAKREP}_settings`, DEFAULT_SETTINGS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_leads`, DEFAULT_LEADS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, DEFAULT_WORKOUT_PROGRAMS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, DEFAULT_DIET_PLANS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, DEFAULT_LOCKERS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, DEFAULT_BROADCASTS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_locations`, DEFAULT_LOCATIONS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, "loc-1");
   };
 
   return (
@@ -1654,20 +2078,19 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setTheme,
         members,
         payments,
-        reminders,
         staff,
-        classes,
-        equipment,
-        insights,
         settings,
         leads,
-        posProducts,
-        posOrders,
         workoutPrograms,
         dietPlans,
         lockers,
+        broadcasts,
         locations,
         currentLocationId,
+        lastSaved,
+        isSaved,
+        exportData,
+        importData,
         addMember,
         updateMember,
         deleteMember,
@@ -1676,39 +2099,42 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         renewMember,
         toggleFreezeMember,
         recordPayment,
-        sendReminder,
-        sendAllReminders,
         addStaff,
         updateStaff,
         deleteStaff,
         payStaffSalary,
         toggleStaffStatus,
         approveLeaveRequest,
-        addEquipment,
-        updateEquipment,
-        deleteEquipment,
-        serviceEquipment,
         addPlan,
         updatePlan,
         deletePlan,
-        addClass,
-        updateClass,
-        deleteClass,
-        bookClass,
-        cancelClassBooking,
-        dismissInsight,
-        executeInsightAction,
-        updateSettings,
-        resetToDefaultData,
         addLead,
         updateLeadStage,
         convertLeadToMember,
-        processPOSSale,
-        restockProduct,
+        addWorkoutProgram,
+        updateWorkoutProgram,
+        duplicateWorkoutProgram,
+        deleteWorkoutProgram,
+        archiveWorkoutProgram,
         assignWorkoutToMember,
+        addDietPlan,
+        updateDietPlan,
+        duplicateDietPlan,
+        deleteDietPlan,
+        archiveDietPlan,
         assignDietToMember,
+        assignProgramToMember,
         assignLocker,
+        reserveLocker,
         releaseLocker,
+        markLockerMaintenance,
+        completeLockerRepair,
+        sendBroadcastMessage,
+        saveDraftBroadcast,
+        deleteBroadcastMessage,
+        addLocation,
+        updateLocation,
+        deleteLocation,
         switchLocation,
         isUPIQRModalOpen,
         setIsUPIQRModalOpen,
@@ -1738,6 +2164,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveSettingsTab,
         editingMember,
         setEditingMember,
+        updateSettings,
+        updateGymLogo,
+        removeGymLogo,
+        resetToDefaultData,
       }}
     >
       {children}

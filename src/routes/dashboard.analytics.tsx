@@ -1,27 +1,12 @@
 import React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import {
   TrendingUp,
   Users,
   Award,
   ArrowUpRight,
-  Sparkles,
-  PieChart as PieIcon,
   ShieldCheck,
+  Building,
 } from "lucide-react";
 import { useGymStore } from "../lib/gym-store";
 
@@ -42,7 +27,7 @@ function AnalyticsDashboard() {
 
   const avgLTV = totalMembers > 0 ? Math.round(totalRevenue / totalMembers) : 0;
 
-  // Real Dynamic Cohort from member join dates
+  // Dynamic Cohort from member join dates
   const currentMonthName = new Date().toLocaleString("default", { month: "short", year: "numeric" });
   const realCohort = [
     {
@@ -56,7 +41,7 @@ function AnalyticsDashboard() {
     },
   ];
 
-  // Dynamic Trainer Revenue Share from actual trainers & PT payments
+  // Dynamic Trainer Revenue Share
   const trainerData = staff.map((s, idx) => {
     const colors = ["#10b981", "#3b82f6", "#a855f7", "#f59e0b"];
     const trainerPayments = payments
@@ -78,11 +63,11 @@ function AnalyticsDashboard() {
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Analytics & Member Retention</h1>
             <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
-              {retentionRate}% 90-Day Retention
+              {retentionRate}% Retention
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Cohort retention curves, trainer performance yields, and churn mitigation telemetry.
+            Cohort retention curves, trainer performance yields, and revenue distribution telemetry.
           </p>
         </div>
       </div>
@@ -93,7 +78,7 @@ function AnalyticsDashboard() {
           <span className="text-xs font-semibold text-muted-foreground">Overall Member Retention</span>
           <p className="text-3xl font-bold font-mono tracking-tight text-emerald">{retentionRate}%</p>
           <p className="text-xs text-muted-foreground">
-            {totalMembers} active enrolled members tracked
+            {totalMembers} enrolled members tracked
           </p>
         </div>
 
@@ -109,7 +94,7 @@ function AnalyticsDashboard() {
 
         <div className="rounded-2xl border border-border bg-surface p-5 space-y-2">
           <span className="text-xs font-semibold text-muted-foreground">Monthly Churn Rate</span>
-          <p className="text-3xl font-bold font-mono tracking-tight text-warn">
+          <p className="text-3xl font-bold font-mono tracking-tight text-amber-500">
             {totalMembers > 0 ? `${100 - retentionRate}%` : "0%"}
           </p>
           <p className="text-xs text-muted-foreground">Based on active subscription renewals</p>
@@ -195,7 +180,7 @@ function AnalyticsDashboard() {
         <div className="rounded-2xl border border-border bg-surface p-6 space-y-4">
           <div>
             <h3 className="text-base font-semibold tracking-tight">Revenue Stream Distribution</h3>
-            <p className="text-xs text-muted-foreground">Membership fees vs personal training vs pro shop store</p>
+            <p className="text-xs text-muted-foreground">Membership fees vs personal training vs registrations</p>
           </div>
 
           <div className="space-y-3 pt-2">
@@ -211,8 +196,8 @@ function AnalyticsDashboard() {
                 color: "#a855f7",
               },
               {
-                name: "Pro Shop Merchandise",
-                value: payments.filter((p) => (p.category === "Pro Shop" || p.category === "Merchandise") && p.status === "Paid").reduce((s, p) => s + p.amount, 0),
+                name: "Registration & Admission",
+                value: payments.filter((p) => p.category === "Registration" && p.status === "Paid").reduce((s, p) => s + p.amount, 0),
                 color: "#3b82f6",
               },
             ].map((st) => {

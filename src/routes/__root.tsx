@@ -74,13 +74,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Repsheet — Never Miss a Gym Payment Again" },
-      { name: "description", content: "Modern gym management for owners. Track members, payments, partial dues and renewals from one premium dashboard." },
-      { property: "og:title", content: "Repsheet — Gym Management, Reimagined" },
-      { property: "og:description", content: "Members, payments, partial dues, renewals — in one calm dashboard." },
+      { title: "PEAKREP — Enterprise Gym Operating System" },
+      { name: "description", content: "The definitive gym management operating system for owners and directors. Track members, payments, installment dues, workouts, lockers, and broadcasts." },
+      { property: "og:title", content: "PEAKREP — Enterprise Gym Operating System" },
+      { property: "og:description", content: "Members, installment billing, lockers, workout splits, broadcast center — in one enterprise dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@GymFlow" },
+      { name: "twitter:site", content: "@PeakRep" },
     ],
     links: [
       {

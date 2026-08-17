@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   X,
   Clock,
-  Sparkles,
 } from "lucide-react";
 import { useGymStore, Lead, LeadStage } from "../lib/gym-store";
 import { toast } from "sonner";
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/dashboard/leads")({
 
 const STAGES: LeadStage[] = [
   "Inquiry",
-  "Trial Booked",
+  "Trial Scheduled",
   "Trial Completed",
   "Offer Sent",
   "Won",

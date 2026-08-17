@@ -14,14 +14,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
-import { Route as DashboardClassesRouteImport } from './routes/dashboard.classes'
-import { Route as DashboardEquipmentRouteImport } from './routes/dashboard.equipment'
 import { Route as DashboardLeadsRouteImport } from './routes/dashboard.leads'
 import { Route as DashboardLockersRouteImport } from './routes/dashboard.lockers'
 import { Route as DashboardMembersRouteImport } from './routes/dashboard.members'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard.payments'
 import { Route as DashboardPlansRouteImport } from './routes/dashboard.plans'
-import { Route as DashboardPosRouteImport } from './routes/dashboard.pos'
 import { Route as DashboardRemindersRouteImport } from './routes/dashboard.reminders'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardStaffRouteImport } from './routes/dashboard.staff'
@@ -52,16 +49,6 @@ const DashboardBillingRoute = DashboardBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardClassesRoute = DashboardClassesRouteImport.update({
-  id: '/classes',
-  path: '/classes',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardEquipmentRoute = DashboardEquipmentRouteImport.update({
-  id: '/equipment',
-  path: '/equipment',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardLeadsRoute = DashboardLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -85,11 +72,6 @@ const DashboardPaymentsRoute = DashboardPaymentsRouteImport.update({
 const DashboardPlansRoute = DashboardPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardPosRoute = DashboardPosRouteImport.update({
-  id: '/pos',
-  path: '/pos',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardRemindersRoute = DashboardRemindersRouteImport.update({
@@ -118,14 +100,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/billing': typeof DashboardBillingRoute
-  '/dashboard/classes': typeof DashboardClassesRoute
-  '/dashboard/equipment': typeof DashboardEquipmentRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/lockers': typeof DashboardLockersRoute
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/plans': typeof DashboardPlansRoute
-  '/dashboard/pos': typeof DashboardPosRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/staff': typeof DashboardStaffRoute
@@ -136,14 +115,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/billing': typeof DashboardBillingRoute
-  '/dashboard/classes': typeof DashboardClassesRoute
-  '/dashboard/equipment': typeof DashboardEquipmentRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/lockers': typeof DashboardLockersRoute
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/plans': typeof DashboardPlansRoute
-  '/dashboard/pos': typeof DashboardPosRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/staff': typeof DashboardStaffRoute
@@ -156,14 +132,11 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/billing': typeof DashboardBillingRoute
-  '/dashboard/classes': typeof DashboardClassesRoute
-  '/dashboard/equipment': typeof DashboardEquipmentRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/lockers': typeof DashboardLockersRoute
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/plans': typeof DashboardPlansRoute
-  '/dashboard/pos': typeof DashboardPosRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/staff': typeof DashboardStaffRoute
@@ -177,14 +150,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/billing'
-    | '/dashboard/classes'
-    | '/dashboard/equipment'
     | '/dashboard/leads'
     | '/dashboard/lockers'
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/plans'
-    | '/dashboard/pos'
     | '/dashboard/reminders'
     | '/dashboard/settings'
     | '/dashboard/staff'
@@ -195,14 +165,11 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard/analytics'
     | '/dashboard/billing'
-    | '/dashboard/classes'
-    | '/dashboard/equipment'
     | '/dashboard/leads'
     | '/dashboard/lockers'
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/plans'
-    | '/dashboard/pos'
     | '/dashboard/reminders'
     | '/dashboard/settings'
     | '/dashboard/staff'
@@ -214,14 +181,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/billing'
-    | '/dashboard/classes'
-    | '/dashboard/equipment'
     | '/dashboard/leads'
     | '/dashboard/lockers'
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/plans'
-    | '/dashboard/pos'
     | '/dashboard/reminders'
     | '/dashboard/settings'
     | '/dashboard/staff'
@@ -271,20 +235,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/classes': {
-      id: '/dashboard/classes'
-      path: '/classes'
-      fullPath: '/dashboard/classes'
-      preLoaderRoute: typeof DashboardClassesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/equipment': {
-      id: '/dashboard/equipment'
-      path: '/equipment'
-      fullPath: '/dashboard/equipment'
-      preLoaderRoute: typeof DashboardEquipmentRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/leads': {
       id: '/dashboard/leads'
       path: '/leads'
@@ -318,13 +268,6 @@ declare module '@tanstack/react-router' {
       path: '/plans'
       fullPath: '/dashboard/plans'
       preLoaderRoute: typeof DashboardPlansRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/pos': {
-      id: '/dashboard/pos'
-      path: '/pos'
-      fullPath: '/dashboard/pos'
-      preLoaderRoute: typeof DashboardPosRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/reminders': {
@@ -361,14 +304,11 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardBillingRoute: typeof DashboardBillingRoute
-  DashboardClassesRoute: typeof DashboardClassesRoute
-  DashboardEquipmentRoute: typeof DashboardEquipmentRoute
   DashboardLeadsRoute: typeof DashboardLeadsRoute
   DashboardLockersRoute: typeof DashboardLockersRoute
   DashboardMembersRoute: typeof DashboardMembersRoute
   DashboardPaymentsRoute: typeof DashboardPaymentsRoute
   DashboardPlansRoute: typeof DashboardPlansRoute
-  DashboardPosRoute: typeof DashboardPosRoute
   DashboardRemindersRoute: typeof DashboardRemindersRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardStaffRoute: typeof DashboardStaffRoute
@@ -379,14 +319,11 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardBillingRoute: DashboardBillingRoute,
-  DashboardClassesRoute: DashboardClassesRoute,
-  DashboardEquipmentRoute: DashboardEquipmentRoute,
   DashboardLeadsRoute: DashboardLeadsRoute,
   DashboardLockersRoute: DashboardLockersRoute,
   DashboardMembersRoute: DashboardMembersRoute,
   DashboardPaymentsRoute: DashboardPaymentsRoute,
   DashboardPlansRoute: DashboardPlansRoute,
-  DashboardPosRoute: DashboardPosRoute,
   DashboardRemindersRoute: DashboardRemindersRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardStaffRoute: DashboardStaffRoute,

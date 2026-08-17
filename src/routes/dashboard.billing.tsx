@@ -1,6 +1,6 @@
 import React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Receipt, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { CheckCircle2, Receipt, ShieldCheck } from "lucide-react";
 import { useGymStore } from "../lib/gym-store";
 
 export const Route = createFileRoute("/dashboard/billing")({
@@ -10,9 +10,10 @@ export const Route = createFileRoute("/dashboard/billing")({
 function Billing() {
   const { members, settings } = useGymStore();
 
+  const perMemberRate = 10;
   const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
-  const currentMonthBill = activeMembersCount * settings.perMemberRate;
-  const estNextMonthBill = (activeMembersCount + 2) * settings.perMemberRate;
+  const currentMonthBill = activeMembersCount * perMemberRate;
+  const estNextMonthBill = (activeMembersCount + 2) * perMemberRate;
 
   const currentMonthName = new Date().toLocaleString("default", { month: "long", year: "numeric" });
 
@@ -20,13 +21,13 @@ function Billing() {
     <div className="space-y-6 animate-in fade-in duration-150">
       <div>
         <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">SaaS Subscription & Invoices</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Platform Subscription & Invoices</h1>
           <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
-            Active Tier
+            Enterprise Unlimited Tier
           </span>
         </div>
         <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-          Transparent usage-based pricing at ₹{settings.perMemberRate} per active member / month.
+          Transparent usage-based pricing at ₹{perMemberRate} per active member / month.
         </p>
       </div>
 
@@ -41,8 +42,8 @@ function Billing() {
             <span className="text-xs text-muted-foreground">/ month</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Calculated on {activeMembersCount} active/expiring member(s) × {settings.currencySymbol}
-            {settings.perMemberRate} rate
+            Calculated on {activeMembersCount} active member(s) × {settings.currencySymbol}
+            {perMemberRate} rate
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-emerald">
             <CheckCircle2 className="h-4 w-4" />
@@ -64,7 +65,7 @@ function Billing() {
 
       <div className="rounded-2xl border border-border bg-surface overflow-hidden">
         <div className="border-b border-border px-5 py-4">
-          <h2 className="text-sm font-semibold">Platform Subscription Invoices</h2>
+          <h2 className="text-sm font-semibold">Platform Invoices</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">

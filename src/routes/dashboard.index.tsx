@@ -9,7 +9,6 @@ import {
   Plus,
   Calendar,
   Layers,
-  Zap,
   Phone,
   MessageCircle,
   Dumbbell,
@@ -17,30 +16,17 @@ import {
   Clock,
   Building,
   UserPlus,
-  ShoppingBag,
   KeyRound,
   FileText,
-  Flame,
   QrCode,
-  ChevronDown,
-  ChevronUp,
-  RefreshCw,
-  Send,
-  ShieldCheck,
-  Sparkles,
+  Radio,
+  Receipt,
+  UserCheck,
+  Activity,
 } from "lucide-react";
 import { useGymStore, Member } from "../lib/gym-store";
 import { OwnerQuickstartBar } from "../components/dashboard/OwnerQuickstartBar";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
+import { LiveClock } from "../components/dashboard/LiveClock";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -51,75 +37,35 @@ function DashboardOverview() {
   const {
     members,
     payments,
-    insights,
     staff,
     leads,
-    posProducts,
     lockers,
+    workoutPrograms,
     settings,
     setIsAddMemberOpen,
     setIsRecordPaymentOpen,
     setSelectedMember360,
     setIsMember360Open,
     openUPIQRModal,
-    renewMember,
-    sendAllReminders,
-    toggleStaffStatus,
+    setActiveInvoicePayment,
+    setIsInvoiceModalOpen,
   } = useGymStore();
-
-  // Expandable Panel States
-  const [expandedPanel, setExpandedPanel] = useState<string | null>("members");
-
-  const togglePanel = (panelId: string) => {
-    setExpandedPanel((prev) => (prev === panelId ? null : panelId));
-  };
 
   const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
   const expiringSoonMembers = members.filter((m) => m.status === "Expiring");
   const overdueMembers = members.filter((m) => m.due > 0);
   const pendingDuesTotal = overdueMembers.reduce((sum, m) => sum + m.due, 0);
-  const staffOnFloor = staff.filter((s) => s.status === "On Floor");
+  const insideMembers = members.filter((m) => m.isCurrentlyInside);
+  const occupiedLockers = lockers.filter((l) => l.status === "Occupied").length;
   const activeLeadsCount = leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length;
-  const trialLeads = leads.filter((l) => l.stage === "Trial Scheduled" || l.stage === "Trial Completed");
 
   // Real Dynamic Revenue Calculations
   const todayStr = new Date().toISOString().split("T")[0];
-  const todayPayments = payments.filter((p) => p.date === todayStr && p.status === "Paid");
+  const todayPayments = payments.filter((p) => p.date === todayStr);
   const todayRevenue = todayPayments.reduce((sum, p) => sum + p.amount, 0);
 
-  const totalPaidRevenue = payments
-    .filter((p) => p.status === "Paid")
-    .reduce((sum, p) => sum + p.amount, 0);
-
-  // Dynamic 7-Day Revenue Velocity from actual payment records
-  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const dynamicRevenueVelocity = daysOfWeek.map((day) => {
-    const dayPayments = payments.filter((p) => p.status === "Paid");
-    const membershipAmt = dayPayments
-      .filter((p) => p.category === "Membership")
-      .reduce((s, p) => s + p.amount, 0);
-    const ptAmt = dayPayments
-      .filter((p) => p.category === "Personal Training")
-      .reduce((s, p) => s + p.amount, 0);
-    const posAmt = dayPayments
-      .filter((p) => p.category === "Pro Shop" || p.category === "Merchandise")
-      .reduce((s, p) => s + p.amount, 0);
-
-    return {
-      day,
-      membership: membershipAmt,
-      pt: ptAmt,
-      pos: posAmt,
-    };
-  });
-
-  // Dynamic Lead Pipeline Bar Chart
-  const LEADS_DATA = [
-    { stage: "Inquiries", count: leads.filter((l) => l.stage === "Inquiry").length },
-    { stage: "Trials", count: trialLeads.length },
-    { stage: "Offers", count: leads.filter((l) => l.stage === "Offer Sent").length },
-    { stage: "Enrolled", count: leads.filter((l) => l.stage === "Won").length },
-  ];
+  const totalCollectedRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
+  const totalExpectedRevenue = members.reduce((sum, m) => sum + (m.planPrice || 0), 0);
 
   const handleMemberClick = (member: Member) => {
     setSelectedMember360(member);
@@ -140,600 +86,311 @@ function DashboardOverview() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      {/* 1. Owner Quickstart Dock */}
+    <div className="space-y-6 animate-in fade-in duration-150">
+      {/* 1. Quickstart Bar */}
       <OwnerQuickstartBar />
 
-      {/* 2. Executive Hero & 5-Second Operational Vitals */}
-      <div className="rounded-3xl border border-border bg-gradient-to-br from-surface via-surface to-canvas p-6 sm:p-8 shadow-sm">
+      {/* 2. Executive Operations Dashboard Hero */}
+      <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8 shadow-2xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald"></span>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-emerald-soft text-accent-foreground px-3 py-0.5 text-xs font-semibold">
+                Operational Cockpit
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Executive Command Center
-              </h1>
-              <span className="rounded-full bg-emerald-soft text-accent-foreground px-3 py-0.5 text-xs font-mono font-semibold">
-                Live Gym Telemetry
-              </span>
+              <LiveClock variant="hero" />
             </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              {settings.name}
+            </h2>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-              Track subscriptions, gross revenue collection, expiring passes, overdue payment radar, and staff rosters in real time.
+              Real-time member attendance, collected revenue velocity, dues recovery, and facility management.
             </p>
-
-            {/* 5-Second Quick Answer Pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 font-medium">
-                <Users className="h-3.5 w-3.5 text-emerald" />
-                <span><b>{activeMembersCount}</b> Active Members</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 font-medium">
-                <CreditCard className="h-3.5 w-3.5 text-purple-500" />
-                <span><b>{settings.currencySymbol}{totalPaidRevenue.toLocaleString("en-IN")}</b> Collections</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 font-medium">
-                <Clock className="h-3.5 w-3.5 text-amber-500" />
-                <span><b>{expiringSoonMembers.length}</b> Expiring &lt;7d</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 font-medium">
-                <AlertTriangle className="h-3.5 w-3.5 text-warn" />
-                <span><b>{overdueMembers.length}</b> Overdue</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 font-medium">
-                <Users className="h-3.5 w-3.5 text-blue-500" />
-                <span><b>{staffOnFloor.length}</b> On-Duty Coaches</span>
-              </span>
-            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setIsAddMemberOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2.5 text-xs font-semibold hover:opacity-90 transition shadow-xs"
+              className="flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2.5 text-xs font-semibold hover:opacity-90 transition shadow-xs"
             >
               <Plus className="h-4 w-4" />
               <span>Enroll Member</span>
             </button>
             <button
               onClick={() => setIsRecordPaymentOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2.5 text-xs font-semibold hover:bg-muted transition"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-4 py-2.5 text-xs font-semibold hover:bg-muted transition"
             >
-              <CreditCard className="h-4 w-4 text-purple-500" />
+              <CreditCard className="h-4 w-4" />
               <span>Record Payment</span>
             </button>
+            <Link
+              to="/dashboard/reminders"
+              className="flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 px-4 py-2.5 text-xs font-semibold hover:bg-purple-500/20 transition"
+            >
+              <Radio className="h-4 w-4" />
+              <span>Broadcast Message</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* 3. Interactive Expandable Information Panels Grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Operations & Financial Control Panels
-          </h2>
-          <span className="text-xs text-muted-foreground">Click any card to expand quick actions</span>
+      {/* 3. Core Financial & Member KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total / Active Members */}
+        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted-foreground">Active Members</span>
+            <Users className="h-4 w-4 text-emerald" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">{activeMembersCount}</p>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>Inside Floor: <strong className="text-foreground font-mono">{insideMembers.length}</strong></span>
+            <span>Total Enrolled: {members.length}</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Panel 1: Active Members Directory (Expandable) */}
-          <div
-            className={`rounded-2xl border transition shadow-2xs overflow-hidden flex flex-col justify-between ${
-              expandedPanel === "members" ? "border-emerald bg-surface ring-1 ring-emerald/30" : "border-border bg-surface hover:border-foreground/30"
-            }`}
-          >
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => togglePanel("members")}>
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-soft text-accent-foreground font-bold">
-                    <Users className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Enrolled Members</h3>
-                    <p className="text-[11px] text-muted-foreground">Active Subscriptions</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-2xl font-bold text-emerald">{activeMembersCount}</span>
-                  {expandedPanel === "members" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                <span>Active Roster</span>
-                <span className="font-mono text-foreground font-semibold">{members.length} Registered</span>
-              </div>
-            </div>
-
-            {/* Expanded Active Members View */}
-            {expandedPanel === "members" && (
-              <div className="border-t border-border bg-canvas p-4 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Enrolled Members</span>
-                  <Link to="/dashboard/members" className="text-emerald hover:underline">
-                    Full Directory →
-                  </Link>
-                </div>
-
-                {members.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {members.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between rounded-xl border border-border bg-surface p-2.5 text-xs">
-                        <div onClick={() => handleMemberClick(m)} className="cursor-pointer hover:text-emerald">
-                          <p className="font-bold text-foreground">{m.name}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono">{m.phone} · {m.plan}</p>
-                        </div>
-                        <button
-                          onClick={() => handleMemberClick(m)}
-                          className="px-2 py-1 rounded-lg bg-muted hover:bg-border text-[10px] font-semibold transition"
-                        >
-                          View 360
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-xs text-muted-foreground py-3">No members registered yet.</p>
-                )}
-              </div>
-            )}
+        {/* Total Collected Revenue */}
+        <div className="rounded-2xl border border-emerald/30 bg-emerald-soft/10 p-5 space-y-2 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald">Total Collected</span>
+            <CheckCircle2 className="h-4 w-4 text-emerald" />
           </div>
-
-          {/* Panel 2: Gross Revenue MTD & Today (Expandable) */}
-          <div
-            className={`rounded-2xl border transition shadow-2xs overflow-hidden flex flex-col justify-between ${
-              expandedPanel === "revenue" ? "border-purple-500 bg-surface ring-1 ring-purple-500/30" : "border-border bg-surface hover:border-foreground/30"
-            }`}
-          >
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => togglePanel("revenue")}>
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
-                    <CreditCard className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Gross Revenue MTD</h3>
-                    <p className="text-[11px] text-muted-foreground">Today: +{settings.currencySymbol}{todayRevenue.toLocaleString("en-IN")}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-2xl font-bold text-foreground">{settings.currencySymbol}{totalPaidRevenue.toLocaleString("en-IN")}</span>
-                  {expandedPanel === "revenue" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                <span>Transactions</span>
-                <span className="font-mono font-semibold text-emerald">{payments.filter((p) => p.status === "Paid").length} Receipts</span>
-              </div>
-            </div>
-
-            {/* Expanded Revenue Breakdown View */}
-            {expandedPanel === "revenue" && (
-              <div className="border-t border-border bg-canvas p-4 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Stream Breakdown</span>
-                  <Link to="/dashboard/payments" className="text-emerald hover:underline">
-                    View Ledger →
-                  </Link>
-                </div>
-
-                <div className="space-y-2 text-xs font-mono">
-                  <div className="flex justify-between p-2 rounded-lg bg-surface border border-border">
-                    <span className="text-muted-foreground font-sans">Subscriptions:</span>
-                    <span className="font-bold text-emerald">
-                      {settings.currencySymbol}{payments.filter((p) => p.category === "Membership" && p.status === "Paid").reduce((s, p) => s + p.amount, 0).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-2 rounded-lg bg-surface border border-border">
-                    <span className="text-muted-foreground font-sans">Personal Training:</span>
-                    <span className="font-bold text-purple-600 dark:text-purple-400">
-                      {settings.currencySymbol}{payments.filter((p) => p.category === "Personal Training" && p.status === "Paid").reduce((s, p) => s + p.amount, 0).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsRecordPaymentOpen(true)}
-                  className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition"
-                >
-                  + Record New Payment
-                </button>
-              </div>
-            )}
+          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
+            {settings.currencySymbol}{totalCollectedRevenue.toLocaleString("en-IN")}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>Today: {settings.currencySymbol}{todayRevenue.toLocaleString("en-IN")}</span>
+            <span className="font-mono">Ledger Verified</span>
           </div>
+        </div>
 
-          {/* Panel 3: Expiring Passes Radar (Expandable) */}
-          <div
-            className={`rounded-2xl border transition shadow-2xs overflow-hidden flex flex-col justify-between ${
-              expandedPanel === "expiring" ? "border-amber-500 bg-surface ring-1 ring-amber-500/30" : "border-border bg-surface hover:border-foreground/30"
-            }`}
-          >
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => togglePanel("expiring")}>
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Expiring &lt;7 Days</h3>
-                    <p className="text-[11px] text-muted-foreground">Renewal Radar</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-2xl font-bold text-amber-500">{expiringSoonMembers.length}</span>
-                  {expandedPanel === "expiring" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                {expiringSoonMembers.length === 0 ? "All member subscriptions currently up to date!" : "Immediate renewal nudges required"}
-              </p>
-            </div>
-
-            {/* Expanded Expiring Members View */}
-            {expandedPanel === "expiring" && (
-              <div className="border-t border-border bg-canvas p-4 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Expiring Member Queue</span>
-                </div>
-
-                {expiringSoonMembers.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {expiringSoonMembers.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between rounded-xl border border-border bg-surface p-2.5 text-xs">
-                        <div onClick={() => handleMemberClick(m)} className="cursor-pointer hover:text-emerald">
-                          <p className="font-bold text-foreground">{m.name}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono">Expires {m.expiry} · {m.plan}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => handleSendNudgeWhatsApp(m)}
-                            className="p-1.5 rounded-lg border border-border hover:bg-muted text-emerald"
-                            title="WhatsApp Nudge"
-                          >
-                            <MessageCircle className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              renewMember(m.id, 1);
-                              toast.success(`Renewed ${m.name} for 1 Month!`);
-                            }}
-                            className="px-2 py-1 rounded-lg bg-foreground text-background text-[10px] font-semibold hover:opacity-90"
-                          >
-                            Renew
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-xs text-muted-foreground py-3">No memberships expiring within the next 7 days.</p>
-                )}
-              </div>
-            )}
+        {/* Outstanding Dues */}
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-2 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Pending Dues</span>
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
           </div>
-
-          {/* Panel 4: Pending Balance Dues Radar (Expandable) */}
-          <div
-            className={`rounded-2xl border transition shadow-2xs overflow-hidden flex flex-col justify-between ${
-              expandedPanel === "dues" ? "border-warn bg-surface ring-1 ring-warn/30" : "border-border bg-surface hover:border-foreground/30"
-            }`}
-          >
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => togglePanel("dues")}>
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-warn/15 text-warn font-bold">
-                    <AlertTriangle className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Pending Balance Dues</h3>
-                    <p className="text-[11px] text-muted-foreground">{overdueMembers.length} Overdue Account(s)</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-2xl font-bold text-warn">{settings.currencySymbol}{pendingDuesTotal.toLocaleString("en-IN")}</span>
-                  {expandedPanel === "dues" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                <span>Settlement Status</span>
-                <span className="font-mono text-warn font-semibold">{overdueMembers.length > 0 ? "Action Needed" : "Clean Ledger"}</span>
-              </div>
-            </div>
-
-            {/* Expanded Dues View */}
-            {expandedPanel === "dues" && (
-              <div className="border-t border-border bg-canvas p-4 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Overdue Accounts ({overdueMembers.length})</span>
-                  {overdueMembers.length > 0 && (
-                    <button
-                      onClick={() => {
-                        sendAllReminders();
-                        toast.success("Dispatched WhatsApp payment reminders!");
-                      }}
-                      className="text-emerald hover:underline"
-                    >
-                      Batch Nudge
-                    </button>
-                  )}
-                </div>
-
-                {overdueMembers.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {overdueMembers.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between rounded-xl border border-border bg-surface p-2.5 text-xs">
-                        <div onClick={() => handleMemberClick(m)} className="cursor-pointer hover:text-emerald">
-                          <p className="font-bold text-foreground">{m.name}</p>
-                          <p className="text-[10px] font-mono text-warn font-bold">Due: {settings.currencySymbol}{m.due.toLocaleString("en-IN")}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => handleSendNudgeWhatsApp(m)}
-                            className="p-1.5 rounded-lg border border-border hover:bg-muted text-emerald"
-                            title="WhatsApp Nudge"
-                          >
-                            <MessageCircle className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => openUPIQRModal(m.due, m.name, `Clear Balance Due`)}
-                            className="px-2 py-1 rounded-lg bg-foreground text-background text-[10px] font-semibold hover:opacity-90"
-                          >
-                            UPI QR
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-xs text-muted-foreground py-3">All member balances and partial dues are settled!</p>
-                )}
-              </div>
-            )}
+          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
+            {settings.currencySymbol}{pendingDuesTotal.toLocaleString("en-IN")}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>{overdueMembers.length} Member(s) with Balance</span>
+            <Link to="/dashboard/payments" className="text-amber-600 dark:text-amber-400 font-semibold hover:underline">
+              Collect →
+            </Link>
           </div>
+        </div>
 
-          {/* Panel 5: On-Floor Coaches & Staff (Expandable) */}
-          <div
-            className={`rounded-2xl border transition shadow-2xs overflow-hidden flex flex-col justify-between ${
-              expandedPanel === "staff" ? "border-blue-500 bg-surface ring-1 ring-blue-500/30" : "border-border bg-surface hover:border-foreground/30"
-            }`}
-          >
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => togglePanel("staff")}>
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 font-bold">
-                    <Users className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Coaches on Duty</h3>
-                    <p className="text-[11px] text-muted-foreground">{staffOnFloor.length} Active / {staff.length} Staff</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-2xl font-bold text-foreground">{staffOnFloor.length}</span>
-                  {expandedPanel === "staff" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                <span>Shift Supervision</span>
-                <span className="text-emerald font-semibold">{staff.length === 0 ? "No Staff Added" : "Floor Covered"}</span>
-              </div>
-            </div>
-
-            {/* Expanded Staff View */}
-            {expandedPanel === "staff" && (
-              <div className="border-t border-border bg-canvas p-4 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Duty Roster</span>
-                  <Link to="/dashboard/staff" className="text-emerald hover:underline">
-                    Manage Staff →
-                  </Link>
-                </div>
-
-                {staff.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {staff.map((s) => (
-                      <div key={s.id} className="flex items-center justify-between rounded-xl border border-border bg-surface p-2.5 text-xs">
-                        <div>
-                          <p className="font-bold text-foreground">{s.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{s.role} · {s.shift}</p>
-                        </div>
-                        <button
-                          onClick={() => toggleStaffStatus(s.id, s.status === "On Floor" ? "Off Duty" : "On Floor")}
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition ${
-                            s.status === "On Floor" ? "bg-emerald-soft text-accent-foreground border-emerald/30" : "bg-muted text-muted-foreground border-border"
-                          }`}
-                        >
-                          {s.status}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-xs text-muted-foreground py-3">No staff members registered. Click "Manage Staff" to add trainers.</p>
-                )}
-              </div>
-            )}
+        {/* Facility Utilization */}
+        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted-foreground">Facility & Lockers</span>
+            <KeyRound className="h-4 w-4 text-blue-500" />
           </div>
-
-          {/* Panel 6: Prospect Leads Funnel (Expandable) */}
-          <div
-            className={`rounded-2xl border transition shadow-2xs overflow-hidden flex flex-col justify-between ${
-              expandedPanel === "leads" ? "border-purple-500 bg-surface ring-1 ring-purple-500/30" : "border-border bg-surface hover:border-foreground/30"
-            }`}
-          >
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => togglePanel("leads")}>
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
-                    <UserPlus className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Prospect Leads CRM</h3>
-                    <p className="text-[11px] text-muted-foreground">{trialLeads.length} Trial Workout Pass(es)</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-2xl font-bold text-purple-600 dark:text-purple-400">{activeLeadsCount}</span>
-                  {expandedPanel === "leads" ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                {activeLeadsCount === 0 ? "No open prospect leads." : "Inquiries & trial workouts in pipeline"}
-              </p>
-            </div>
-
-            {/* Expanded Leads View */}
-            {expandedPanel === "leads" && (
-              <div className="border-t border-border bg-canvas p-4 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Active Inquiries</span>
-                  <Link to="/dashboard/leads" className="text-emerald hover:underline">
-                    View Funnel →
-                  </Link>
-                </div>
-
-                {leads.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {leads.map((l) => (
-                      <div key={l.id} className="flex items-center justify-between rounded-xl border border-border bg-surface p-2.5 text-xs">
-                        <div>
-                          <p className="font-bold text-foreground">{l.name}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono">{l.phone} · {l.source}</p>
-                        </div>
-                        <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold">
-                          {l.stage}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-xs text-muted-foreground py-3">No active prospect leads right now.</p>
-                )}
-              </div>
-            )}
+          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
+            {occupiedLockers} / {lockers.length}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>{lockers.filter((l) => l.status === "Available").length} Lockers Free</span>
+            <Link to="/dashboard/lockers" className="text-foreground font-semibold hover:underline">
+              Manage →
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* 4. Live Telemetry Charts (Linear & Stripe Visual Velocity) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue Velocity Chart (2 Cols) */}
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-surface p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      {/* 4. Two-Column Operational Views: Members & Financial Transactions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column: Member Roster with Quick Nudge */}
+        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold tracking-tight">Revenue Velocity (Subscriptions vs PT vs Pro Shop)</h3>
-              <p className="text-xs text-muted-foreground">Daily gross collections across all revenue streams</p>
+              <h3 className="text-sm font-bold text-foreground">Member Registry & Status</h3>
+              <p className="text-xs text-muted-foreground">Click member to open complete profile & history</p>
             </div>
-            <div className="flex items-center gap-4 text-xs font-medium">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald"></span> Subscriptions
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-purple-500"></span> Personal Training
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Pro Shop
-              </span>
-            </div>
+            <Link
+              to="/dashboard/members"
+              className="text-xs font-semibold text-emerald hover:underline flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </div>
 
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dynamicRevenueVelocity}>
-                <defs>
-                  <linearGradient id="colorSub" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorPT" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="day" stroke="#888888" fontSize={11} tickLine={false} />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={11}
-                  tickLine={false}
-                  tickFormatter={(v) => `₹${v}`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#0f172a",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    color: "#fff",
-                  }}
-                  formatter={(value: any) => [`₹${Number(value).toLocaleString("en-IN")}`, ""]}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="membership"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorSub)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="pt"
-                  stroke="#a855f7"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorPT)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="pos"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  fillOpacity={0.2}
-                  fill="#3b82f6"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="divide-y divide-border rounded-xl border border-border bg-canvas overflow-hidden">
+            {members.slice(0, 5).map((m) => (
+              <div
+                key={m.id}
+                onClick={() => handleMemberClick(m)}
+                className="p-3.5 flex items-center justify-between gap-3 text-xs hover:bg-muted/30 cursor-pointer transition"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-foreground text-background font-bold text-xs">
+                    {m.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-foreground">{m.name}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">{m.phone} • {m.plan}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {m.due > 0 ? (
+                    <span className="rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 text-[10px] font-mono">
+                      Due: {settings.currencySymbol}{m.due.toLocaleString("en-IN")}
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-soft text-accent-foreground font-semibold px-2 py-0.5 text-[10px]">
+                      Active
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSendNudgeWhatsApp(m);
+                    }}
+                    className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-emerald"
+                    title="Send WhatsApp Nudge"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Lead Funnel Pipeline Bar Chart (1 Col) */}
-        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4">
-          <div>
-            <h3 className="text-sm font-semibold tracking-tight">Lead Conversion Pipeline</h3>
-            <p className="text-xs text-muted-foreground">Prospect funnel conversion progression</p>
+        {/* Right Column: Recent Payments & Receipts */}
+        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Recent Financial Receipts</h3>
+              <p className="text-xs text-muted-foreground">Logged payments and installment collections</p>
+            </div>
+            <Link
+              to="/dashboard/payments"
+              className="text-xs font-semibold text-emerald hover:underline flex items-center gap-1"
+            >
+              <span>Ledger</span>
+              <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </div>
 
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={LEADS_DATA}>
-                <XAxis dataKey="stage" stroke="#888888" fontSize={10} tickLine={false} />
-                <YAxis stroke="#888888" fontSize={10} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#0f172a",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    color: "#fff",
-                  }}
-                  formatter={(v: any) => [`${v} leads`, "Prospects"]}
-                />
-                <Bar dataKey="count" fill="#a855f7" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="divide-y divide-border rounded-xl border border-border bg-canvas overflow-hidden">
+            {payments.slice(0, 5).map((p) => (
+              <div
+                key={p.id}
+                className="p-3.5 flex items-center justify-between gap-3 text-xs hover:bg-muted/30 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas border border-border text-foreground">
+                    <Receipt className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-foreground">{p.member}</span>
+                      <span className="rounded bg-muted px-1.5 py-0.2 text-[10px] font-mono text-muted-foreground">
+                        {p.method}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-mono">{p.invoiceNumber} • {p.date}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-foreground text-sm">
+                    {settings.currencySymbol}{p.amount.toLocaleString("en-IN")}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setActiveInvoicePayment(p);
+                      setIsInvoiceModalOpen(true);
+                    }}
+                    className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                    title="View Receipt"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {payments.length === 0 && (
+              <div className="p-6 text-center text-xs text-muted-foreground">
+                No payment transactions recorded yet.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Bottom Roster: Training Splits & Floor Staff */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Workout Splits */}
+        <div className="rounded-2xl border border-border bg-surface p-5 space-y-3 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Dumbbell className="h-3.5 w-3.5 text-emerald" />
+              <span>Training Programs & Splits</span>
+            </h3>
+            <Link to="/dashboard/workouts" className="text-xs text-emerald font-semibold hover:underline">
+              Workout Builder →
+            </Link>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            {workoutPrograms.slice(0, 3).map((w) => (
+              <div key={w.id} className="p-3 rounded-xl border border-border bg-canvas flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-foreground">{w.title}</p>
+                  <p className="text-[11px] text-muted-foreground">{w.category} • {w.daysPerWeek} Days/Wk ({w.level})</p>
+                </div>
+                <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                  {members.filter((m) => m.assignedWorkout === w.title).length} Enrolled
+                </span>
+              </div>
+            ))}
+
+            {workoutPrograms.length === 0 && (
+              <div className="p-4 text-center text-muted-foreground text-xs">
+                No workout splits created yet.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Staff */}
+        <div className="rounded-2xl border border-border bg-surface p-5 space-y-3 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <UserCheck className="h-3.5 w-3.5 text-blue-500" />
+              <span>Duty Trainers & Staff</span>
+            </h3>
+            <Link to="/dashboard/staff" className="text-xs text-emerald font-semibold hover:underline">
+              Staff Directory →
+            </Link>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            {staff.slice(0, 3).map((s) => (
+              <div key={s.id} className="p-3 rounded-xl border border-border bg-canvas flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-foreground">{s.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{s.role} • {s.shift}</p>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  s.status === "On Floor" ? "bg-emerald-soft text-accent-foreground" : "bg-muted text-muted-foreground"
+                }`}>
+                  {s.status}
+                </span>
+              </div>
+            ))}
+
+            {staff.length === 0 && (
+              <div className="p-4 text-center text-muted-foreground text-xs">
+                No staff members currently configured.
+              </div>
+            )}
           </div>
         </div>
       </div>
