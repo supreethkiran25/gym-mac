@@ -15,7 +15,6 @@ import {
   X,
   History,
   ShieldCheck,
-  Sparkles,
   BookmarkCheck,
   UserMinus,
   RefreshCcw,

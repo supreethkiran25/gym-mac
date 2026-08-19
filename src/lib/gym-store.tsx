@@ -1,10 +1,36 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
+import { extractDominantColor, applyBrandThemeCss } from "./color-extractor";
+
+export type UserRole = "admin" | "reception";
+
+export interface CurrentUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+  shift?: string;
+  loggedInAt: string;
+}
 
 export type MemberStatus = "Active" | "Expiring" | "Expired" | "Partial" | "Frozen";
 
 export interface MemberTimelineEvent {
   id: string;
-  type: "registration" | "payment" | "attendance" | "upgrade" | "pt_session" | "freeze" | "workout_assigned" | "diet_assigned" | "locker_assigned" | "broadcast_sent";
+  type:
+    | "registration"
+    | "payment"
+    | "attendance"
+    | "upgrade"
+    | "pt_session"
+    | "freeze"
+    | "workout_assigned"
+    | "diet_assigned"
+    | "locker_assigned"
+    | "broadcast_sent"
+    | "renewal"
+    | "transfer"
+    | "refund";
   title: string;
   timestamp: string;
   amount?: number;
@@ -18,7 +44,7 @@ export interface MemberInvoice {
   amount: number;
   plan: string;
   method: "UPI" | "Cash" | "Card" | "Bank";
-  status: "Paid" | "Partial";
+  status: "Paid" | "Partial" | "Refunded";
   installmentInfo?: string;
 }
 
@@ -55,6 +81,8 @@ export interface Member {
   assignedTrainer?: string;
   healthGoal?: string;
   emergencyContact?: string;
+  freezeUntil?: string;
+  freezeReason?: string;
   assignedWorkout?: string;
   assignedWorkoutId?: string;
   assignedDiet?: string;
@@ -73,11 +101,48 @@ export interface Payment {
   method: "UPI" | "Cash" | "Card" | "Bank";
   amount: number;
   category: "Membership" | "Personal Training" | "Registration";
-  status: "Paid" | "Partial" | "Overdue";
+  status: "Paid" | "Partial" | "Overdue" | "Refunded";
   invoiceNumber: string;
   installmentIndex?: number;
   totalInstallments?: number;
   notes?: string;
+  collectedBy?: string;
+}
+
+export interface RefundRecord {
+  id: string;
+  paymentId: string;
+  memberId: string;
+  memberName: string;
+  amount: number;
+  date: string;
+  reason: string;
+  processedBy: string;
+  invoiceNumber: string;
+}
+
+export interface RenewalRecord {
+  id: string;
+  memberId: string;
+  memberName: string;
+  planName: string;
+  previousExpiry: string;
+  newExpiry: string;
+  amount: number;
+  date: string;
+  processedBy: string;
+  paymentMethod: "UPI" | "Cash" | "Card" | "Bank";
+}
+
+export interface SystemLog {
+  id: string;
+  timestamp: string;
+  userName: string;
+  userRole: UserRole;
+  action: string;
+  category: "Auth" | "Member" | "Payment" | "Plan" | "Staff" | "Locker" | "Settings" | "Attendance" | "Renewal" | "Refund";
+  details: string;
+  ipAddress?: string;
 }
 
 export interface MembershipPlan {
@@ -85,7 +150,7 @@ export interface MembershipPlan {
   name: string;
   price: number;
   durationMonths: number;
-  type: "Standard" | "Premium" | "PT Package" | "VIP Pass";
+  type: "Standard" | "Premium" | "PT Package" | "VIP Pass" | string;
   perks: string[];
   activeCount: number;
   expiringCount: number;
@@ -104,6 +169,7 @@ export interface StaffMember {
   status: "On Floor" | "Off Duty" | "On Leave";
   avatar: string;
   assignedClientsCount: number;
+  lastPaidDate?: string;
   leaveRecords: {
     id: string;
     type: "Casual" | "Sick" | "Annual";
@@ -112,6 +178,31 @@ export interface StaffMember {
     status: "Approved" | "Pending" | "Rejected";
     reason: string;
   }[];
+}
+
+// Operational Expenses, Bills & Payroll Outflow
+export type ExpenseCategory =
+  | "Building Rent"
+  | "Electricity & Water"
+  | "Staff Salary"
+  | "Equipment Maintenance"
+  | "Supplements & Inventory"
+  | "Software & Marketing"
+  | "Miscellaneous";
+
+export interface GymExpense {
+  id: string;
+  title: string;
+  category: ExpenseCategory;
+  amount: number;
+  date: string;
+  paymentMethod: "UPI" | "Bank Transfer" | "Cash" | "Card" | "Cheque";
+  status: "Paid" | "Pending";
+  recipientName: string;
+  receiptNumber?: string;
+  notes?: string;
+  recordedBy: string;
+  staffId?: string;
 }
 
 // Lead CRM Model
@@ -249,6 +340,25 @@ export interface GymLocation {
   capacity: number;
 }
 
+export interface BrandThemePreset {
+  id: string;
+  name: string;
+  primary: string;
+  accent: string;
+  description: string;
+}
+
+export const BRAND_THEMES: BrandThemePreset[] = [
+  { id: "violet", name: "Ultra Violet", primary: "#8b5cf6", accent: "#a78bfa", description: "Modern luxury purple" },
+  { id: "gold", name: "Gold Prestige", primary: "#f59e0b", accent: "#fbbf24", description: "Elite championship gold" },
+  { id: "emerald", name: "Cyber Emerald", primary: "#10b981", accent: "#34d399", description: "Energetic athletic green" },
+  { id: "crimson", name: "Crimson Power", primary: "#ef4444", accent: "#f87171", description: "Aggressive bodybuilding red" },
+  { id: "cobalt", name: "Cobalt Pulse", primary: "#3b82f6", accent: "#60a5fa", description: "High-tech performance blue" },
+  { id: "sunset", name: "Sunset Blaze", primary: "#f97316", accent: "#fb923c", description: "Dynamic fiery orange" },
+  { id: "cyan", name: "Aqua Cyan", primary: "#06b6d4", accent: "#22d3ee", description: "Clean futuristic cyan" },
+  { id: "lime", name: "Neon Lime", primary: "#84cc16", accent: "#a3e635", description: "High-voltage endurance lime" },
+];
+
 export interface GymSettings {
   name: string;
   ownerName: string;
@@ -257,6 +367,9 @@ export interface GymSettings {
   phone: string;
   email: string;
   logoUrl?: string;
+  brandColor?: string;
+  brandThemeName?: string;
+  adminPassword?: string;
   currencySymbol: string;
   operatingHours: string;
   gstNumber: string;
@@ -274,6 +387,50 @@ export interface GymSettings {
   broadcastTemplateDue: string;
   broadcastTemplateWelcome: string;
 }
+
+// Role Permissions Matrix
+export const ROLE_PERMISSIONS = {
+  admin: {
+    canAccessFinancialAnalytics: true,
+    canProcessRefunds: true,
+    canExportFinancialReports: true,
+    canManagePlans: true,
+    canManageStaff: true,
+    canManageSalaries: true,
+    canAccessSettings: true,
+    canManageRoles: true,
+    canBackupRestore: true,
+    canViewAllReports: true,
+    canDeleteMember: true,
+    canTransferMembership: true,
+    canFreezeMember: true,
+    canAddMember: true,
+    canEditMember: true,
+    canCollectPayment: true,
+    canCheckInMember: true,
+    canRenewMember: true,
+  },
+  reception: {
+    canAccessFinancialAnalytics: false,
+    canProcessRefunds: false,
+    canExportFinancialReports: false,
+    canManagePlans: false,
+    canManageStaff: false,
+    canManageSalaries: false,
+    canAccessSettings: false,
+    canManageRoles: false,
+    canBackupRestore: false,
+    canViewAllReports: false,
+    canDeleteMember: false,
+    canTransferMembership: false,
+    canFreezeMember: true,
+    canAddMember: true,
+    canEditMember: true,
+    canCollectPayment: true,
+    canCheckInMember: true,
+    canRenewMember: true,
+  },
+};
 
 // Default Datasets
 const DEFAULT_LOCATIONS: GymLocation[] = [
@@ -296,10 +453,10 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     durationMonths: 1,
     type: "Standard",
     perks: ["Full gym floor access", "Locker room & shower", "1 Free Assessment"],
-    activeCount: 1,
-    expiringCount: 0,
+    activeCount: 3,
+    expiringCount: 1,
     frozenCount: 0,
-    upgradeOpportunities: 0,
+    upgradeOpportunities: 1,
   },
   {
     id: "plan-2",
@@ -308,9 +465,9 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     durationMonths: 3,
     type: "Standard",
     perks: ["Full floor access", "Steam & Sauna access", "Diet consultation", "Locker storage"],
-    activeCount: 0,
-    expiringCount: 0,
-    frozenCount: 0,
+    activeCount: 2,
+    expiringCount: 1,
+    frozenCount: 1,
     upgradeOpportunities: 0,
   },
   {
@@ -320,7 +477,7 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     durationMonths: 12,
     type: "VIP Pass",
     perks: ["All-hours unlimited access", "2 Free PT Sessions / mo", "Custom Nutrition chart", "Free towel service"],
-    activeCount: 0,
+    activeCount: 2,
     expiringCount: 0,
     frozenCount: 0,
     upgradeOpportunities: 0,
@@ -332,7 +489,7 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     durationMonths: 1,
     type: "PT Package",
     perks: ["Dedicated Senior Coach", "Custom biometric tracking", "Weekly diet adjust", "Recovery zone access"],
-    activeCount: 0,
+    activeCount: 1,
     expiringCount: 0,
     frozenCount: 0,
     upgradeOpportunities: 0,
@@ -356,7 +513,7 @@ const DEFAULT_MEMBERS: Member[] = [
     lastVisit: "Today, 6:30 AM",
     isCurrentlyInside: true,
     checkInTime: "06:30 AM",
-    assignedTrainer: "Head Coach",
+    assignedTrainer: "Marcus Vance",
     healthGoal: "Strength & Hypertrophy",
     emergencyContact: "+91 98765 00000",
     assignedWorkout: "Push-Pull-Legs Hypertrophy Split",
@@ -386,6 +543,160 @@ const DEFAULT_MEMBERS: Member[] = [
       { id: "inv-kariya-1", invoiceNumber: "INV-2026-0001", date: "2026-05-01", amount: 3000, plan: "Monthly Flex", method: "UPI", status: "Paid", installmentInfo: "Single Full Payment" },
     ],
   },
+  {
+    id: "m-alex",
+    name: "Alex Morgan",
+    phone: "+91 98450 11223",
+    email: "alex.morgan@gmail.com",
+    plan: "Quarterly Pro",
+    planPrice: 8000,
+    collectedAmount: 8000,
+    due: 0,
+    joinDate: "2026-03-01",
+    expiry: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    status: "Expiring",
+    attendanceRate: 92,
+    lastVisit: "Yesterday, 7:15 PM",
+    isCurrentlyInside: false,
+    assignedTrainer: "Marcus Vance",
+    healthGoal: "Fat Loss & Endurance",
+    emergencyContact: "+91 98450 99887",
+    assignedLocker: 4,
+    notes: "Expiring in 3 days. Send renewal reminder.",
+    installments: [
+      {
+        id: "inst-alex-1",
+        amount: 8000,
+        date: "2026-03-01",
+        method: "Card",
+        invoiceNumber: "INV-2026-0002",
+        installmentNumber: 1,
+        totalInstallments: 1,
+      },
+    ],
+    timeline: [
+      { id: "t-a1", type: "attendance", title: "Checked in at Main Gate", timestamp: "Yesterday, 7:15 PM" },
+      { id: "t-a2", type: "payment", title: "Paid ₹8,000 for Quarterly Pro via Card", timestamp: "Mar 01, 2026", amount: 8000 },
+    ],
+    invoices: [
+      { id: "inv-alex-1", invoiceNumber: "INV-2026-0002", date: "2026-03-01", amount: 8000, plan: "Quarterly Pro", method: "Card", status: "Paid" },
+    ],
+  },
+  {
+    id: "m-rohan",
+    name: "Rohan Sharma",
+    phone: "+91 97410 88990",
+    email: "rohan.sharma@outlook.com",
+    plan: "Annual Elite",
+    planPrice: 24000,
+    collectedAmount: 12000,
+    due: 12000,
+    joinDate: "2026-04-15",
+    expiry: "2027-04-15",
+    status: "Partial",
+    attendanceRate: 85,
+    lastVisit: "Today, 7:45 AM",
+    isCurrentlyInside: true,
+    checkInTime: "07:45 AM",
+    assignedTrainer: "Devendra Rao",
+    healthGoal: "Muscle Building",
+    emergencyContact: "+91 97410 11223",
+    assignedLocker: 8,
+    notes: "2nd Installment of ₹12,000 due on 15th.",
+    installments: [
+      {
+        id: "inst-rohan-1",
+        amount: 12000,
+        date: "2026-04-15",
+        method: "UPI",
+        invoiceNumber: "INV-2026-0003",
+        installmentNumber: 1,
+        totalInstallments: 2,
+        note: "1st Installment (50%)",
+      },
+    ],
+    timeline: [
+      { id: "t-r1", type: "attendance", title: "Checked in at Main Floor Gate", timestamp: "Today, 7:45 AM" },
+      { id: "t-r2", type: "payment", title: "Paid ₹12,000 (Installment 1) via UPI", timestamp: "Apr 15, 2026", amount: 12000 },
+    ],
+    invoices: [
+      { id: "inv-rohan-1", invoiceNumber: "INV-2026-0003", date: "2026-04-15", amount: 12000, plan: "Annual Elite", method: "UPI", status: "Partial", installmentInfo: "Installment 1 of 2 (Due: ₹12,000)" },
+    ],
+  },
+  {
+    id: "m-sneha",
+    name: "Sneha Patel",
+    phone: "+91 99001 22334",
+    email: "sneha.patel@gmail.com",
+    plan: "Monthly Flex",
+    planPrice: 3000,
+    collectedAmount: 3000,
+    due: 0,
+    joinDate: "2026-04-01",
+    expiry: "2026-05-01",
+    status: "Expired",
+    attendanceRate: 60,
+    lastVisit: "May 01, 2026",
+    isCurrentlyInside: false,
+    healthGoal: "General Fitness",
+    notes: "Expired membership. Follow up for renewal discount.",
+    installments: [],
+    timeline: [
+      { id: "t-s1", type: "registration", title: "Monthly Flex membership expired", timestamp: "May 01, 2026" },
+    ],
+    invoices: [],
+  },
+  {
+    id: "m-vikram",
+    name: "Vikram Malhotra",
+    phone: "+91 98860 33445",
+    email: "vikram.m@techcorp.in",
+    plan: "Quarterly Pro",
+    planPrice: 8000,
+    collectedAmount: 8000,
+    due: 0,
+    joinDate: "2026-02-15",
+    expiry: "2026-06-15",
+    status: "Frozen",
+    freezeUntil: "2026-05-25",
+    freezeReason: "Medical recovery - Knee ligament strain",
+    attendanceRate: 78,
+    lastVisit: "May 05, 2026",
+    isCurrentlyInside: false,
+    healthGoal: "Rehabilitation & Strength",
+    notes: "Membership temporarily paused until May 25.",
+    installments: [],
+    timeline: [
+      { id: "t-v1", type: "freeze", title: "Membership frozen until May 25 (Knee strain)", timestamp: "May 05, 2026" },
+    ],
+    invoices: [],
+  },
+  {
+    id: "m-priya",
+    name: "Priya Nair",
+    phone: "+91 97312 99001",
+    email: "priya.nair@gmail.com",
+    plan: "Personal Training 1-on-1",
+    planPrice: 15000,
+    collectedAmount: 15000,
+    due: 0,
+    joinDate: "2026-05-10",
+    expiry: "2026-06-10",
+    status: "Active",
+    attendanceRate: 100,
+    lastVisit: "Today, 8:00 AM",
+    isCurrentlyInside: true,
+    checkInTime: "08:00 AM",
+    assignedTrainer: "Marcus Vance",
+    healthGoal: "Contest Prep & Conditioning",
+    notes: "VIP Client. Daily morning PT slot.",
+    installments: [],
+    timeline: [
+      { id: "t-p1", type: "attendance", title: "Checked in for PT with Marcus Vance", timestamp: "Today, 8:00 AM" },
+      { id: "t-p2", type: "payment", title: "Paid ₹15,000 for PT Package via UPI", timestamp: "May 10, 2026", amount: 15000 },
+    ],
+    invoices: [],
+  },
 ];
 
 const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
@@ -397,7 +708,7 @@ const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
     daysPerWeek: 6,
     durationWeeks: 8,
     focus: "Progressive overload focused on muscle hypertrophy and foundational strength.",
-    assignedCount: 1,
+    assignedCount: 2,
     createdAt: "2026-05-01",
     routine: [
       {
@@ -444,7 +755,7 @@ const DEFAULT_DIET_PLANS: DietPlan[] = [
     proteinGrams: 180,
     carbsGrams: 240,
     fatsGrams: 65,
-    assignedCount: 1,
+    assignedCount: 2,
     createdAt: "2026-05-01",
     meals: [
       { time: "07:30 AM", name: "Breakfast Fuel", items: "4 Whole Eggs, 2 Slices Whole Grain Toast, 1 Banana", quantity: "1 Plate", calories: 580, protein: 32, carbs: 54, fats: 22, instructions: "Scramble eggs in olive oil spray." },
@@ -459,14 +770,17 @@ const DEFAULT_DIET_PLANS: DietPlan[] = [
 const DEFAULT_LOCKERS: Locker[] = Array.from({ length: 24 }, (_, i) => {
   const num = i + 1;
   const isKariya = num === 1;
+  const isAlex = num === 4;
+  const isRohan = num === 8;
   return {
     id: `loc-l-${num}`,
     number: num,
     section: num <= 10 ? "Men's Locker Room" : num <= 20 ? "Women's Locker Room" : "Executive VIP",
-    status: isKariya ? "Occupied" : "Available",
-    assignedMemberId: isKariya ? "m-kariya" : undefined,
-    assignedMemberName: isKariya ? "Kariya" : undefined,
-    expiresOn: isKariya ? "2026-06-01" : undefined,
+    status: isKariya || isAlex || isRohan ? "Occupied" : num === 12 ? "Under Maintenance" : "Available",
+    assignedMemberId: isKariya ? "m-kariya" : isAlex ? "m-alex" : isRohan ? "m-rohan" : undefined,
+    assignedMemberName: isKariya ? "Kariya" : isAlex ? "Alex Morgan" : isRohan ? "Rohan Sharma" : undefined,
+    expiresOn: isKariya ? "2026-06-01" : isAlex ? "2026-05-22" : undefined,
+    maintenanceIssue: num === 12 ? "Electronic biometric lock keypad jammed" : undefined,
     repairHistory: [],
     history: [
       {
@@ -487,6 +801,9 @@ const DEFAULT_SETTINGS: GymSettings = {
   phone: "+91 821 241 5566",
   email: "mysore@goldsgym.in",
   logoUrl: "",
+  brandColor: "#8b5cf6",
+  brandThemeName: "Ultra Violet",
+  adminPassword: "admin123",
   currencySymbol: "₹",
   operatingHours: "5:30 AM – 10:30 PM (Mon-Sat), 6:00 AM – 2:00 PM (Sun)",
   gstNumber: "29AABCU9603R1ZM",
@@ -508,9 +825,118 @@ const DEFAULT_SETTINGS: GymSettings = {
     "Welcome to {gym}, {name}! Your {plan} pass is now active. Let's reach your peak potential!",
 };
 
-const DEFAULT_STAFF: StaffMember[] = [];
-const DEFAULT_LEADS: Lead[] = [];
-const DEFAULT_BROADCASTS: BroadcastMessage[] = [];
+const DEFAULT_STAFF: StaffMember[] = [
+  {
+    id: "staff-1",
+    name: "Karan Johar",
+    role: "Head Coach",
+    phone: "+91 98450 00111",
+    email: "karan@goldsgym.in",
+    salary: 75000,
+    shift: "Morning (05:30 AM – 02:00 PM)",
+    status: "On Floor",
+    avatar: "KJ",
+    assignedClientsCount: 4,
+    leaveRecords: [],
+  },
+  {
+    id: "staff-2",
+    name: "Sneha Reddy",
+    role: "Front Desk Manager",
+    phone: "+91 98450 00222",
+    email: "reception@goldsgym.in",
+    salary: 35000,
+    shift: "General (08:00 AM – 05:00 PM)",
+    status: "On Floor",
+    avatar: "SR",
+    assignedClientsCount: 0,
+    leaveRecords: [],
+  },
+  {
+    id: "staff-3",
+    name: "Marcus Vance",
+    role: "Personal Trainer",
+    phone: "+91 98450 00333",
+    email: "marcus@goldsgym.in",
+    salary: 45000,
+    shift: "Evening (02:00 PM – 10:30 PM)",
+    status: "On Floor",
+    avatar: "MV",
+    assignedClientsCount: 6,
+    leaveRecords: [],
+  },
+  {
+    id: "staff-4",
+    name: "Ananya Roy",
+    role: "Nutritionist",
+    phone: "+91 98450 00444",
+    email: "ananya@goldsgym.in",
+    salary: 40000,
+    shift: "Morning (06:00 AM – 02:30 PM)",
+    status: "Off Duty",
+    avatar: "AR",
+    assignedClientsCount: 8,
+    leaveRecords: [],
+  },
+  {
+    id: "staff-5",
+    name: "Devendra Rao",
+    role: "Floor Trainer",
+    phone: "+91 98450 00555",
+    email: "devendra@goldsgym.in",
+    salary: 28000,
+    shift: "Evening (02:00 PM – 10:30 PM)",
+    status: "On Floor",
+    avatar: "DR",
+    assignedClientsCount: 3,
+    leaveRecords: [],
+  },
+];
+
+const DEFAULT_LEADS: Lead[] = [
+  {
+    id: "lead-1",
+    name: "Aditya Verma",
+    phone: "+91 98800 11223",
+    email: "aditya.v@gmail.com",
+    source: "Instagram",
+    stage: "Trial Scheduled",
+    fitnessGoal: "Weight Loss & Functional Fitness",
+    trialDate: "Tomorrow, 6:00 PM",
+    notes: "Interested in 3-Month Transformation package.",
+    assignedTrainer: "Marcus Vance",
+    createdAt: "2026-05-18",
+    budget: 10000,
+  },
+  {
+    id: "lead-2",
+    name: "Kavya Menon",
+    phone: "+91 98800 44556",
+    email: "kavya.m@tech.com",
+    source: "Walk-In",
+    stage: "Offer Sent",
+    fitnessGoal: "Personal Training",
+    notes: "Sent quote for Annual VIP + PT.",
+    assignedTrainer: "Ananya Roy",
+    createdAt: "2026-05-17",
+    budget: 35000,
+  },
+];
+
+const DEFAULT_BROADCASTS: BroadcastMessage[] = [
+  {
+    id: "bc-1",
+    title: "Weekend Powerlifting Workshop with Coach Marcus",
+    body: "Join our masterclass this Saturday at 9:00 AM covering Deadlift & Squat bio-mechanics. Free for all active members!",
+    category: "Announcement",
+    recipientsType: "active",
+    recipientCount: 5,
+    channels: ["WhatsApp", "In-App"],
+    status: "Sent",
+    sentAt: "Today, 9:00 AM",
+    createdAt: "2026-05-19",
+  },
+];
 
 const DEFAULT_PAYMENTS: Payment[] = [
   {
@@ -526,15 +952,214 @@ const DEFAULT_PAYMENTS: Payment[] = [
     installmentIndex: 1,
     totalInstallments: 1,
     notes: "Full Monthly Flex membership fee",
+    collectedBy: "Sneha Reddy (Reception)",
+  },
+  {
+    id: "p-alex-1",
+    memberId: "m-alex",
+    member: "Alex Morgan",
+    date: "2026-03-01",
+    method: "Card",
+    amount: 8000,
+    category: "Membership",
+    status: "Paid",
+    invoiceNumber: "INV-2026-0002",
+    installmentIndex: 1,
+    totalInstallments: 1,
+    notes: "Quarterly Pro membership fee",
+    collectedBy: "Sneha Reddy (Reception)",
+  },
+  {
+    id: "p-rohan-1",
+    memberId: "m-rohan",
+    member: "Rohan Sharma",
+    date: "2026-04-15",
+    method: "UPI",
+    amount: 12000,
+    category: "Membership",
+    status: "Partial",
+    invoiceNumber: "INV-2026-0003",
+    installmentIndex: 1,
+    totalInstallments: 2,
+    notes: "1st installment of Annual Elite",
+    collectedBy: "Karan Johar (Admin)",
+  },
+  {
+    id: "p-priya-1",
+    memberId: "m-priya",
+    member: "Priya Nair",
+    date: "2026-05-10",
+    method: "UPI",
+    amount: 15000,
+    category: "Personal Training",
+    status: "Paid",
+    invoiceNumber: "INV-2026-0004",
+    installmentIndex: 1,
+    totalInstallments: 1,
+    notes: "1-on-1 PT package with Marcus Vance",
+    collectedBy: "Sneha Reddy (Reception)",
   },
 ];
+
+const DEFAULT_EXPENSES: GymExpense[] = [
+  {
+    id: "exp-1",
+    title: "Gym Floor Monthly Lease (Jayalakshmipuram)",
+    category: "Building Rent",
+    amount: 65000,
+    date: "2026-05-05",
+    paymentMethod: "Bank Transfer",
+    status: "Paid",
+    recipientName: "Habitat Properties Ltd.",
+    receiptNumber: "RENT-MAY-2026",
+    notes: "Monthly commercial lease for 4,500 sq.ft gym facility",
+    recordedBy: "Karan Johar (Admin)",
+  },
+  {
+    id: "exp-2",
+    title: "BESCOM Commercial Electricity Bill",
+    category: "Electricity & Water",
+    amount: 18450,
+    date: "2026-05-12",
+    paymentMethod: "UPI",
+    status: "Paid",
+    recipientName: "BESCOM Mysore Sub-Division",
+    receiptNumber: "BESCOM-992140",
+    notes: "Peak summer HVAC cooling and facility lighting charges",
+    recordedBy: "Karan Johar (Admin)",
+  },
+  {
+    id: "exp-3",
+    title: "Staff Salary — Sneha Reddy (Front Desk Manager)",
+    category: "Staff Salary",
+    amount: 35000,
+    date: "2026-05-01",
+    paymentMethod: "Bank Transfer",
+    status: "Paid",
+    recipientName: "Sneha Reddy",
+    receiptNumber: "PAY-2026-05-SR",
+    notes: "May 2026 Monthly Payroll",
+    recordedBy: "Karan Johar (Admin)",
+    staffId: "staff-2",
+  },
+  {
+    id: "exp-4",
+    title: "Staff Salary — Devendra Rao (Floor Trainer)",
+    category: "Staff Salary",
+    amount: 28000,
+    date: "2026-05-01",
+    paymentMethod: "Bank Transfer",
+    status: "Paid",
+    recipientName: "Devendra Rao",
+    receiptNumber: "PAY-2026-05-DR",
+    notes: "May 2026 Monthly Payroll",
+    recordedBy: "Karan Johar (Admin)",
+    staffId: "staff-5",
+  },
+  {
+    id: "exp-5",
+    title: "Treadmill Motor & Cable Pulley Bi-Monthly Maintenance",
+    category: "Equipment Maintenance",
+    amount: 7500,
+    date: "2026-05-15",
+    paymentMethod: "UPI",
+    status: "Paid",
+    recipientName: "FitCare Technicians Mysore",
+    receiptNumber: "SRV-2026-881",
+    notes: "Lubrication, motor check and wire alignment on 6 treadmills",
+    recordedBy: "Karan Johar (Admin)",
+  },
+  {
+    id: "exp-6",
+    title: "Supplements Stock (Whey Isolate & Pre-Workout)",
+    category: "Supplements & Inventory",
+    amount: 14200,
+    date: "2026-05-16",
+    paymentMethod: "UPI",
+    status: "Paid",
+    recipientName: "MuscleBlaze Wholesale Distributor",
+    receiptNumber: "INV-MB-4412",
+    notes: "Restocked 10 tubs Whey Isolate and 15 shakers for POS desk",
+    recordedBy: "Karan Johar (Admin)",
+  },
+];
+
+const DEFAULT_SYSTEM_LOGS: SystemLog[] = [
+  {
+    id: "log-1",
+    timestamp: "Today, 08:00 AM",
+    userName: "Sneha Reddy",
+    userRole: "reception",
+    action: "Member Check-In",
+    category: "Attendance",
+    details: "Checked in Priya Nair for morning PT session",
+    ipAddress: "192.168.1.45 (Front Desk PC)",
+  },
+  {
+    id: "log-2",
+    timestamp: "Today, 07:45 AM",
+    userName: "Sneha Reddy",
+    userRole: "reception",
+    action: "Member Check-In",
+    category: "Attendance",
+    details: "Checked in Rohan Sharma at Main Floor turnstile",
+    ipAddress: "192.168.1.45 (Front Desk PC)",
+  },
+  {
+    id: "log-3",
+    timestamp: "Today, 06:30 AM",
+    userName: "Karan Johar",
+    userRole: "admin",
+    action: "Member Check-In",
+    category: "Attendance",
+    details: "Checked in Kariya at Main Floor Gate",
+    ipAddress: "192.168.1.10 (Director Console)",
+  },
+  {
+    id: "log-4",
+    timestamp: "Yesterday, 04:15 PM",
+    userName: "Karan Johar",
+    userRole: "admin",
+    action: "Plan Updated",
+    category: "Plan",
+    details: "Updated benefits on Annual Elite plan (Added 2 PT sessions)",
+    ipAddress: "192.168.1.10 (Director Console)",
+  },
+  {
+    id: "log-5",
+    timestamp: "May 10, 2026, 11:20 AM",
+    userName: "Sneha Reddy",
+    userRole: "reception",
+    action: "Payment Recorded",
+    category: "Payment",
+    details: "Collected ₹15,000 from Priya Nair (INV-2026-0004) via UPI",
+    ipAddress: "192.168.1.45 (Front Desk PC)",
+  },
+];
+
+const DEFAULT_REFUNDS: RefundRecord[] = [];
+
+const DEFAULT_RENEWALS: RenewalRecord[] = [];
 
 interface GymStoreContextType {
   theme: "dark" | "light";
   toggleTheme: () => void;
   setTheme: (theme: "dark" | "light") => void;
+
+  // RBAC & Session State
+  currentUser: CurrentUser;
+  login: (role: UserRole, email?: string, name?: string) => void;
+  logout: () => void;
+  switchRole: (role: UserRole) => void;
+  requestRoleSwitch: (role: UserRole) => void;
+  isAdminAuthModalOpen: boolean;
+  setIsAdminAuthModalOpen: (open: boolean) => void;
+  verifyAndSwitchToAdmin: (password: string) => boolean;
+  hasPermission: (action: keyof typeof ROLE_PERMISSIONS.admin) => boolean;
+
   members: Member[];
   payments: Payment[];
+  expenses: GymExpense[];
   staff: StaffMember[];
   settings: GymSettings;
   leads: Lead[];
@@ -543,11 +1168,17 @@ interface GymStoreContextType {
   lockers: Locker[];
   locations: GymLocation[];
   broadcasts: BroadcastMessage[];
+  systemLogs: SystemLog[];
+  refunds: RefundRecord[];
+  renewals: RenewalRecord[];
   currentLocationId: string;
   lastSaved: Date | null;
   isSaved: boolean;
   exportData: () => string;
   importData: (jsonStr: string) => boolean;
+
+  // Audit Logs
+  addSystemLog: (action: string, category: SystemLog["category"], details: string) => void;
 
   // Core Member Actions
   addMember: (member: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside" | "installments" | "collectedAmount">) => void;
@@ -556,9 +1187,13 @@ interface GymStoreContextType {
   checkInMember: (memberId: string) => void;
   checkOutMember: (memberId: string) => void;
   renewMember: (memberId: string, durationMonths: number, planName?: string, paidAmount?: number, paymentMethod?: "UPI" | "Cash" | "Card" | "Bank") => void;
-  toggleFreezeMember: (memberId: string) => void;
+  extendMembershipDays: (memberId: string, additionalDays: number, reason: string) => void;
+  freezeMember: (memberId: string, days: number, reason: string) => void;
+  unfreezeMember: (memberId: string) => void;
+  transferMembership: (fromMemberId: string, toName: string, toPhone: string, toEmail: string) => void;
+  bulkImportMembers: (newMembers: Array<Partial<Member>>) => number;
 
-  // Payment Engine Actions
+  // Payment & Inflow Actions
   recordPayment: (payment: {
     memberId: string;
     member: string;
@@ -570,12 +1205,18 @@ interface GymStoreContextType {
     installmentNumber?: number;
     totalInstallments?: number;
   }) => void;
+  refundPayment: (paymentId: string, refundAmount: number, reason: string) => boolean;
 
-  // Staff CRUD
+  // Operational Expenses, Bills & Payroll Outflow Actions
+  addExpense: (expense: Omit<GymExpense, "id">) => void;
+  updateExpense: (id: string, updates: Partial<GymExpense>) => void;
+  deleteExpense: (id: string) => void;
+
+  // Staff CRUD & Payroll
   addStaff: (staffMember: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">) => void;
   updateStaff: (id: string, updates: Partial<StaffMember>) => void;
   deleteStaff: (id: string) => void;
-  payStaffSalary: (staffId: string) => void;
+  payStaffSalary: (staffId: string, paymentMethod?: "UPI" | "Bank Transfer" | "Cash" | "Cheque", notes?: string) => void;
   toggleStaffStatus: (staffId: string, status: "On Floor" | "Off Duty" | "On Leave") => void;
   approveLeaveRequest: (staffId: string, leaveId: string) => void;
 
@@ -603,10 +1244,9 @@ interface GymStoreContextType {
   deleteDietPlan: (id: string) => void;
   archiveDietPlan: (id: string) => void;
   assignDietToMember: (memberId: string, dietId: string) => void;
-
   assignProgramToMember: (memberId: string, workoutId?: string, dietId?: string, notes?: string) => void;
 
-  // Locker Operations & Maintenance Workflow
+  // Locker Operations
   assignLocker: (lockerNumber: number, memberId: string, memberName: string, durationDays?: number) => void;
   reserveLocker: (lockerNumber: number, reservedFor: string, note?: string) => void;
   releaseLocker: (lockerNumber: number) => void;
@@ -656,10 +1296,35 @@ interface GymStoreContextType {
   editingMember: Member | null;
   setEditingMember: (member: Member | null) => void;
 
+  // Additional RBAC Modals
+  isBulkImportOpen: boolean;
+  setIsBulkImportOpen: (open: boolean) => void;
+  isRefundModalOpen: boolean;
+  setIsRefundModalOpen: (open: boolean) => void;
+  selectedPaymentForRefund: Payment | null;
+  setSelectedPaymentForRefund: (payment: Payment | null) => void;
+  isRenewModalOpen: boolean;
+  setIsRenewModalOpen: (open: boolean) => void;
+  selectedMemberForRenewal: Member | null;
+  setSelectedMemberForRenewal: (member: Member | null) => void;
+  isTransferModalOpen: boolean;
+  setIsTransferModalOpen: (open: boolean) => void;
+  selectedMemberForTransfer: Member | null;
+  setSelectedMemberForTransfer: (member: Member | null) => void;
+  isFreezeModalOpen: boolean;
+  setIsFreezeModalOpen: (open: boolean) => void;
+  selectedMemberForFreeze: Member | null;
+  setSelectedMemberForFreeze: (member: Member | null) => void;
+  isExpenseModalOpen: boolean;
+  setIsExpenseModalOpen: (open: boolean) => void;
+  editingExpense: GymExpense | null;
+  setEditingExpense: (expense: GymExpense | null) => void;
+
   // Settings Actions
   updateSettings: (newSettings: Partial<GymSettings>) => void;
   updateGymLogo: (logoBase64: string) => void;
   removeGymLogo: () => void;
+  setBrandColor: (hexColor: string, themeName?: string) => void;
   resetToDefaultData: () => void;
 }
 
@@ -667,14 +1332,38 @@ const GymContext = createContext<GymStoreContextType | null>(null);
 
 const STORAGE_KEY_PEAKREP = "peakrep_gym_os_v9";
 
+const DEFAULT_ADMIN_USER: CurrentUser = {
+  id: "u-admin",
+  name: "Karan Johar",
+  email: "admin@gym.com",
+  role: "admin",
+  shift: "Full Director Access",
+  avatar: "KJ",
+  loggedInAt: new Date().toISOString(),
+};
+
+const DEFAULT_RECEPTION_USER: CurrentUser = {
+  id: "u-reception",
+  name: "Sneha Reddy",
+  email: "reception@gym.com",
+  role: "reception",
+  shift: "Front Desk (08:00 AM - 05:00 PM)",
+  avatar: "SR",
+  loggedInAt: new Date().toISOString(),
+};
+
 export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isHydratedRef = useRef(false);
 
   // Theme state
   const [theme, setThemeState] = useState<"dark" | "light">("dark");
 
+  // User & RBAC state
+  const [currentUser, setCurrentUser] = useState<CurrentUser>(DEFAULT_ADMIN_USER);
+
   const [members, setMembers] = useState<Member[]>(DEFAULT_MEMBERS);
   const [payments, setPayments] = useState<Payment[]>(DEFAULT_PAYMENTS);
+  const [expenses, setExpenses] = useState<GymExpense[]>(DEFAULT_EXPENSES);
   const [staff, setStaff] = useState<StaffMember[]>(DEFAULT_STAFF);
   const [settings, setSettings] = useState<GymSettings>(DEFAULT_SETTINGS);
   const [leads, setLeads] = useState<Lead[]>(DEFAULT_LEADS);
@@ -683,6 +1372,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [lockers, setLockers] = useState<Locker[]>(DEFAULT_LOCKERS);
   const [broadcasts, setBroadcasts] = useState<BroadcastMessage[]>(DEFAULT_BROADCASTS);
   const [locations, setLocations] = useState<GymLocation[]>(DEFAULT_LOCATIONS);
+  const [systemLogs, setSystemLogs] = useState<SystemLog[]>(DEFAULT_SYSTEM_LOGS);
+  const [refunds, setRefunds] = useState<RefundRecord[]>(DEFAULT_REFUNDS);
+  const [renewals, setRenewals] = useState<RenewalRecord[]>(DEFAULT_RENEWALS);
   const [currentLocationId, setCurrentLocationId] = useState<string>("loc-1");
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -704,7 +1396,56 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [editingMember, setEditingMember] = useState<Member | null>(null);
 
-  // Safe Storage persistence helper
+  // Additional RBAC Modals
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+  const [selectedPaymentForRefund, setSelectedPaymentForRefund] = useState<Payment | null>(null);
+  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
+  const [selectedMemberForRenewal, setSelectedMemberForRenewal] = useState<Member | null>(null);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [selectedMemberForTransfer, setSelectedMemberForTransfer] = useState<Member | null>(null);
+  const [isFreezeModalOpen, setIsFreezeModalOpen] = useState(false);
+  const [selectedMemberForFreeze, setSelectedMemberForFreeze] = useState<Member | null>(null);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<GymExpense | null>(null);
+
+  // Admin Auth Gate Modal State
+  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
+
+  // Session Storage helper for Multi-Tab Independence
+  const STORAGE_KEY_SESSION = "peakrep_session_user_v9";
+
+  const safePersistSession = (user: CurrentUser) => {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(user));
+      setLastSaved(new Date());
+    } catch (err) {
+      console.warn("[PeakRep Session Storage Sync Error]:", err);
+    }
+  };
+
+  const safeLoadSession = (fallback: CurrentUser): CurrentUser => {
+    if (typeof window === "undefined") return fallback;
+    try {
+      const item = sessionStorage.getItem(STORAGE_KEY_SESSION);
+      if (item !== null && item !== undefined && item !== "") {
+        return JSON.parse(item);
+      }
+      // Check localStorage for initial tab migration
+      const localItem = localStorage.getItem(`${STORAGE_KEY_PEAKREP}_current_user`);
+      if (localItem) {
+        const parsed = JSON.parse(localItem);
+        sessionStorage.setItem(STORAGE_KEY_SESSION, localItem);
+        return parsed;
+      }
+    } catch (e) {
+      console.warn(`[PeakRep Session Load Error]:`, e);
+    }
+    return fallback;
+  };
+
+  // Safe Storage persistence helper for Shared Database Entities
   const safePersist = (key: string, data: any) => {
     if (typeof window === "undefined") return;
     try {
@@ -730,6 +1471,110 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return fallback;
   };
 
+  // Add system audit log helper
+  const addSystemLog = (action: string, category: SystemLog["category"], details: string) => {
+    const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const newLog: SystemLog = {
+      id: `log-${Date.now()}`,
+      timestamp: `Today, ${timeNow}`,
+      userName: currentUser.name,
+      userRole: currentUser.role,
+      action,
+      category,
+      details,
+      ipAddress: currentUser.role === "admin" ? "192.168.1.10 (Director Console)" : "192.168.1.45 (Front Desk PC)",
+    };
+
+    setSystemLogs((prev) => {
+      const updated = [newLog, ...prev.slice(0, 99)];
+      safePersist(`${STORAGE_KEY_PEAKREP}_system_logs`, updated);
+      return updated;
+    });
+  };
+
+  // Auth / Role Actions
+  const login = (role: UserRole, email?: string, name?: string) => {
+    const user: CurrentUser =
+      role === "admin"
+        ? {
+            id: "u-admin",
+            name: name || "Karan Johar",
+            email: email || "admin@gym.com",
+            role: "admin",
+            shift: "Full Director Access",
+            avatar: "KJ",
+            loggedInAt: new Date().toISOString(),
+          }
+        : {
+            id: "u-reception",
+            name: name || "Sneha Reddy",
+            email: email || "reception@gym.com",
+            role: "reception",
+            shift: "Front Desk (08:00 AM - 05:00 PM)",
+            avatar: "SR",
+            loggedInAt: new Date().toISOString(),
+          };
+
+    setCurrentUser(user);
+    safePersistSession(user);
+    addSystemLog(`User Login (${role.toUpperCase()})`, "Auth", `${user.name} logged in successfully`);
+  };
+
+  const logout = () => {
+    addSystemLog(`User Logout (${currentUser.role.toUpperCase()})`, "Auth", `${currentUser.name} logged out`);
+    const defaultUser = DEFAULT_RECEPTION_USER;
+    setCurrentUser(defaultUser);
+    safePersistSession(defaultUser);
+  };
+
+  const switchRole = (role: UserRole) => {
+    if (role === "admin") {
+      const currentOwnerName = settings.ownerName || "Karan Johar";
+      const adminUser: CurrentUser = {
+        ...DEFAULT_ADMIN_USER,
+        name: currentOwnerName,
+        avatar: currentOwnerName
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "AD",
+      };
+      setCurrentUser(adminUser);
+      safePersistSession(adminUser);
+      addSystemLog("Role Switched to Admin", "Auth", `Switched session to Gym Owner (${currentOwnerName})`);
+    } else {
+      setCurrentUser(DEFAULT_RECEPTION_USER);
+      safePersistSession(DEFAULT_RECEPTION_USER);
+      addSystemLog("Role Switched to Reception", "Auth", "Switched session to Front Desk (Limited Access)");
+    }
+  };
+
+  // Role Switch Guard: Requires Admin Password when switching Reception -> Admin
+  const requestRoleSwitch = (targetRole: UserRole) => {
+    if (targetRole === currentUser.role) return;
+    if (targetRole === "admin" && currentUser.role === "reception") {
+      setIsAdminAuthModalOpen(true);
+    } else {
+      switchRole(targetRole);
+    }
+  };
+
+  const verifyAndSwitchToAdmin = (password: string): boolean => {
+    const expected = settings.adminPassword || "admin123";
+    if (password.trim() === expected.trim()) {
+      switchRole("admin");
+      setIsAdminAuthModalOpen(false);
+      return true;
+    }
+    return false;
+  };
+
+  const hasPermission = (action: keyof typeof ROLE_PERMISSIONS.admin): boolean => {
+    const perms = ROLE_PERMISSIONS[currentUser.role];
+    return perms ? !!perms[action] : false;
+  };
+
   // Initial Client Hydration from LocalStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -744,20 +1589,43 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         document.documentElement.classList.add("dark");
       }
 
+      const loadedSettings = safeLoad(`${STORAGE_KEY_PEAKREP}_settings`, DEFAULT_SETTINGS);
+      const loadedUser = safeLoadSession(DEFAULT_ADMIN_USER);
       const loadedMembers = safeLoad(`${STORAGE_KEY_PEAKREP}_members`, DEFAULT_MEMBERS);
       const loadedPayments = safeLoad(`${STORAGE_KEY_PEAKREP}_payments`, DEFAULT_PAYMENTS);
+      const loadedExpenses = safeLoad(`${STORAGE_KEY_PEAKREP}_expenses`, DEFAULT_EXPENSES);
       const loadedStaff = safeLoad(`${STORAGE_KEY_PEAKREP}_staff`, DEFAULT_STAFF);
-      const loadedSettings = safeLoad(`${STORAGE_KEY_PEAKREP}_settings`, DEFAULT_SETTINGS);
       const loadedLeads = safeLoad(`${STORAGE_KEY_PEAKREP}_leads`, DEFAULT_LEADS);
       const loadedWorkouts = safeLoad(`${STORAGE_KEY_PEAKREP}_workout_programs`, DEFAULT_WORKOUT_PROGRAMS);
       const loadedDiets = safeLoad(`${STORAGE_KEY_PEAKREP}_diet_plans`, DEFAULT_DIET_PLANS);
       const loadedLockers = safeLoad(`${STORAGE_KEY_PEAKREP}_lockers`, DEFAULT_LOCKERS);
       const loadedBroadcasts = safeLoad(`${STORAGE_KEY_PEAKREP}_broadcasts`, DEFAULT_BROADCASTS);
       const loadedLocations = safeLoad(`${STORAGE_KEY_PEAKREP}_locations`, DEFAULT_LOCATIONS);
+      const loadedLogs = safeLoad(`${STORAGE_KEY_PEAKREP}_system_logs`, DEFAULT_SYSTEM_LOGS);
+      const loadedRefunds = safeLoad(`${STORAGE_KEY_PEAKREP}_refunds`, DEFAULT_REFUNDS);
+      const loadedRenewals = safeLoad(`${STORAGE_KEY_PEAKREP}_renewals`, DEFAULT_RENEWALS);
       const loadedLocId = localStorage.getItem(`${STORAGE_KEY_PEAKREP}_current_loc`) || "loc-1";
 
+      const finalUser =
+        loadedUser.role === "admin" && loadedSettings.ownerName && loadedUser.name !== loadedSettings.ownerName
+          ? {
+              ...loadedUser,
+              name: loadedSettings.ownerName,
+              avatar:
+                loadedSettings.ownerName
+                  .split(" ")
+                  .map((w: string) => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase() || "AD",
+            }
+          : loadedUser;
+
+      setCurrentUser(finalUser);
+      setSettings(loadedSettings);
       setMembers(loadedMembers);
       setPayments(loadedPayments);
+      setExpenses(loadedExpenses);
       setStaff(loadedStaff);
       setSettings(loadedSettings);
       setLeads(loadedLeads);
@@ -766,7 +1634,15 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setLockers(loadedLockers);
       setBroadcasts(loadedBroadcasts);
       setLocations(loadedLocations);
+      setSystemLogs(loadedLogs);
+      setRefunds(loadedRefunds);
+      setRenewals(loadedRenewals);
       setCurrentLocationId(loadedLocId);
+
+      // Initialize Brand Theme CSS tokens
+      if (loadedSettings.brandColor) {
+        applyBrandThemeCss(loadedSettings.brandColor);
+      }
 
       setLastSaved(new Date());
     } catch (err) {
@@ -775,6 +1651,13 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isHydratedRef.current = true;
     }
   }, []);
+
+  // Sync Dynamic Brand CSS Theme when settings.brandColor changes
+  useEffect(() => {
+    if (settings?.brandColor) {
+      applyBrandThemeCss(settings.brandColor);
+    }
+  }, [settings?.brandColor]);
 
   const setTheme = (newTheme: "dark" | "light") => {
     setThemeState(newTheme);
@@ -786,6 +1669,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } else {
           document.documentElement.classList.remove("dark");
         }
+        // Immediately re-harmonize brand CSS tokens for the new dark/light background
+        applyBrandThemeCss(settings.brandColor || "#8b5cf6");
       } catch (e) {
         console.warn(e);
       }
@@ -796,9 +1681,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  // Guarded sync to LocalStorage (only writes AFTER client hydration has loaded persisted state)
+  // Guarded sync to LocalStorage for Shared State (Excluding currentUser for Tab-Isolation)
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_members`, members); }, [members]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_payments`, payments); }, [payments]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, expenses); }, [expenses]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_staff`, staff); }, [staff]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_settings`, settings); }, [settings]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_leads`, leads); }, [leads]);
@@ -807,9 +1693,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, lockers); }, [lockers]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, broadcasts); }, [broadcasts]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_locations`, locations); }, [locations]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_system_logs`, systemLogs); }, [systemLogs]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_refunds`, refunds); }, [refunds]);
+  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_renewals`, renewals); }, [renewals]);
   useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, currentLocationId); }, [currentLocationId]);
 
-  // Live Cross-Tab Multi-Window Synchronization
+  // Live Cross-Tab Multi-Window Synchronization (Excludes currentUser to allow isolated Admin and Reception tabs)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handleStorageChange = (e: StorageEvent) => {
@@ -817,20 +1706,27 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         if (e.key === `${STORAGE_KEY_PEAKREP}_members`) setMembers(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_payments`) setPayments(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_expenses`) setExpenses(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_staff`) setStaff(JSON.parse(e.newValue));
-        else if (e.key === `${STORAGE_KEY_PEAKREP}_settings`) setSettings(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_settings`) {
+          const parsedSettings = JSON.parse(e.newValue);
+          setSettings(parsedSettings);
+          if (parsedSettings.brandColor) applyBrandThemeCss(parsedSettings.brandColor);
+        }
         else if (e.key === `${STORAGE_KEY_PEAKREP}_leads`) setLeads(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_workout_programs`) setWorkoutPrograms(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_diet_plans`) setDietPlans(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_lockers`) setLockers(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_broadcasts`) setBroadcasts(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_locations`) setLocations(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_system_logs`) setSystemLogs(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_current_loc`) setCurrentLocationId(e.newValue);
         else if (e.key === "peakrep_theme") {
           if (e.newValue === "light" || e.newValue === "dark") {
             setThemeState(e.newValue);
             if (e.newValue === "dark") document.documentElement.classList.add("dark");
             else document.documentElement.classList.remove("dark");
+            applyBrandThemeCss(settings.brandColor || "#8b5cf6");
           }
         }
         setLastSaved(new Date());
@@ -870,6 +1766,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       version: "9.0",
       exportedAt: new Date().toISOString(),
       theme,
+      currentUser,
       currentLocationId,
       settings,
       members,
@@ -881,7 +1778,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lockers,
       broadcasts,
       locations,
+      systemLogs,
+      refunds,
+      renewals,
     };
+    addSystemLog("Database Exported", "Settings", "Exported full JSON database snapshot");
     return JSON.stringify(payload, null, 2);
   };
 
@@ -928,6 +1829,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLocations(data.locations);
         safePersist(`${STORAGE_KEY_PEAKREP}_locations`, data.locations);
       }
+      if (data.systemLogs && Array.isArray(data.systemLogs)) {
+        setSystemLogs(data.systemLogs);
+        safePersist(`${STORAGE_KEY_PEAKREP}_system_logs`, data.systemLogs);
+      }
       if (data.currentLocationId) {
         setCurrentLocationId(data.currentLocationId);
         safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, data.currentLocationId);
@@ -937,6 +1842,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       setLastSaved(new Date());
       setIsSaved(true);
+      addSystemLog("Database Restored", "Settings", "Imported and restored JSON database snapshot");
       return true;
     } catch (err) {
       console.error("[PeakRep Import Failed]:", err);
@@ -964,18 +1870,21 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const initialPaid = Math.max(0, planPrice - (memberData.due || 0));
     const pendingDue = Math.max(0, planPrice - initialPaid);
 
-    const initialInstallments: InstallmentRecord[] = initialPaid > 0 ? [
-      {
-        id: `inst-${Date.now()}`,
-        amount: initialPaid,
-        date: today,
-        method: "UPI",
-        invoiceNumber: invoiceNum,
-        installmentNumber: 1,
-        totalInstallments: pendingDue > 0 ? 2 : 1,
-        note: pendingDue > 0 ? "Initial Enrollment Deposit" : "Full Membership Fee",
-      },
-    ] : [];
+    const initialInstallments: InstallmentRecord[] =
+      initialPaid > 0
+        ? [
+            {
+              id: `inst-${Date.now()}`,
+              amount: initialPaid,
+              date: today,
+              method: "UPI",
+              invoiceNumber: invoiceNum,
+              installmentNumber: 1,
+              totalInstallments: pendingDue > 0 ? 2 : 1,
+              note: pendingDue > 0 ? "Initial Enrollment Deposit" : "Full Membership Fee",
+            },
+          ]
+        : [];
 
     const newMember: Member = {
       ...memberData,
@@ -995,18 +1904,21 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           timestamp: "Just now",
         },
       ],
-      invoices: initialPaid > 0 ? [
-        {
-          id: `inv-${Date.now()}`,
-          invoiceNumber: invoiceNum,
-          date: today,
-          amount: initialPaid,
-          plan: memberData.plan,
-          method: "UPI",
-          status: pendingDue === 0 ? "Paid" : "Partial",
-          installmentInfo: pendingDue > 0 ? `Installment 1 of 2 (Due: ${settings.currencySymbol}${pendingDue})` : "Full Paid",
-        },
-      ] : [],
+      invoices:
+        initialPaid > 0
+          ? [
+              {
+                id: `inv-${Date.now()}`,
+                invoiceNumber: invoiceNum,
+                date: today,
+                amount: initialPaid,
+                plan: memberData.plan,
+                method: "UPI",
+                status: pendingDue === 0 ? "Paid" : "Partial",
+                installmentInfo: pendingDue > 0 ? `Installment 1 of 2 (Due: ${settings.currencySymbol}${pendingDue})` : "Full Paid",
+              },
+            ]
+          : [],
     };
 
     setMembers((prev) => {
@@ -1029,6 +1941,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         installmentIndex: 1,
         totalInstallments: pendingDue > 0 ? 2 : 1,
         notes: `Enrollment fee for ${newMember.plan}`,
+        collectedBy: `${currentUser.name} (${currentUser.role === "admin" ? "Admin" : "Reception"})`,
       };
       setPayments((prev) => {
         const updated = [newPayment, ...prev];
@@ -1036,6 +1949,60 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return updated;
       });
     }
+
+    addSystemLog("Member Added", "Member", `Added new member ${newMember.name} with ${newMember.plan} plan`);
+  };
+
+  const bulkImportMembers = (newMembersList: Array<Partial<Member>>): number => {
+    const today = new Date().toISOString().split("T")[0];
+    let importedCount = 0;
+
+    const importedMembers: Member[] = newMembersList.map((data, index) => {
+      const planName = data.plan || "Monthly Flex";
+      const planObj = settings.membershipPlans.find((p) => p.name === planName);
+      const planPrice = data.planPrice || planObj?.price || 3000;
+      const due = data.due !== undefined ? data.due : 0;
+      const collected = Math.max(0, planPrice - due);
+
+      const member: Member = {
+        id: `m-bulk-${Date.now()}-${index}`,
+        name: data.name || `Member ${index + 1}`,
+        phone: data.phone || "+91 90000 00000",
+        email: data.email || `member${index + 1}@gym.com`,
+        plan: planName,
+        planPrice,
+        collectedAmount: collected,
+        due,
+        joinDate: data.joinDate || today,
+        expiry: data.expiry || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        status: (data.status as MemberStatus) || (due > 0 ? "Partial" : "Active"),
+        attendanceRate: 100,
+        lastVisit: "Imported via CSV",
+        isCurrentlyInside: false,
+        notes: data.notes || "Bulk imported member record",
+        installments: [],
+        timeline: [
+          {
+            id: `t-bulk-${Date.now()}-${index}`,
+            type: "registration",
+            title: "Imported via Bulk CSV upload",
+            timestamp: "Just now",
+          },
+        ],
+        invoices: [],
+      };
+      importedCount++;
+      return member;
+    });
+
+    setMembers((prev) => {
+      const updated = [...importedMembers, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+
+    addSystemLog("Bulk Member Import", "Member", `Successfully bulk-imported ${importedCount} members`);
+    return importedCount;
   };
 
   const updateMember = (id: string, updates: Partial<Member>) => {
@@ -1056,9 +2023,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
+    addSystemLog("Member Updated", "Member", `Updated profile details for member ID ${id}`);
   };
 
   const deleteMember = (id: string) => {
+    const target = members.find((m) => m.id === id);
     setMembers((prev) => {
       const updated = prev.filter((m) => m.id !== id);
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
@@ -1068,13 +2037,17 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsMember360Open(false);
       setSelectedMember360(null);
     }
+    addSystemLog("Member Deleted", "Member", `Permanently removed member: ${target?.name || id}`);
   };
 
   const checkInMember = (memberId: string) => {
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    let memberName = "";
+
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
+          memberName = m.name;
           return {
             ...m,
             isCurrentlyInside: true,
@@ -1096,13 +2069,18 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
+
+    addSystemLog("Member Check-In", "Attendance", `Checked in ${memberName || memberId} at ${timeNow}`);
   };
 
   const checkOutMember = (memberId: string) => {
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    let memberName = "";
+
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
+          memberName = m.name;
           return {
             ...m,
             isCurrentlyInside: false,
@@ -1122,6 +2100,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
+
+    addSystemLog("Member Check-Out", "Attendance", `Checked out ${memberName || memberId} at ${timeNow}`);
   };
 
   const renewMember = (
@@ -1135,10 +2115,16 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     today.setMonth(today.getMonth() + durationMonths);
     const newExpiry = today.toISOString().split("T")[0];
     const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    let renewedMemberName = "";
+    let prevExp = "";
 
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
+          renewedMemberName = m.name;
+          prevExp = m.expiry;
           const selectedPlan = planName || m.plan;
           const planPrice = settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
           const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
@@ -1147,45 +2133,46 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const newInstallment: InstallmentRecord = {
             id: `inst-${Date.now()}`,
             amount: actualPaid,
-            date: new Date().toISOString().split("T")[0],
+            date: todayStr,
             method: paymentMethod,
             invoiceNumber: invoiceNum,
-            installmentNumber: m.installments.length + 1,
-            totalInstallments: remainingDue > 0 ? m.installments.length + 2 : m.installments.length + 1,
-            note: `Renewal for ${selectedPlan} (${durationMonths} mos)`,
+            installmentNumber: 1,
+            totalInstallments: remainingDue > 0 ? 2 : 1,
+            note: "Renewal Fee",
+          };
+
+          const newInvoice: MemberInvoice = {
+            id: `inv-${Date.now()}`,
+            invoiceNumber: invoiceNum,
+            date: todayStr,
+            amount: actualPaid,
+            plan: selectedPlan,
+            method: paymentMethod,
+            status: remainingDue === 0 ? "Paid" : "Partial",
+            installmentInfo: remainingDue > 0 ? `Renewal Installment 1 (Due: ${settings.currencySymbol}${remainingDue})` : "Full Renewal Paid",
           };
 
           return {
             ...m,
             plan: selectedPlan,
-            planPrice: m.planPrice + planPrice,
-            collectedAmount: m.collectedAmount + actualPaid,
+            planPrice,
+            collectedAmount: actualPaid,
             due: remainingDue,
             expiry: newExpiry,
-            status: remainingDue === 0 ? ("Active" as MemberStatus) : ("Partial" as MemberStatus),
+            status: remainingDue > 0 ? "Partial" : ("Active" as MemberStatus),
+            freezeUntil: undefined,
+            freezeReason: undefined,
             installments: [newInstallment, ...m.installments],
+            invoices: [newInvoice, ...m.invoices],
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "upgrade" as const,
-                title: `Renewed ${selectedPlan} membership (${durationMonths} month pass)`,
+                type: "renewal" as const,
+                title: `Renewed ${selectedPlan} (${durationMonths} mos) — Exp: ${newExpiry}`,
                 timestamp: "Just now",
                 amount: actualPaid,
               },
               ...m.timeline,
-            ],
-            invoices: [
-              {
-                id: `inv-${Date.now()}`,
-                invoiceNumber: invoiceNum,
-                date: new Date().toISOString().split("T")[0],
-                amount: actualPaid,
-                plan: selectedPlan,
-                method: paymentMethod,
-                status: remainingDue === 0 ? ("Paid" as const) : ("Partial" as const),
-                installmentInfo: remainingDue > 0 ? `Installment payment (Due: ${settings.currencySymbol}${remainingDue})` : "Full Paid",
-              },
-              ...m.invoices,
             ],
           };
         }
@@ -1195,46 +2182,74 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    const m = members.find((x) => x.id === memberId);
-    const selectedPlan = planName || m?.plan || "Membership";
-    const planPrice = settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
-    const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
-
+    // Record Payment
+    const actualPaid = paidAmount !== undefined ? paidAmount : 3000;
     if (actualPaid > 0) {
-      const paymentEntry: Payment = {
+      const newPayment: Payment = {
         id: `p-${Date.now()}`,
         memberId,
-        member: m?.name || "Member",
-        date: new Date().toISOString().split("T")[0],
+        member: renewedMemberName,
+        date: todayStr,
         method: paymentMethod,
         amount: actualPaid,
         category: "Membership",
-        status: planPrice - actualPaid === 0 ? "Paid" : "Partial",
+        status: "Paid",
         invoiceNumber: invoiceNum,
-        installmentIndex: (m?.installments?.length || 0) + 1,
-        notes: `Renewal fee for ${selectedPlan}`,
+        installmentIndex: 1,
+        totalInstallments: 1,
+        notes: `Membership Renewal (${planName || "Plan"})`,
+        collectedBy: `${currentUser.name} (${currentUser.role})`,
       };
       setPayments((prev) => {
-        const updated = [paymentEntry, ...prev];
+        const updated = [newPayment, ...prev];
         safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
         return updated;
       });
     }
+
+    // Record Renewal
+    const newRenewal: RenewalRecord = {
+      id: `rn-${Date.now()}`,
+      memberId,
+      memberName: renewedMemberName,
+      planName: planName || "Membership Plan",
+      previousExpiry: prevExp,
+      newExpiry,
+      amount: actualPaid,
+      date: todayStr,
+      processedBy: currentUser.name,
+      paymentMethod,
+    };
+    setRenewals((prev) => {
+      const updated = [newRenewal, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_renewals`, updated);
+      return updated;
+    });
+
+    addSystemLog("Membership Renewed", "Renewal", `Renewed ${renewedMemberName} for ${durationMonths} months until ${newExpiry}`);
   };
 
-  const toggleFreezeMember = (memberId: string) => {
+  const extendMembershipDays = (memberId: string, additionalDays: number, reason: string) => {
+    let memberName = "";
+    let newExpiryStr = "";
+
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
-          const newStatus: MemberStatus = m.status === "Frozen" ? "Active" : "Frozen";
+          memberName = m.name;
+          const currentExp = new Date(m.expiry || new Date());
+          currentExp.setDate(currentExp.getDate() + additionalDays);
+          newExpiryStr = currentExp.toISOString().split("T")[0];
+
           return {
             ...m,
-            status: newStatus,
+            expiry: newExpiryStr,
+            status: "Active" as MemberStatus,
             timeline: [
               {
                 id: `t-${Date.now()}`,
-                type: "freeze" as const,
-                title: newStatus === "Frozen" ? "Membership paused / frozen" : "Membership resumed / active",
+                type: "upgrade" as const,
+                title: `Extended membership by +${additionalDays} days (${reason})`,
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -1246,9 +2261,132 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
+
+    addSystemLog("Membership Extended", "Renewal", `Extended ${memberName} by +${additionalDays} days until ${newExpiryStr} (${reason})`);
   };
 
-  // Rebuilt Payment Engine
+  const freezeMember = (memberId: string, days: number, reason: string) => {
+    const today = new Date();
+    today.setDate(today.getDate() + days);
+    const freezeUntil = today.toISOString().split("T")[0];
+    let memberName = "";
+
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
+        if (m.id === memberId) {
+          memberName = m.name;
+          return {
+            ...m,
+            status: "Frozen" as MemberStatus,
+            freezeUntil,
+            freezeReason: reason,
+            timeline: [
+              {
+                id: `t-${Date.now()}`,
+                type: "freeze" as const,
+                title: `Membership frozen for ${days} days until ${freezeUntil} (${reason})`,
+                timestamp: "Just now",
+              },
+              ...m.timeline,
+            ],
+          };
+        }
+        return m;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+
+    addSystemLog("Membership Frozen", "Member", `Froze membership for ${memberName} until ${freezeUntil} (${reason})`);
+  };
+
+  const unfreezeMember = (memberId: string) => {
+    let memberName = "";
+
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
+        if (m.id === memberId) {
+          memberName = m.name;
+          return {
+            ...m,
+            status: (m.due > 0 ? "Partial" : "Active") as MemberStatus,
+            freezeUntil: undefined,
+            freezeReason: undefined,
+            timeline: [
+              {
+                id: `t-${Date.now()}`,
+                type: "freeze" as const,
+                title: "Membership resumed / unfrozen",
+                timestamp: "Just now",
+              },
+              ...m.timeline,
+            ],
+          };
+        }
+        return m;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+
+    addSystemLog("Membership Unfrozen", "Member", `Resumed/unfroze membership for ${memberName}`);
+  };
+
+  const transferMembership = (fromMemberId: string, toName: string, toPhone: string, toEmail: string) => {
+    const fromMember = members.find((m) => m.id === fromMemberId);
+    if (!fromMember) return;
+
+    const newId = `m-transfer-${Date.now()}`;
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    const newRecipient: Member = {
+      ...fromMember,
+      id: newId,
+      name: toName,
+      phone: toPhone,
+      email: toEmail,
+      status: "Active",
+      isCurrentlyInside: false,
+      notes: `Transferred from ${fromMember.name} on ${todayStr}`,
+      timeline: [
+        {
+          id: `t-${Date.now()}`,
+          type: "transfer",
+          title: `Received membership transfer from ${fromMember.name} (Valid till ${fromMember.expiry})`,
+          timestamp: "Just now",
+        },
+      ],
+    };
+
+    setMembers((prev) => {
+      const updated = prev.map((m) => {
+        if (m.id === fromMemberId) {
+          return {
+            ...m,
+            status: "Expired" as MemberStatus,
+            notes: `Transferred remaining membership to ${toName} on ${todayStr}`,
+            timeline: [
+              {
+                id: `t-tr-${Date.now()}`,
+                type: "transfer" as const,
+                title: `Transferred membership to ${toName}`,
+                timestamp: "Just now",
+              },
+              ...m.timeline,
+            ],
+          };
+        }
+        return m;
+      });
+      const final = [newRecipient, ...updated];
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, final);
+      return final;
+    });
+
+    addSystemLog("Membership Transferred", "Member", `Transferred membership from ${fromMember.name} to ${toName}`);
+  };
+
+  // Payment Actions
   const recordPayment = (paymentData: {
     memberId: string;
     member: string;
@@ -1260,21 +2398,16 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     installmentNumber?: number;
     totalInstallments?: number;
   }) => {
-    const invoiceNumber = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
-
+    const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
     const newPayment: Payment = {
+      ...paymentData,
       id: `p-${Date.now()}`,
-      memberId: paymentData.memberId,
-      member: paymentData.member,
-      date: paymentData.date,
-      method: paymentData.method,
-      amount: paymentData.amount,
       category: paymentData.category || "Membership",
       status: "Paid",
-      invoiceNumber,
-      installmentIndex: paymentData.installmentNumber,
-      totalInstallments: paymentData.totalInstallments,
-      notes: paymentData.notes,
+      invoiceNumber: invoiceNum,
+      installmentIndex: paymentData.installmentNumber || 1,
+      totalInstallments: paymentData.totalInstallments || 1,
+      collectedBy: `${currentUser.name} (${currentUser.role === "admin" ? "Admin" : "Reception"})`,
     };
 
     setPayments((prev) => {
@@ -1283,56 +2416,51 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
+    // Update member collected dues & history
     setMembers((prev) => {
       const updated = prev.map((m) => {
-        if (m.id === paymentData.memberId || m.name.toLowerCase() === paymentData.member.toLowerCase()) {
+        if (m.id === paymentData.memberId) {
           const newCollected = m.collectedAmount + paymentData.amount;
           const newDue = Math.max(0, m.planPrice - newCollected);
-          const newStatus: MemberStatus = newDue === 0 ? "Active" : "Partial";
 
-          const currentInstallmentCount = (m.installments?.length || 0) + 1;
-          const estTotalInstallments = paymentData.totalInstallments || (newDue > 0 ? currentInstallmentCount + 1 : currentInstallmentCount);
-
-          const newInstallmentRecord: InstallmentRecord = {
+          const newInstallment: InstallmentRecord = {
             id: `inst-${Date.now()}`,
             amount: paymentData.amount,
             date: paymentData.date,
             method: paymentData.method,
-            invoiceNumber,
-            installmentNumber: paymentData.installmentNumber || currentInstallmentCount,
-            totalInstallments: estTotalInstallments,
-            note: paymentData.notes || `Installment ${currentInstallmentCount} of ${estTotalInstallments}`,
+            invoiceNumber: invoiceNum,
+            installmentNumber: (m.installments.length || 0) + 1,
+            totalInstallments: paymentData.totalInstallments || 2,
+            note: paymentData.notes || "Installment Payment",
+          };
+
+          const newInvoice: MemberInvoice = {
+            id: `inv-${Date.now()}`,
+            invoiceNumber: invoiceNum,
+            date: paymentData.date,
+            amount: paymentData.amount,
+            plan: m.plan,
+            method: paymentData.method,
+            status: newDue === 0 ? "Paid" : "Partial",
+            installmentInfo: newDue > 0 ? `Installment Payment (Remaining: ${settings.currencySymbol}${newDue})` : "Full Paid",
           };
 
           return {
             ...m,
             collectedAmount: newCollected,
             due: newDue,
-            status: newStatus,
-            installments: [newInstallmentRecord, ...(m.installments || [])],
+            status: (newDue === 0 && (m.status === "Partial" || m.status === "Expired") ? "Active" : m.status) as MemberStatus,
+            installments: [newInstallment, ...m.installments],
+            invoices: [newInvoice, ...m.invoices],
             timeline: [
               {
                 id: `t-${Date.now()}`,
                 type: "payment" as const,
-                title: `Recorded payment of ${settings.currencySymbol}${paymentData.amount.toLocaleString("en-IN")} via ${paymentData.method}`,
+                title: `Paid ${settings.currencySymbol}${paymentData.amount.toLocaleString("en-IN")} via ${paymentData.method}`,
                 timestamp: "Just now",
                 amount: paymentData.amount,
-                note: newDue > 0 ? `Remaining Due: ${settings.currencySymbol}${newDue.toLocaleString("en-IN")}` : "Full Balance Cleared",
               },
               ...m.timeline,
-            ],
-            invoices: [
-              {
-                id: `inv-${Date.now()}`,
-                invoiceNumber,
-                date: paymentData.date,
-                amount: paymentData.amount,
-                plan: m.plan,
-                method: paymentData.method,
-                status: newDue === 0 ? ("Paid" as const) : ("Partial" as const),
-                installmentInfo: `Installment #${paymentData.installmentNumber || currentInstallmentCount} (${newDue === 0 ? "Fully Cleared" : `Due: ${settings.currencySymbol}${newDue}`})`,
-              },
-              ...m.invoices,
             ],
           };
         }
@@ -1341,28 +2469,100 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
+
+    addSystemLog("Payment Collected", "Payment", `Collected ${settings.currencySymbol}${paymentData.amount} from ${paymentData.member} via ${paymentData.method}`);
+  };
+
+  const refundPayment = (paymentId: string, refundAmount: number, reason: string): boolean => {
+    const targetPayment = payments.find((p) => p.id === paymentId);
+    if (!targetPayment) return false;
+
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    // Mark payment as refunded
+    setPayments((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === paymentId) {
+          return {
+            ...p,
+            status: "Refunded" as const,
+            notes: `${p.notes || ""} [REFUNDED: ${settings.currencySymbol}${refundAmount} on ${todayStr} - Reason: ${reason}]`,
+          };
+        }
+        return p;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+      return updated;
+    });
+
+    // Update Member balance
+    if (targetPayment.memberId) {
+      setMembers((prev) => {
+        const updated = prev.map((m) => {
+          if (m.id === targetPayment.memberId) {
+            const newCollected = Math.max(0, m.collectedAmount - refundAmount);
+            const newDue = Math.max(0, m.planPrice - newCollected);
+            return {
+              ...m,
+              collectedAmount: newCollected,
+              due: newDue,
+              status: (newDue > 0 ? "Partial" : m.status) as MemberStatus,
+              timeline: [
+                {
+                  id: `t-ref-${Date.now()}`,
+                  type: "refund" as const,
+                  title: `Processed Refund of ${settings.currencySymbol}${refundAmount} (${reason})`,
+                  timestamp: "Just now",
+                  amount: -refundAmount,
+                },
+                ...m.timeline,
+              ],
+            };
+          }
+          return m;
+        });
+        safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+        return updated;
+      });
+    }
+
+    // Record Refund
+    const refundRecord: RefundRecord = {
+      id: `ref-${Date.now()}`,
+      paymentId,
+      memberId: targetPayment.memberId || "",
+      memberName: targetPayment.member,
+      amount: refundAmount,
+      date: todayStr,
+      reason,
+      processedBy: currentUser.name,
+      invoiceNumber: targetPayment.invoiceNumber,
+    };
+
+    setRefunds((prev) => {
+      const updated = [refundRecord, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_refunds`, updated);
+      return updated;
+    });
+
+    addSystemLog("Payment Refunded", "Refund", `Refunded ${settings.currencySymbol}${refundAmount} to ${targetPayment.member} (${reason})`);
+    return true;
   };
 
   // Staff CRUD
   const addStaff = (staffData: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">) => {
-    const initials = staffData.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
     const newStaff: StaffMember = {
       ...staffData,
-      id: `s-${Date.now()}`,
-      avatar: initials || "ST",
-      assignedClientsCount: 0,
+      id: `staff-${Date.now()}`,
       leaveRecords: [],
+      assignedClientsCount: 0,
     };
     setStaff((prev) => {
       const updated = [...prev, newStaff];
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
+    addSystemLog("Staff Added", "Staff", `Added staff member: ${newStaff.name} (${newStaff.role})`);
   };
 
   const updateStaff = (id: string, updates: Partial<StaffMember>) => {
@@ -1371,36 +2571,93 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
+    addSystemLog("Staff Updated", "Staff", `Updated staff profile for ID ${id}`);
   };
 
   const deleteStaff = (id: string) => {
+    const target = staff.find((s) => s.id === id);
     setStaff((prev) => {
       const updated = prev.filter((s) => s.id !== id);
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
+    addSystemLog("Staff Removed", "Staff", `Removed staff member ${target?.name || id}`);
   };
 
-  const payStaffSalary = (staffId: string) => {
-    const targetStaff = staff.find((s) => s.id === staffId);
-    if (!targetStaff) return;
-
-    const paymentEntry: Payment = {
-      id: `p-${Date.now()}`,
-      member: `Staff: ${targetStaff.name}`,
-      date: new Date().toISOString().split("T")[0],
-      method: "Bank",
-      amount: targetStaff.salary,
-      category: "Personal Training",
-      status: "Paid",
-      invoiceNumber: `PAY-${Date.now().toString().slice(-4)}`,
-      notes: `Monthly payroll compensation for ${targetStaff.name} (${targetStaff.role})`,
+  // Operational Expenses, Utility Bills & Rent Actions
+  const addExpense = (expenseData: Omit<GymExpense, "id">) => {
+    const newExpense: GymExpense = {
+      ...expenseData,
+      id: `exp-${Date.now()}`,
     };
-    setPayments((prev) => {
-      const updated = [paymentEntry, ...prev];
-      safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+    setExpenses((prev) => {
+      const updated = [newExpense, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, updated);
       return updated;
     });
+    addSystemLog("Expense Logged", "Payment", `Recorded ${settings.currencySymbol}${newExpense.amount.toLocaleString("en-IN")} for ${newExpense.title} (${newExpense.category})`);
+  };
+
+  const updateExpense = (id: string, updates: Partial<GymExpense>) => {
+    setExpenses((prev) => {
+      const updated = prev.map((e) => (e.id === id ? { ...e, ...updates } : e));
+      safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, updated);
+      return updated;
+    });
+    addSystemLog("Expense Updated", "Payment", `Updated expense record ${id}`);
+  };
+
+  const deleteExpense = (id: string) => {
+    const target = expenses.find((e) => e.id === id);
+    setExpenses((prev) => {
+      const updated = prev.filter((e) => e.id !== id);
+      safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, updated);
+      return updated;
+    });
+    addSystemLog("Expense Removed", "Payment", `Removed expense record: ${target?.title || id}`);
+  };
+
+  // Staff Salary Disbursement (Integrated with Operational Expenses Outflow)
+  const payStaffSalary = (
+    staffId: string,
+    paymentMethod: "UPI" | "Bank Transfer" | "Cash" | "Cheque" = "Bank Transfer",
+    notes: string = ""
+  ) => {
+    const target = staff.find((s) => s.id === staffId);
+    if (!target) return;
+    const todayStr = new Date().toISOString().split("T")[0];
+    const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
+    // 1. Create a Salary Outflow Expense in Financial Ledger
+    const salaryExpense: GymExpense = {
+      id: `exp-sal-${Date.now()}`,
+      title: `Staff Salary — ${target.name} (${target.role})`,
+      category: "Staff Salary",
+      amount: target.salary,
+      date: todayStr,
+      paymentMethod,
+      status: "Paid",
+      recipientName: target.name,
+      receiptNumber: `PAY-${Date.now().toString().slice(-6)}`,
+      notes: notes || `${currentMonth} Monthly Payroll Disbursement`,
+      recordedBy: currentUser.name,
+      staffId: target.id,
+    };
+
+    setExpenses((prev) => {
+      const updated = [salaryExpense, ...prev];
+      safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, updated);
+      return updated;
+    });
+
+    // 2. Mark Staff record as paid today
+    setStaff((prev) => {
+      const updated = prev.map((s) => (s.id === staffId ? { ...s, lastPaidDate: todayStr } : s));
+      safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
+      return updated;
+    });
+
+    addSystemLog("Salary Paid", "Staff", `Disbursed ${settings.currencySymbol}${target.salary.toLocaleString("en-IN")} to ${target.name} (${target.role}) via ${paymentMethod}`);
   };
 
   const toggleStaffStatus = (staffId: string, status: "On Floor" | "Off Duty" | "On Leave") => {
@@ -1409,6 +2666,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
+    addSystemLog("Staff Status Changed", "Staff", `Changed status of staff ${staffId} to ${status}`);
   };
 
   const approveLeaveRequest = (staffId: string, leaveId: string) => {
@@ -1417,9 +2675,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (s.id === staffId) {
           return {
             ...s,
-            leaveRecords: s.leaveRecords.map((l) =>
-              l.id === leaveId ? { ...l, status: "Approved" as const } : l
-            ),
+            leaveRecords: s.leaveRecords.map((l) => (l.id === leaveId ? { ...l, status: "Approved" as const } : l)),
           };
         }
         return s;
@@ -1427,6 +2683,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
+    addSystemLog("Leave Approved", "Staff", `Approved leave request ${leaveId} for staff ${staffId}`);
   };
 
   // Plans CRUD
@@ -1440,26 +2697,23 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       upgradeOpportunities: 0,
     };
     setSettings((prev) => {
-      const updated = {
-        ...prev,
-        membershipPlans: [...prev.membershipPlans, newPlan],
-      };
+      const updated = { ...prev, membershipPlans: [...prev.membershipPlans, newPlan] };
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
+    addSystemLog("Plan Created", "Plan", `Created new membership plan: ${newPlan.name} (${settings.currencySymbol}${newPlan.price})`);
   };
 
   const updatePlan = (id: string, updates: Partial<MembershipPlan>) => {
     setSettings((prev) => {
       const updated = {
         ...prev,
-        membershipPlans: prev.membershipPlans.map((p) =>
-          p.id === id ? { ...p, ...updates } : p
-        ),
+        membershipPlans: prev.membershipPlans.map((p) => (p.id === id ? { ...p, ...updates } : p)),
       };
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
+    addSystemLog("Plan Updated", "Plan", `Updated plan ID ${id}`);
   };
 
   const deletePlan = (id: string) => {
@@ -1471,9 +2725,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
+    addSystemLog("Plan Deleted", "Plan", `Deleted plan ID ${id}`);
   };
 
-  // Lead CRM Actions
+  // Lead CRM
   const addLead = (leadData: Omit<Lead, "id" | "createdAt">) => {
     const newLead: Lead = {
       ...leadData,
@@ -1485,6 +2740,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_leads`, updated);
       return updated;
     });
+    addSystemLog("Lead Added", "Member", `Recorded new lead: ${newLead.name} (${newLead.source})`);
   };
 
   const updateLeadStage = (leadId: string, stage: LeadStage) => {
@@ -1495,18 +2751,14 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const convertLeadToMember = (
-    leadId: string,
-    planName: string,
-    initialPaid: number = 0,
-    method: "UPI" | "Cash" | "Card" | "Bank" = "UPI"
-  ) => {
+  const convertLeadToMember = (leadId: string, planName: string, initialPaid?: number, method: "UPI" | "Cash" | "Card" | "Bank" = "UPI") => {
     const targetLead = leads.find((l) => l.id === leadId);
     if (!targetLead) return;
 
     const planObj = settings.membershipPlans.find((p) => p.name === planName);
     const planPrice = planObj?.price || 3000;
-    const due = Math.max(0, planPrice - initialPaid);
+    const paid = initialPaid !== undefined ? initialPaid : planPrice;
+    const due = Math.max(0, planPrice - paid);
 
     addMember({
       name: targetLead.name,
@@ -1516,19 +2768,20 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       planPrice,
       due,
       joinDate: new Date().toISOString().split("T")[0],
-      expiry: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split("T")[0],
-      status: due === 0 ? "Active" : "Partial",
+      expiry: new Date(Date.now() + (planObj?.durationMonths || 1) * 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      status: due > 0 ? "Partial" : "Active",
       healthGoal: targetLead.fitnessGoal,
-      notes: `Converted from ${targetLead.source} inquiry. ${targetLead.notes}`,
+      assignedTrainer: targetLead.assignedTrainer,
+      notes: `Converted from Lead (Source: ${targetLead.source}). ${targetLead.notes}`,
     });
 
     updateLeadStage(leadId, "Won");
   };
 
-  // Workout Builder & Management
-  const addWorkoutProgram = (progData: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">) => {
+  // Workout Programs & Diets
+  const addWorkoutProgram = (programData: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">) => {
     const newProg: WorkoutProgram = {
-      ...progData,
+      ...programData,
       id: `wo-${Date.now()}`,
       assignedCount: 0,
       createdAt: new Date().toISOString().split("T")[0],
@@ -1549,17 +2802,17 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const duplicateWorkoutProgram = (id: string) => {
-    const existing = workoutPrograms.find((w) => w.id === id);
-    if (!existing) return;
-    const duplicated: WorkoutProgram = {
-      ...existing,
+    const source = workoutPrograms.find((w) => w.id === id);
+    if (!source) return;
+    const clone: WorkoutProgram = {
+      ...source,
       id: `wo-${Date.now()}`,
-      title: `${existing.title} (Copy)`,
+      title: `${source.title} (Copy)`,
       assignedCount: 0,
       createdAt: new Date().toISOString().split("T")[0],
     };
     setWorkoutPrograms((prev) => {
-      const updated = [duplicated, ...prev];
+      const updated = [clone, ...prev];
       safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
       return updated;
     });
@@ -1582,42 +2835,15 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const assignWorkoutToMember = (memberId: string, workoutId: string) => {
-    const workout = workoutPrograms.find((w) => w.id === workoutId);
-    if (!workout) return;
-
+    const prog = workoutPrograms.find((w) => w.id === workoutId);
+    if (!prog) return;
     setMembers((prev) => {
-      const updated = prev.map((m) => {
-        if (m.id === memberId) {
-          return {
-            ...m,
-            assignedWorkout: workout.title,
-            assignedWorkoutId: workout.id,
-            timeline: [
-              {
-                id: `t-${Date.now()}`,
-                type: "workout_assigned" as const,
-                title: `Assigned Workout Split: ${workout.title}`,
-                timestamp: "Just now",
-                note: `${workout.daysPerWeek} Days/Week • ${workout.level}`,
-              },
-              ...m.timeline,
-            ],
-          };
-        }
-        return m;
-      });
+      const updated = prev.map((m) => (m.id === memberId ? { ...m, assignedWorkout: prog.title, assignedWorkoutId: prog.id } : m));
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
-      return updated;
-    });
-
-    setWorkoutPrograms((prev) => {
-      const updated = prev.map((w) => (w.id === workoutId ? { ...w, assignedCount: w.assignedCount + 1 } : w));
-      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, updated);
       return updated;
     });
   };
 
-  // Diet Builder & Management
   const addDietPlan = (dietData: Omit<DietPlan, "id" | "assignedCount" | "createdAt">) => {
     const newDiet: DietPlan = {
       ...dietData,
@@ -1641,17 +2867,17 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const duplicateDietPlan = (id: string) => {
-    const existing = dietPlans.find((d) => d.id === id);
-    if (!existing) return;
-    const duplicated: DietPlan = {
-      ...existing,
+    const source = dietPlans.find((d) => d.id === id);
+    if (!source) return;
+    const clone: DietPlan = {
+      ...source,
       id: `diet-${Date.now()}`,
-      title: `${existing.title} (Copy)`,
+      title: `${source.title} (Copy)`,
       assignedCount: 0,
       createdAt: new Date().toISOString().split("T")[0],
     };
     setDietPlans((prev) => {
-      const updated = [duplicated, ...prev];
+      const updated = [clone, ...prev];
       safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
       return updated;
     });
@@ -1676,24 +2902,26 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const assignDietToMember = (memberId: string, dietId: string) => {
     const diet = dietPlans.find((d) => d.id === dietId);
     if (!diet) return;
+    setMembers((prev) => {
+      const updated = prev.map((m) => (m.id === memberId ? { ...m, assignedDiet: diet.title, assignedDietId: diet.id } : m));
+      safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+      return updated;
+    });
+  };
 
+  const assignProgramToMember = (memberId: string, workoutId?: string, dietId?: string, notes?: string) => {
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
+          const wObj = workoutPrograms.find((w) => w.id === workoutId);
+          const dObj = dietPlans.find((d) => d.id === dietId);
           return {
             ...m,
-            assignedDiet: diet.title,
-            assignedDietId: diet.id,
-            timeline: [
-              {
-                id: `t-${Date.now()}`,
-                type: "diet_assigned" as const,
-                title: `Assigned Nutrition Plan: ${diet.title}`,
-                timestamp: "Just now",
-                note: `${diet.calorieTarget} kcal • ${diet.proteinGrams}g Protein`,
-              },
-              ...m.timeline,
-            ],
+            assignedWorkout: wObj ? wObj.title : m.assignedWorkout,
+            assignedWorkoutId: wObj ? wObj.id : m.assignedWorkoutId,
+            assignedDiet: dObj ? dObj.title : m.assignedDiet,
+            assignedDietId: dObj ? dObj.id : m.assignedDietId,
+            notes: notes !== undefined ? notes : m.notes,
           };
         }
         return m;
@@ -1701,48 +2929,36 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
-
-    setDietPlans((prev) => {
-      const updated = prev.map((d) => (d.id === dietId ? { ...d, assignedCount: d.assignedCount + 1 } : d));
-      safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, updated);
-      return updated;
-    });
   };
 
-  const assignProgramToMember = (memberId: string, workoutId?: string, dietId?: string, notes?: string) => {
-    if (workoutId) assignWorkoutToMember(memberId, workoutId);
-    if (dietId) assignDietToMember(memberId, dietId);
-  };
-
-  // Locker Operations & Maintenance Workflow
-  const assignLocker = (lockerNumber: number, memberId: string, memberName: string, durationDays: number = 30) => {
-    const expiresOn = new Date(Date.now() + durationDays * 24 * 3600 * 1000).toISOString().split("T")[0];
-    const timestamp = new Date().toISOString().split("T")[0];
+  // Lockers
+  const assignLocker = (lockerNumber: number, memberId: string, memberName: string, durationDays = 30) => {
+    const exp = new Date();
+    exp.setDate(exp.getDate() + durationDays);
+    const expStr = exp.toISOString().split("T")[0];
 
     setLockers((prev) => {
-      const updated = prev.map((l) =>
-        l.number === lockerNumber
-          ? {
+      const updated = prev.map((l) => {
+        if (l.number === lockerNumber) {
+          return {
             ...l,
             status: "Occupied" as LockerStatus,
             assignedMemberId: memberId,
             assignedMemberName: memberName,
-            reservedFor: undefined,
-            maintenanceDate: undefined,
-            maintenanceIssue: undefined,
-            expiresOn,
+            expiresOn: expStr,
             history: [
               {
                 id: `lh-${Date.now()}`,
                 action: "Assigned",
-                timestamp,
-                details: `Assigned to ${memberName} (Expires: ${expiresOn})`,
+                timestamp: new Date().toISOString().split("T")[0],
+                details: `Assigned to ${memberName} (Expires ${expStr})`,
               },
               ...l.history,
             ],
-          }
-          : l
-      );
+          };
+        }
+        return l;
+      });
       safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
       return updated;
     });
@@ -1752,134 +2968,24 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
+
+    addSystemLog("Locker Assigned", "Locker", `Assigned locker #${lockerNumber} to ${memberName}`);
   };
 
   const reserveLocker = (lockerNumber: number, reservedFor: string, note?: string) => {
-    const timestamp = new Date().toISOString().split("T")[0];
     setLockers((prev) => {
-      const updated = prev.map((l) =>
-        l.number === lockerNumber
-          ? {
+      const updated = prev.map((l) => {
+        if (l.number === lockerNumber) {
+          return {
             ...l,
             status: "Reserved" as LockerStatus,
             reservedFor,
-            assignedMemberId: undefined,
-            assignedMemberName: undefined,
-            expiresOn: undefined,
             history: [
               {
                 id: `lh-${Date.now()}`,
                 action: "Reserved",
-                timestamp,
-                details: `Reserved for ${reservedFor}${note ? ` (${note})` : ""}`,
-              },
-              ...l.history,
-            ],
-          }
-          : l
-      );
-      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
-      return updated;
-    });
-  };
-
-  const releaseLocker = (lockerNumber: number) => {
-    const targetLocker = lockers.find((l) => l.number === lockerNumber);
-    const timestamp = new Date().toISOString().split("T")[0];
-
-    if (targetLocker?.assignedMemberId) {
-      setMembers((prev) => {
-        const updated = prev.map((m) =>
-          m.id === targetLocker.assignedMemberId ? { ...m, assignedLocker: undefined } : m
-        );
-        safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
-        return updated;
-      });
-    }
-
-    setLockers((prev) => {
-      const updated = prev.map((l) =>
-        l.number === lockerNumber
-          ? {
-            ...l,
-            status: "Available" as LockerStatus,
-            assignedMemberId: undefined,
-            assignedMemberName: undefined,
-            reservedFor: undefined,
-            expiresOn: undefined,
-            maintenanceDate: undefined,
-            maintenanceIssue: undefined,
-            history: [
-              {
-                id: `lh-${Date.now()}`,
-                action: "Released",
-                timestamp,
-                details: `Released by staff. Returned to Available.`,
-              },
-              ...l.history,
-            ],
-          }
-          : l
-      );
-      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
-      return updated;
-    });
-  };
-
-  const markLockerMaintenance = (lockerNumber: number, issue: string, date?: string) => {
-    const maintenanceDate = date || new Date().toISOString().split("T")[0];
-
-    setLockers((prev) => {
-      const updated = prev.map((l) =>
-        l.number === lockerNumber
-          ? {
-            ...l,
-            status: "Under Maintenance" as LockerStatus,
-            maintenanceDate,
-            maintenanceIssue: issue,
-            history: [
-              {
-                id: `lh-${Date.now()}`,
-                action: "Maintenance Reported",
-                timestamp: maintenanceDate,
-                details: `Issue: ${issue}`,
-              },
-              ...l.history,
-            ],
-          }
-          : l
-      );
-      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
-      return updated;
-    });
-  };
-
-  const completeLockerRepair = (lockerNumber: number, repairNotes?: string, repairedBy: string = "Duty Staff") => {
-    const timestamp = new Date().toISOString().split("T")[0];
-
-    setLockers((prev) => {
-      const updated = prev.map((l) => {
-        if (l.number === lockerNumber) {
-          const repairEntry: LockerRepairLog = {
-            id: `rep-${Date.now()}`,
-            issue: l.maintenanceIssue || "General Maintenance",
-            repairedAt: timestamp,
-            repairedBy,
-            notes: repairNotes || "Repaired and sanitized. Returned to operational status.",
-          };
-
-          return {
-            ...l,
-            status: "Available" as LockerStatus,
-            maintenanceDate: undefined,
-            maintenanceIssue: undefined,
-            repairHistory: [repairEntry, ...l.repairHistory],
-            history: [
-              {
-                id: `lh-${Date.now()}`,
-                action: "Repaired & Restored",
-                timestamp,
-                details: `Repaired by ${repairedBy}. Issue resolved. Automatically restored to Available.`,
+                timestamp: new Date().toISOString().split("T")[0],
+                details: `Reserved for ${reservedFor} (${note || "Hold"})`,
               },
               ...l.history,
             ],
@@ -1892,60 +2998,117 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  // Broadcast Messaging Center
-  const sendBroadcastMessage = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
-    const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const releaseLocker = (lockerNumber: number) => {
+    setLockers((prev) => {
+      const updated = prev.map((l) => {
+        if (l.number === lockerNumber) {
+          const oldMember = l.assignedMemberName;
+          return {
+            ...l,
+            status: "Available" as LockerStatus,
+            assignedMemberId: undefined,
+            assignedMemberName: undefined,
+            expiresOn: undefined,
+            reservedFor: undefined,
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Released",
+                timestamp: new Date().toISOString().split("T")[0],
+                details: `Released and made available (Previously: ${oldMember || "Occupied"})`,
+              },
+              ...l.history,
+            ],
+          };
+        }
+        return l;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
+  };
+
+  const markLockerMaintenance = (lockerNumber: number, issue: string, date?: string) => {
+    const mDate = date || new Date().toISOString().split("T")[0];
+    setLockers((prev) => {
+      const updated = prev.map((l) => {
+        if (l.number === lockerNumber) {
+          return {
+            ...l,
+            status: "Under Maintenance" as LockerStatus,
+            maintenanceDate: mDate,
+            maintenanceIssue: issue,
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Maintenance",
+                timestamp: mDate,
+                details: `Reported issue: ${issue}`,
+              },
+              ...l.history,
+            ],
+          };
+        }
+        return l;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
+  };
+
+  const completeLockerRepair = (lockerNumber: number, repairNotes?: string, repairedBy = "Maintenance Team") => {
     const todayStr = new Date().toISOString().split("T")[0];
+    setLockers((prev) => {
+      const updated = prev.map((l) => {
+        if (l.number === lockerNumber) {
+          const repairItem: LockerRepairLog = {
+            id: `rep-${Date.now()}`,
+            issue: l.maintenanceIssue || "Routine Repair",
+            repairedAt: todayStr,
+            repairedBy,
+            notes: repairNotes,
+          };
+          return {
+            ...l,
+            status: "Available" as LockerStatus,
+            maintenanceDate: undefined,
+            maintenanceIssue: undefined,
+            repairHistory: [repairItem, ...l.repairHistory],
+            history: [
+              {
+                id: `lh-${Date.now()}`,
+                action: "Repaired",
+                timestamp: todayStr,
+                details: `Repaired by ${repairedBy}: ${repairNotes || "Issue resolved"}`,
+              },
+              ...l.history,
+            ],
+          };
+        }
+        return l;
+      });
+      safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
+      return updated;
+    });
+  };
+
+  // Broadcast Communications
+  const sendBroadcastMessage = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const newBroadcast: BroadcastMessage = {
       ...broadcastData,
       id: `bc-${Date.now()}`,
       status: "Sent",
-      sentAt: `${todayStr}, ${nowStr}`,
+      sentAt: `Today, ${timeNow}`,
       createdAt: todayStr,
     };
-
     setBroadcasts((prev) => {
       const updated = [newBroadcast, ...prev];
       safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, updated);
       return updated;
     });
-
-    let targetMembers = members;
-    if (broadcastData.recipientsType === "active") targetMembers = members.filter((m) => m.status === "Active");
-    else if (broadcastData.recipientsType === "expiring") targetMembers = members.filter((m) => m.status === "Expiring");
-    else if (broadcastData.recipientsType === "expired") targetMembers = members.filter((m) => m.status === "Expired");
-    else if (broadcastData.recipientsType === "partial_due") targetMembers = members.filter((m) => m.due > 0);
-    else if (broadcastData.recipientsType === "plan" && broadcastData.targetPlanName) {
-      targetMembers = members.filter((m) => m.plan === broadcastData.targetPlanName);
-    } else if (broadcastData.recipientsType === "individual" && broadcastData.targetMemberId) {
-      targetMembers = members.filter((m) => m.id === broadcastData.targetMemberId);
-    }
-
-    const memberIds = targetMembers.map((m) => m.id);
-    if (memberIds.length > 0) {
-      setMembers((prev) => {
-        const updated = prev.map((m) => {
-          if (memberIds.includes(m.id)) {
-            return {
-              ...m,
-              timeline: [
-                {
-                  id: `t-bc-${Date.now()}`,
-                  type: "broadcast_sent" as const,
-                  title: `Broadcast: ${broadcastData.title}`,
-                  timestamp: "Just now",
-                  note: `Sent via ${broadcastData.channels.join(", ")}`,
-                },
-                ...m.timeline,
-              ],
-            };
-          }
-          return m;
-        });
-        safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
-        return updated;
-      });
-    }
+    addSystemLog("Broadcast Sent", "Settings", `Dispatched broadcast "${newBroadcast.title}" to ${newBroadcast.recipientCount} members`);
   };
 
   const saveDraftBroadcast = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
@@ -2026,6 +3189,43 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
+
+    if (newSettings.ownerName) {
+      const newOwnerName = newSettings.ownerName.trim();
+      setCurrentUser((prevUser) => {
+        if (prevUser.role === "admin") {
+          const updatedUser: CurrentUser = {
+            ...prevUser,
+            name: newOwnerName,
+            avatar:
+              newOwnerName
+                .split(" ")
+                .map((w: string) => w[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase() || "AD",
+          };
+          safePersistSession(updatedUser);
+          return updatedUser;
+        }
+        return prevUser;
+      });
+    }
+
+    addSystemLog("Settings Updated", "Settings", "Updated gym business settings & preferences");
+  };
+
+  const setBrandColor = (hex: string, themeName?: string) => {
+    setSettings((prev) => {
+      const updated = {
+        ...prev,
+        brandColor: hex,
+        brandThemeName: themeName || prev.brandThemeName || "Custom Brand",
+      };
+      safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
+      return updated;
+    });
+    applyBrandThemeCss(hex);
   };
 
   const updateGymLogo = (logoBase64: string) => {
@@ -2034,19 +3234,33 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
+
+    if (logoBase64 && logoBase64.startsWith("data:image")) {
+      extractDominantColor(logoBase64)
+        .then((hex) => {
+          setBrandColor(hex, "Extracted from Gym Logo");
+          addSystemLog("Brand Color Extracted", "Settings", `Extracted dominant logo color: ${hex}`);
+        })
+        .catch((err) => {
+          console.warn("[ColorExtractor] Failed to extract dominant color:", err);
+        });
+    }
   };
 
   const removeGymLogo = () => {
     setSettings((prev) => {
-      const updated = { ...prev, logoUrl: "" };
+      const updated = { ...prev, logoUrl: "", brandColor: "#8b5cf6", brandThemeName: "Ultra Violet" };
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
+    applyBrandThemeCss("#8b5cf6");
   };
 
   const resetToDefaultData = () => {
+    setCurrentUser(DEFAULT_ADMIN_USER);
     setMembers(DEFAULT_MEMBERS);
     setPayments(DEFAULT_PAYMENTS);
+    setExpenses(DEFAULT_EXPENSES);
     setStaff(DEFAULT_STAFF);
     setSettings(DEFAULT_SETTINGS);
     setLeads(DEFAULT_LEADS);
@@ -2055,10 +3269,15 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLockers(DEFAULT_LOCKERS);
     setBroadcasts(DEFAULT_BROADCASTS);
     setLocations(DEFAULT_LOCATIONS);
+    setSystemLogs(DEFAULT_SYSTEM_LOGS);
+    setRefunds(DEFAULT_REFUNDS);
+    setRenewals(DEFAULT_RENEWALS);
     setCurrentLocationId("loc-1");
 
+    safePersistSession(DEFAULT_ADMIN_USER);
     safePersist(`${STORAGE_KEY_PEAKREP}_members`, DEFAULT_MEMBERS);
     safePersist(`${STORAGE_KEY_PEAKREP}_payments`, DEFAULT_PAYMENTS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, DEFAULT_EXPENSES);
     safePersist(`${STORAGE_KEY_PEAKREP}_staff`, DEFAULT_STAFF);
     safePersist(`${STORAGE_KEY_PEAKREP}_settings`, DEFAULT_SETTINGS);
     safePersist(`${STORAGE_KEY_PEAKREP}_leads`, DEFAULT_LEADS);
@@ -2067,7 +3286,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, DEFAULT_LOCKERS);
     safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, DEFAULT_BROADCASTS);
     safePersist(`${STORAGE_KEY_PEAKREP}_locations`, DEFAULT_LOCATIONS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_system_logs`, DEFAULT_SYSTEM_LOGS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_refunds`, DEFAULT_REFUNDS);
+    safePersist(`${STORAGE_KEY_PEAKREP}_renewals`, DEFAULT_RENEWALS);
     safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, "loc-1");
+
+    applyBrandThemeCss("#8b5cf6");
   };
 
   return (
@@ -2076,8 +3300,18 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         theme,
         toggleTheme,
         setTheme,
+        currentUser,
+        login,
+        logout,
+        switchRole,
+        requestRoleSwitch,
+        isAdminAuthModalOpen,
+        setIsAdminAuthModalOpen,
+        verifyAndSwitchToAdmin,
+        hasPermission,
         members,
         payments,
+        expenses,
         staff,
         settings,
         leads,
@@ -2086,19 +3320,31 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lockers,
         broadcasts,
         locations,
+        systemLogs,
+        refunds,
+        renewals,
         currentLocationId,
         lastSaved,
         isSaved,
         exportData,
         importData,
+        addSystemLog,
         addMember,
+        bulkImportMembers,
         updateMember,
         deleteMember,
         checkInMember,
         checkOutMember,
         renewMember,
-        toggleFreezeMember,
+        extendMembershipDays,
+        freezeMember,
+        unfreezeMember,
+        transferMembership,
         recordPayment,
+        refundPayment,
+        addExpense,
+        updateExpense,
+        deleteExpense,
         addStaff,
         updateStaff,
         deleteStaff,
@@ -2164,9 +3410,32 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveSettingsTab,
         editingMember,
         setEditingMember,
+        isBulkImportOpen,
+        setIsBulkImportOpen,
+        isRefundModalOpen,
+        setIsRefundModalOpen,
+        selectedPaymentForRefund,
+        setSelectedPaymentForRefund,
+        isRenewModalOpen,
+        setIsRenewModalOpen,
+        selectedMemberForRenewal,
+        setSelectedMemberForRenewal,
+        isTransferModalOpen,
+        setIsTransferModalOpen,
+        selectedMemberForTransfer,
+        setSelectedMemberForTransfer,
+        isFreezeModalOpen,
+        setIsFreezeModalOpen,
+        selectedMemberForFreeze,
+        setSelectedMemberForFreeze,
+        isExpenseModalOpen,
+        setIsExpenseModalOpen,
+        editingExpense,
+        setEditingExpense,
         updateSettings,
         updateGymLogo,
         removeGymLogo,
+        setBrandColor,
         resetToDefaultData,
       }}
     >

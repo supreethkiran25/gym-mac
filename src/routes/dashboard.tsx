@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
@@ -25,6 +25,12 @@ import {
   Building,
   Radio,
   Send,
+  RotateCw,
+  FileSpreadsheet,
+  Lock,
+  Zap,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { useGymStore } from "../lib/gym-store";
 import { AddMemberModal } from "../components/AddMemberModal";
@@ -37,24 +43,75 @@ import { InvoiceModal } from "../components/dashboard/InvoiceModal";
 import { DynamicUPIQRModal } from "../components/dashboard/DynamicUPIQRModal";
 import { MobileBottomNav } from "../components/dashboard/MobileBottomNav";
 import { LiveClock } from "../components/dashboard/LiveClock";
+import { RoleBadge } from "../components/dashboard/RoleBadge";
+import { RefundModal } from "../components/dashboard/RefundModal";
+import { RenewMemberModal } from "../components/dashboard/RenewMemberModal";
+import { BulkImportModal } from "../components/dashboard/BulkImportModal";
+import { TransferMembershipModal } from "../components/dashboard/TransferMembershipModal";
+import { FreezeMemberModal } from "../components/dashboard/FreezeMemberModal";
+import { AdminAuthModal } from "../components/dashboard/AdminAuthModal";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
 });
 
-const NAV_ITEMS = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/dashboard/leads", label: "Prospect CRM", icon: UserPlus },
-  { to: "/dashboard/members", label: "Members Directory", icon: Users },
-  { to: "/dashboard/payments", label: "Finances & Payments", icon: CreditCard },
-  { to: "/dashboard/workouts", label: "Workout & Diet Plans", icon: Dumbbell },
-  { to: "/dashboard/lockers", label: "Locker Registry", icon: KeyRound },
-  { to: "/dashboard/staff", label: "Staff & Payroll", icon: Users },
-  { to: "/dashboard/plans", label: "Membership Plans", icon: Layers },
-  { to: "/dashboard/reminders", label: "Broadcast Center", icon: Radio },
-  { to: "/dashboard/analytics", label: "Analytics & Growth", icon: BarChart3 },
-  { to: "/dashboard/settings", label: "Business Settings", icon: Settings },
-] as const;
+interface NavGroup {
+  group: string;
+  items: {
+    to: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    role: "all" | "admin";
+  }[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    group: "HOME",
+    items: [
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, role: "all" },
+      { to: "/dashboard/checkin", label: "Floor Check-In", icon: CheckCircle2, role: "all" },
+    ],
+  },
+  {
+    group: "OPERATIONS",
+    items: [
+      { to: "/dashboard/members", label: "Members Directory", icon: Users, role: "all" },
+      { to: "/dashboard/renewals", label: "Renewals Hub", icon: RotateCw, role: "all" },
+      { to: "/dashboard/plans", label: "Membership Plans", icon: Layers, role: "all" },
+    ],
+  },
+  {
+    group: "FINANCES & STAFF",
+    items: [
+      { to: "/dashboard/payments", label: "Finances & Dues", icon: CreditCard, role: "admin" },
+      { to: "/dashboard/staff", label: "Staff & Payroll", icon: Users, role: "admin" },
+    ],
+  },
+  {
+    group: "GROWTH & CRM",
+    items: [
+      { to: "/dashboard/leads", label: "Prospect CRM", icon: UserPlus, role: "all" },
+      { to: "/dashboard/reports", label: "Reports & Exports", icon: FileSpreadsheet, role: "all" },
+      { to: "/dashboard/analytics", label: "Analytics & Growth", icon: BarChart3, role: "admin" },
+    ],
+  },
+  {
+    group: "FACILITIES & DIET",
+    items: [
+      { to: "/dashboard/workouts", label: "Workouts & Diet", icon: Dumbbell, role: "all" },
+      { to: "/dashboard/lockers", label: "Locker Registry", icon: KeyRound, role: "all" },
+      { to: "/dashboard/reminders", label: "Broadcast Center", icon: Radio, role: "all" },
+    ],
+  },
+  {
+    group: "SYSTEM",
+    items: [
+      { to: "/dashboard/settings", label: "Business Settings", icon: Settings, role: "admin" },
+    ],
+  },
+];
 
 function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -63,6 +120,7 @@ function DashboardLayout() {
     leads,
     broadcasts,
     settings,
+    currentUser,
     theme,
     toggleTheme,
     setIsAddMemberOpen,
@@ -70,93 +128,195 @@ function DashboardLayout() {
     setIsCommandPaletteOpen,
     setIsSettingsOpen,
     openUPIQRModal,
+    requestRoleSwitch,
+    logout,
   } = useGymStore();
 
+  const navigate = useNavigate();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const isAdmin = currentUser.role === "admin";
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+    navigate({ to: "/" });
+  };
 
   const pendingDuesCount = members.filter((m) => m.due > 0).length;
   const activeLeadsCount = leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length;
   const expiringMembersCount = members.filter((m) => m.status === "Expiring").length;
+  const insideMembersCount = members.filter((m) => m.isCurrentlyInside).length;
 
   return (
-    <div className="flex min-h-screen w-full bg-canvas text-foreground">
-      {/* Enterprise Navigation Rail for Desktop */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border bg-surface/60 select-none">
+    <div className="flex min-h-screen w-full bg-canvas text-foreground font-sans selection:bg-brand selection:text-brand-foreground">
+      {/* Sleek Enterprise Navigation Rail (Gymforce / Calyxo Style) */}
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border bg-sidebar select-none print:hidden">
         {/* Brand Header */}
-        <div className="border-b border-border px-5 py-4">
+        <div className="border-b border-border px-5 py-5">
           <div className="flex items-center gap-3">
             {settings.logoUrl ? (
               <img
                 src={settings.logoUrl}
                 alt={settings.name}
-                className="h-10 w-10 rounded-xl object-cover border border-border shadow-xs shrink-0"
+                className="h-9 w-9 rounded-xl object-cover border border-brand/30 shadow-xs shrink-0"
               />
             ) : (
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-foreground text-background font-bold font-mono text-base shadow-xs shrink-0">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground font-heading font-black text-sm shadow-xs shrink-0">
                 PR
               </div>
             )}
-            <div className="leading-tight overflow-hidden">
-              <h1 className="text-sm font-bold tracking-wider uppercase text-foreground">
-                PEAKREP
-              </h1>
-              <p className="text-xs text-muted-foreground truncate font-medium mt-0.5">
+            <div className="leading-tight overflow-hidden flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <h1 className="text-sm font-heading font-black tracking-wider uppercase text-foreground">
+                  PEAKREP
+                </h1>
+                <span className="text-[9px] font-heading uppercase font-extrabold px-2 py-0.5 rounded-full bg-brand-soft text-brand border border-brand/20">
+                  {isAdmin ? "Admin" : "Recep"}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground truncate font-medium mt-0.5">
                 {settings.name}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.to === "/dashboard"
-                ? pathname === "/dashboard" || pathname === "/dashboard/"
-                : pathname.startsWith(item.to);
+        {/* Grouped Navigation Links */}
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3.5 py-4">
+          {NAV_GROUPS.map((group) => {
+            const visibleItems = group.items.filter((item) => isAdmin || item.role === "all");
+            if (visibleItems.length === 0) return null;
 
             return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`group flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium transition ${
-                  isActive
-                    ? "bg-foreground text-background shadow-xs font-semibold"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
+              <div key={group.group} className="space-y-1">
+                <div className="px-3 pb-1 text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground/70">
+                  {group.group}
                 </div>
-                {item.to === "/dashboard/members" && pendingDuesCount > 0 && (
-                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                    isActive ? "bg-background text-foreground" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                  }`}>
-                    {pendingDuesCount}
-                  </span>
-                )}
-                {item.to === "/dashboard/leads" && activeLeadsCount > 0 && (
-                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                    isActive ? "bg-background text-foreground" : "bg-purple-500/20 text-purple-600 dark:text-purple-400"
-                  }`}>
-                    {activeLeadsCount}
-                  </span>
-                )}
-              </Link>
+
+                {visibleItems.map((item) => {
+                  const isActive =
+                    item.to === "/dashboard"
+                      ? pathname === "/dashboard" || pathname === "/dashboard/"
+                      : pathname.startsWith(item.to);
+
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={`group flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                        isActive
+                          ? "bg-brand-soft text-brand border border-brand/30 shadow-xs font-bold"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon
+                          className={`h-4 w-4 shrink-0 transition-transform ${
+                            isActive ? "text-brand scale-105" : "text-muted-foreground group-hover:text-foreground"
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {item.to === "/dashboard/checkin" && insideMembersCount > 0 && (
+                          <span
+                            className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
+                              isActive ? "bg-brand text-brand-foreground" : "bg-emerald-500/20 text-emerald"
+                            }`}
+                          >
+                            {insideMembersCount}
+                          </span>
+                        )}
+
+                        {item.to === "/dashboard/renewals" && expiringMembersCount > 0 && (
+                          <span
+                            className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
+                              isActive ? "bg-brand text-brand-foreground" : "bg-amber-500/20 text-amber-500"
+                            }`}
+                          >
+                            {expiringMembersCount}
+                          </span>
+                        )}
+
+                        {item.to === "/dashboard/members" && pendingDuesCount > 0 && (
+                          <span
+                            className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
+                              isActive ? "bg-brand text-brand-foreground" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                            }`}
+                          >
+                            {pendingDuesCount}
+                          </span>
+                        )}
+
+                        {item.to === "/dashboard/leads" && activeLeadsCount > 0 && (
+                          <span
+                            className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
+                              isActive ? "bg-brand text-brand-foreground" : "bg-brand-soft text-brand"
+                            }`}
+                          >
+                            {activeLeadsCount}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </nav>
 
-        {/* Footer Quick Profile & Sync Status */}
-        <div className="border-t border-border p-3 space-y-2">
-          <div className="flex items-center justify-between rounded-xl border border-border bg-canvas p-2.5 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-emerald" />
-              <span className="font-semibold text-foreground truncate">{settings.ownerName || "Gym Director"}</span>
+        {/* User Session Footer & Log Out */}
+        <div className="p-3.5 border-t border-border space-y-2.5">
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="grid h-8 w-8 place-items-center rounded-xl bg-brand text-brand-foreground font-heading font-extrabold text-xs shrink-0">
+                {currentUser.name.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="leading-tight truncate">
+                <p className="text-xs font-bold text-foreground truncate">{currentUser.name}</p>
+                <p className="text-[10px] text-brand uppercase font-extrabold tracking-wider">{currentUser.role}</p>
+              </div>
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground">OS v8.0</span>
+
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-xl border border-border bg-canvas hover:bg-rose-500/10 hover:border-rose-500/30 text-muted-foreground hover:text-rose-500 transition shrink-0"
+              title="Log Out Session"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Quick Utility Toggles */}
+          <div className="flex items-center justify-between px-1 text-muted-foreground text-xs">
+            <button
+              onClick={() => toggleTheme()}
+              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition"
+              title="Toggle Theme"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
+            </button>
+
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition"
+              title="Search (⌘K)"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+
+            <button
+              onClick={() => requestRoleSwitch(isAdmin ? "reception" : "admin")}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition text-[11px] font-semibold"
+              title="Switch Active Role"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-brand" />
+              <span>Switch: {isAdmin ? "Recep" : "Admin"}</span>
+            </button>
           </div>
         </div>
       </aside>
@@ -164,7 +324,7 @@ function DashboardLayout() {
       {/* Mobile Drawer Navigation Backdrop */}
       {mobileDrawerOpen && (
         <div
-          className="fixed inset-0 z-50 flex lg:hidden bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex lg:hidden bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={() => setMobileDrawerOpen(false)}
         >
           <div
@@ -180,12 +340,12 @@ function DashboardLayout() {
                     className="h-9 w-9 rounded-xl object-cover border border-border shrink-0"
                   />
                 ) : (
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-foreground text-background font-bold text-sm shrink-0">
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground font-heading font-black text-sm shrink-0">
                     PR
                   </div>
                 )}
                 <div>
-                  <h2 className="text-sm font-bold tracking-wider uppercase text-foreground">PEAKREP</h2>
+                  <h2 className="text-sm font-heading font-black tracking-wider uppercase text-foreground">PEAKREP</h2>
                   <p className="text-[11px] text-muted-foreground truncate">{settings.name}</p>
                 </div>
               </div>
@@ -197,27 +357,39 @@ function DashboardLayout() {
               </button>
             </div>
 
-            <nav className="flex-1 space-y-1 overflow-y-auto">
-              {NAV_ITEMS.map((item) => {
-                const isActive =
-                  item.to === "/dashboard"
-                    ? pathname === "/dashboard" || pathname === "/dashboard/"
-                    : pathname.startsWith(item.to);
+            <nav className="flex-1 space-y-4 overflow-y-auto">
+              {NAV_GROUPS.map((group) => {
+                const visibleItems = group.items.filter((item) => isAdmin || item.role === "all");
+                if (visibleItems.length === 0) return null;
 
                 return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ${
-                      isActive
-                        ? "bg-foreground text-background font-bold"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
+                  <div key={group.group} className="space-y-1">
+                    <div className="px-3 text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground/70">
+                      {group.group}
+                    </div>
+                    {visibleItems.map((item) => {
+                      const isActive =
+                        item.to === "/dashboard"
+                          ? pathname === "/dashboard" || pathname === "/dashboard/"
+                          : pathname.startsWith(item.to);
+
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setMobileDrawerOpen(false)}
+                          className={`flex items-center gap-3 rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                            isActive
+                              ? "bg-brand-soft text-brand font-bold border border-brand/30"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 );
               })}
             </nav>
@@ -228,7 +400,7 @@ function DashboardLayout() {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0 pb-16 md:pb-0">
         {/* Redesigned Universal Top Header */}
-        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface/90 px-4 md:px-8 backdrop-blur-md">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface/90 px-4 md:px-8 backdrop-blur-md print:hidden">
           {/* Header Left: Menu Toggle + PEAKREP Title & Dynamic Gym Name */}
           <div className="flex items-center gap-3 sm:gap-4">
             <button
@@ -239,53 +411,26 @@ function DashboardLayout() {
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Application Branding Hub */}
-            <div className="flex items-center gap-2.5">
-              {settings.logoUrl ? (
-                <img
-                  src={settings.logoUrl}
-                  alt={settings.name}
-                  className="hidden sm:block h-8 w-8 rounded-lg object-cover border border-border shrink-0"
-                />
-              ) : null}
-              <div className="leading-tight">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm md:text-base font-bold tracking-wider uppercase text-foreground">
-                    PEAKREP
-                  </span>
-                </div>
-                <p className="text-[11px] md:text-xs text-muted-foreground font-medium truncate max-w-[150px] sm:max-w-[240px] md:max-w-[320px]">
-                  {settings.name}
-                </p>
-              </div>
-            </div>
-
             {/* Universal Search & Command Palette Trigger */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className="hidden md:flex items-center gap-2.5 rounded-xl border border-border bg-canvas px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/40 transition w-48 lg:w-64 text-left ml-2"
+              className="flex items-center gap-2.5 rounded-xl border border-border bg-canvas px-3.5 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-brand/40 transition w-56 lg:w-72 text-left"
             >
               <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate">Search records, actions...</span>
+              <span className="truncate">Search members, actions...</span>
               <kbd className="ml-auto inline-flex items-center gap-0.5 text-[10px] font-mono bg-surface px-1.5 py-0.5 rounded border border-border">
                 ⌘K
               </kbd>
             </button>
           </div>
 
-          {/* Header Right: Live Clock, Notifications, Quick Actions & Profile */}
-          <div className="flex items-center gap-2">
+          {/* Header Right: RoleBadge, Live Clock, Notifications, Quick Actions */}
+          <div className="flex items-center gap-2.5">
+            {/* RBAC Role Switcher Badge */}
+            <RoleBadge variant="header" />
+
             {/* Live Real-Time Clock */}
             <LiveClock variant="badge" />
-
-            {/* Search Icon Trigger on Small Screens */}
-            <button
-              onClick={() => setIsCommandPaletteOpen(true)}
-              className="md:hidden p-2 rounded-xl border border-border bg-canvas text-muted-foreground hover:text-foreground"
-              title="Search"
-            >
-              <Search className="h-4 w-4" />
-            </button>
 
             {/* Notifications Popover Trigger */}
             <div className="relative">
@@ -318,121 +463,73 @@ function DashboardLayout() {
                     </button>
                   </div>
 
-                  <div className="space-y-2 max-h-64 overflow-y-auto text-xs">
+                  <div className="space-y-2 text-xs">
                     {pendingDuesCount > 0 && (
-                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-foreground space-y-1">
-                        <p className="font-semibold text-amber-600 dark:text-amber-400">
-                          {pendingDuesCount} Pending Dues
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Members have outstanding installment balances awaiting collection.
-                        </p>
-                      </div>
+                      <Link
+                        to="/dashboard/payments"
+                        onClick={() => setNotificationsOpen(false)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition"
+                      >
+                        <span>{pendingDuesCount} member(s) with pending dues</span>
+                        <span className="font-bold">Review →</span>
+                      </Link>
                     )}
-
                     {expiringMembersCount > 0 && (
-                      <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-foreground space-y-1">
-                        <p className="font-semibold text-rose-600 dark:text-rose-400">
-                          {expiringMembersCount} Members Expiring Soon
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Members reach term expiration within the next 7 days.
-                        </p>
+                      <Link
+                        to="/dashboard/renewals"
+                        onClick={() => setNotificationsOpen(false)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition"
+                      >
+                        <span>{expiringMembersCount} membership(s) expiring soon</span>
+                        <span className="font-bold">Renew →</span>
+                      </Link>
+                    )}
+                    {pendingDuesCount === 0 && expiringMembersCount === 0 && (
+                      <div className="py-4 text-center text-muted-foreground text-xs">
+                        All member accounts & dues are fully updated!
                       </div>
                     )}
-
-                    {broadcasts.length > 0 && (
-                      <div className="p-2.5 rounded-xl bg-canvas border border-border text-foreground space-y-1">
-                        <p className="font-semibold">Recent Broadcast: {broadcasts[0].title}</p>
-                        <p className="text-[11px] text-muted-foreground">{broadcasts[0].sentAt || broadcasts[0].createdAt}</p>
-                      </div>
-                    )}
-
-                    {pendingDuesCount === 0 && expiringMembersCount === 0 && broadcasts.length === 0 && (
-                      <p className="text-center text-muted-foreground py-4 text-xs">
-                        No pending operational alerts.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pt-2 border-t border-border flex justify-end">
-                    <Link
-                      to="/dashboard/reminders"
-                      onClick={() => setNotificationsOpen(false)}
-                      className="text-xs font-semibold text-emerald hover:underline"
-                    >
-                      Open Broadcast Center →
-                    </Link>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Dark / Light Mode Toggle Button */}
+            {/* Header Direct Log Out Action */}
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl border border-border bg-canvas text-muted-foreground hover:text-foreground hover:bg-muted transition"
-              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-2 text-xs font-heading font-bold text-muted-foreground hover:text-rose-500 hover:border-rose-500/30 hover:bg-rose-500/10 transition"
+              title="Log Out Current Session"
             >
-              {theme === "dark" ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4 text-foreground" />}
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Log Out</span>
             </button>
-
-            {/* Show UPI QR Button */}
-            <button
-              onClick={() => openUPIQRModal(settings.membershipPlans[0]?.price || 3000, "Walk-in Member", "Monthly Flex Pass")}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-semibold hover:bg-muted transition"
-            >
-              <QrCode className="h-3.5 w-3.5 text-emerald" />
-              <span>UPI QR</span>
-            </button>
-
-            {/* Record Payment Button */}
-            <button
-              onClick={() => setIsRecordPaymentOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-semibold hover:bg-muted transition"
-            >
-              <CreditCard className="h-3.5 w-3.5" />
-              <span>Record Payment</span>
-            </button>
-
-            {/* Add Member Button */}
-            <button
-              onClick={() => setIsAddMemberOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-3.5 py-1.5 text-xs font-semibold hover:opacity-90 transition shadow-xs"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add Member</span>
-            </button>
-
-            {/* Profile Dropdown / Trigger */}
-            <Link
-              to="/dashboard/settings"
-              className="hidden md:flex items-center gap-2 rounded-xl border border-border bg-canvas p-1.5 hover:bg-muted transition"
-              title="Business Profile & Settings"
-            >
-              <div className="grid h-6 w-6 place-items-center rounded-lg bg-muted text-[11px] font-bold text-foreground">
-                {settings.ownerName ? settings.ownerName.charAt(0) : "G"}
-              </div>
-            </Link>
           </div>
         </header>
 
-        {/* Dynamic Route Content */}
-        <main className="flex-1 px-4 md:px-8 py-6 md:py-8 max-w-7xl w-full mx-auto">
-          <Outlet />
+        {/* Dynamic Nested Route View */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-canvas print:hidden">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
         </main>
       </div>
 
-      {/* Global Interactive Modals & Slide-Overs */}
-      <CommandPalette />
-      <Member360Sheet />
-      <InvoiceModal />
-      <DynamicUPIQRModal />
+      {/* Global Context Modals */}
       <AddMemberModal />
       <EditMemberModal />
       <RecordPaymentModal />
       <SettingsModal />
+      <CommandPalette />
+      <Member360Sheet />
+      <InvoiceModal />
+      <DynamicUPIQRModal />
       <MobileBottomNav />
+      <RefundModal />
+      <RenewMemberModal />
+      <BulkImportModal />
+      <TransferMembershipModal />
+      <FreezeMemberModal />
+      <AdminAuthModal />
     </div>
   );
 }

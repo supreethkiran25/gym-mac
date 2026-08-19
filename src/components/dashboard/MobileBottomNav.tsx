@@ -19,31 +19,29 @@ export function MobileBottomNav() {
     setIsCommandPaletteOpen,
     members,
     leads,
+    currentUser,
   } = useGymStore();
 
+  const isAdmin = currentUser.role === "admin";
   const pendingDuesCount = members.filter((m) => m.due > 0).length;
   const activeLeadsCount = leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length;
 
-  const items = [
-    { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-    { to: "/dashboard/members", label: "Members", icon: Users, badge: pendingDuesCount },
-    { to: "/dashboard/leads", label: "Leads", icon: UserPlus, badge: activeLeadsCount },
-    { to: "/dashboard/payments", label: "Finances", icon: CreditCard },
-  ];
+  const items = isAdmin
+    ? [
+        { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
+        { to: "/dashboard/members", label: "Members", icon: Users, badge: pendingDuesCount },
+        { to: "/dashboard/leads", label: "Leads", icon: UserPlus, badge: activeLeadsCount },
+        { to: "/dashboard/payments", label: "Finances", icon: CreditCard },
+      ]
+    : [
+        { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
+        { to: "/dashboard/checkin", label: "Check-In", icon: LayoutDashboard },
+        { to: "/dashboard/members", label: "Members", icon: Users },
+        { to: "/dashboard/renewals", label: "Renewals", icon: UserPlus },
+      ];
 
   return (
     <>
-      {/* Mobile Floating Quick Action Button */}
-      <div className="fixed bottom-16 right-4 z-40 flex flex-col gap-2 md:hidden">
-        <button
-          onClick={() => setIsAddMemberOpen(true)}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background shadow-xl hover:scale-105 active:scale-95 transition"
-          title="Enroll Member"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
-      </div>
-
       {/* Mobile Sticky Bottom Nav Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-border bg-surface/95 px-2 backdrop-blur md:hidden">
         {items.map((item) => {

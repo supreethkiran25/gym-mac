@@ -14,12 +14,15 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
+import { Route as DashboardCheckinRouteImport } from './routes/dashboard.checkin'
 import { Route as DashboardLeadsRouteImport } from './routes/dashboard.leads'
 import { Route as DashboardLockersRouteImport } from './routes/dashboard.lockers'
 import { Route as DashboardMembersRouteImport } from './routes/dashboard.members'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard.payments'
 import { Route as DashboardPlansRouteImport } from './routes/dashboard.plans'
 import { Route as DashboardRemindersRouteImport } from './routes/dashboard.reminders'
+import { Route as DashboardRenewalsRouteImport } from './routes/dashboard.renewals'
+import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardStaffRouteImport } from './routes/dashboard.staff'
 import { Route as DashboardWorkoutsRouteImport } from './routes/dashboard.workouts'
@@ -47,6 +50,11 @@ const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
 const DashboardBillingRoute = DashboardBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCheckinRoute = DashboardCheckinRouteImport.update({
+  id: '/checkin',
+  path: '/checkin',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardLeadsRoute = DashboardLeadsRouteImport.update({
@@ -79,6 +87,16 @@ const DashboardRemindersRoute = DashboardRemindersRouteImport.update({
   path: '/reminders',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardRenewalsRoute = DashboardRenewalsRouteImport.update({
+  id: '/renewals',
+  path: '/renewals',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardReportsRoute = DashboardReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -100,12 +118,15 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/checkin': typeof DashboardCheckinRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/lockers': typeof DashboardLockersRoute
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/plans': typeof DashboardPlansRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
+  '/dashboard/renewals': typeof DashboardRenewalsRoute
+  '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/staff': typeof DashboardStaffRoute
   '/dashboard/workouts': typeof DashboardWorkoutsRoute
@@ -115,12 +136,15 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/checkin': typeof DashboardCheckinRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/lockers': typeof DashboardLockersRoute
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/plans': typeof DashboardPlansRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
+  '/dashboard/renewals': typeof DashboardRenewalsRoute
+  '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/staff': typeof DashboardStaffRoute
   '/dashboard/workouts': typeof DashboardWorkoutsRoute
@@ -132,12 +156,15 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/checkin': typeof DashboardCheckinRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/lockers': typeof DashboardLockersRoute
   '/dashboard/members': typeof DashboardMembersRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/plans': typeof DashboardPlansRoute
   '/dashboard/reminders': typeof DashboardRemindersRoute
+  '/dashboard/renewals': typeof DashboardRenewalsRoute
+  '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/staff': typeof DashboardStaffRoute
   '/dashboard/workouts': typeof DashboardWorkoutsRoute
@@ -150,12 +177,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/billing'
+    | '/dashboard/checkin'
     | '/dashboard/leads'
     | '/dashboard/lockers'
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/plans'
     | '/dashboard/reminders'
+    | '/dashboard/renewals'
+    | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/staff'
     | '/dashboard/workouts'
@@ -165,12 +195,15 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard/analytics'
     | '/dashboard/billing'
+    | '/dashboard/checkin'
     | '/dashboard/leads'
     | '/dashboard/lockers'
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/plans'
     | '/dashboard/reminders'
+    | '/dashboard/renewals'
+    | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/staff'
     | '/dashboard/workouts'
@@ -181,12 +214,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/billing'
+    | '/dashboard/checkin'
     | '/dashboard/leads'
     | '/dashboard/lockers'
     | '/dashboard/members'
     | '/dashboard/payments'
     | '/dashboard/plans'
     | '/dashboard/reminders'
+    | '/dashboard/renewals'
+    | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/staff'
     | '/dashboard/workouts'
@@ -235,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/checkin': {
+      id: '/dashboard/checkin'
+      path: '/checkin'
+      fullPath: '/dashboard/checkin'
+      preLoaderRoute: typeof DashboardCheckinRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/leads': {
       id: '/dashboard/leads'
       path: '/leads'
@@ -277,6 +320,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRemindersRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/renewals': {
+      id: '/dashboard/renewals'
+      path: '/renewals'
+      fullPath: '/dashboard/renewals'
+      preLoaderRoute: typeof DashboardRenewalsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/reports': {
+      id: '/dashboard/reports'
+      path: '/reports'
+      fullPath: '/dashboard/reports'
+      preLoaderRoute: typeof DashboardReportsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/settings': {
       id: '/dashboard/settings'
       path: '/settings'
@@ -304,12 +361,15 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardBillingRoute: typeof DashboardBillingRoute
+  DashboardCheckinRoute: typeof DashboardCheckinRoute
   DashboardLeadsRoute: typeof DashboardLeadsRoute
   DashboardLockersRoute: typeof DashboardLockersRoute
   DashboardMembersRoute: typeof DashboardMembersRoute
   DashboardPaymentsRoute: typeof DashboardPaymentsRoute
   DashboardPlansRoute: typeof DashboardPlansRoute
   DashboardRemindersRoute: typeof DashboardRemindersRoute
+  DashboardRenewalsRoute: typeof DashboardRenewalsRoute
+  DashboardReportsRoute: typeof DashboardReportsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardStaffRoute: typeof DashboardStaffRoute
   DashboardWorkoutsRoute: typeof DashboardWorkoutsRoute
@@ -319,12 +379,15 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardBillingRoute: DashboardBillingRoute,
+  DashboardCheckinRoute: DashboardCheckinRoute,
   DashboardLeadsRoute: DashboardLeadsRoute,
   DashboardLockersRoute: DashboardLockersRoute,
   DashboardMembersRoute: DashboardMembersRoute,
   DashboardPaymentsRoute: DashboardPaymentsRoute,
   DashboardPlansRoute: DashboardPlansRoute,
   DashboardRemindersRoute: DashboardRemindersRoute,
+  DashboardRenewalsRoute: DashboardRenewalsRoute,
+  DashboardReportsRoute: DashboardReportsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardStaffRoute: DashboardStaffRoute,
   DashboardWorkoutsRoute: DashboardWorkoutsRoute,

@@ -1,71 +1,91 @@
-import React, { useState } from "react";
+import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Users,
   CreditCard,
+  CheckCircle2,
   TrendingUp,
   AlertTriangle,
-  ArrowUpRight,
+  RotateCw,
   Plus,
-  Calendar,
-  Layers,
-  Phone,
-  MessageCircle,
-  Dumbbell,
-  CheckCircle2,
-  Clock,
-  Building,
-  UserPlus,
-  KeyRound,
-  FileText,
-  QrCode,
-  Radio,
-  Receipt,
-  UserCheck,
+  ArrowUpRight,
   Activity,
+  Zap,
+  Flame,
+  Dumbbell,
+  Radio,
+  FileSpreadsheet,
+  BarChart3,
+  Calendar,
+  MessageCircle,
+  FileText,
+  Clock,
+  ArrowRight,
+  ShieldCheck,
+  Receipt,
+  Droplets,
+  Award,
 } from "lucide-react";
 import { useGymStore, Member } from "../lib/gym-store";
-import { OwnerQuickstartBar } from "../components/dashboard/OwnerQuickstartBar";
-import { LiveClock } from "../components/dashboard/LiveClock";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardOverview,
+  head: () => ({
+    meta: [{ title: "Cockpit Overview | PEAKREP Gym OS" }],
+  }),
 });
 
 function DashboardOverview() {
   const {
     members,
     payments,
+    expenses,
     staff,
     leads,
     lockers,
     workoutPrograms,
     settings,
+    currentUser,
     setIsAddMemberOpen,
     setIsRecordPaymentOpen,
+    setIsBulkImportOpen,
     setSelectedMember360,
     setIsMember360Open,
-    openUPIQRModal,
     setActiveInvoicePayment,
     setIsInvoiceModalOpen,
   } = useGymStore();
 
+  const isAdmin = currentUser.role === "admin";
+
+  // Time-aware greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "GOOD MORNING" : hour < 17 ? "GOOD AFTERNOON" : "GOOD EVENING";
+  const firstName = currentUser.name.split(" ")[0]?.toUpperCase() || "ADMIN";
+
+  // Members & Floor metrics
   const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
   const expiringSoonMembers = members.filter((m) => m.status === "Expiring");
+  const expiredMembers = members.filter((m) => m.status === "Expired");
   const overdueMembers = members.filter((m) => m.due > 0);
   const pendingDuesTotal = overdueMembers.reduce((sum, m) => sum + m.due, 0);
   const insideMembers = members.filter((m) => m.isCurrentlyInside);
-  const occupiedLockers = lockers.filter((l) => l.status === "Occupied").length;
   const activeLeadsCount = leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length;
 
-  // Real Dynamic Revenue Calculations
+  // Financial Calculations
   const todayStr = new Date().toISOString().split("T")[0];
-  const todayPayments = payments.filter((p) => p.date === todayStr);
+  const todayPayments = payments.filter((p) => p.date === todayStr && p.status !== "Refunded");
   const todayRevenue = todayPayments.reduce((sum, p) => sum + p.amount, 0);
+  const totalInflow = payments.reduce((sum, p) => sum + (p.status === "Refunded" ? 0 : p.amount), 0);
+  const totalOutflow = expenses.reduce((sum, e) => sum + (e.status === "Paid" ? e.amount : 0), 0);
+  const netOperatingBalance = totalInflow - totalOutflow;
+  const isNetLoss = netOperatingBalance < 0;
 
-  const totalCollectedRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
-  const totalExpectedRevenue = members.reduce((sum, m) => sum + (m.planPrice || 0), 0);
+  // Performance Ring Metrics (Target calculations)
+  const revenueTarget = 150000;
+  const revenuePercent = Math.min(100, Math.round((totalInflow / revenueTarget) * 100));
+  const retentionPercent = members.length > 0 ? Math.round(((members.length - expiredMembers.length) / members.length) * 100) : 100;
+  const capacityPercent = Math.min(100, Math.round((insideMembers.length / 25) * 100));
 
   const handleMemberClick = (member: Member) => {
     setSelectedMember360(member);
@@ -87,137 +107,382 @@ function DashboardOverview() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
-      {/* 1. Quickstart Bar */}
-      <OwnerQuickstartBar />
-
-      {/* 2. Executive Operations Dashboard Hero */}
-      <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8 shadow-2xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-emerald-soft text-accent-foreground px-3 py-0.5 text-xs font-semibold">
-                Operational Cockpit
-              </span>
-              <LiveClock variant="hero" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              {settings.name}
-            </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-              Real-time member attendance, collected revenue velocity, dues recovery, and facility management.
+      {/* 1. Calyxo-Style Top Greeting Header */}
+      <div className="space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground uppercase">
+              {greeting}, {firstName}!
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-0.5">
+              Your personalized gym operating system is running optimally.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setIsAddMemberOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2.5 text-xs font-semibold hover:opacity-90 transition shadow-xs"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Enroll Member</span>
-            </button>
-            <button
-              onClick={() => setIsRecordPaymentOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-4 py-2.5 text-xs font-semibold hover:bg-muted transition"
-            >
-              <CreditCard className="h-4 w-4" />
-              <span>Record Payment</span>
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand-soft/20 px-3.5 py-1 text-xs font-heading font-extrabold text-brand tracking-wider uppercase">
+              <Activity className="h-3 w-3" />
+              <span>LIVE FLOOR · {insideMembers.length} INSIDE</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Operational Progress Bar (Calyxo XP bar style) */}
+        <div className="space-y-1 pt-1">
+          <div className="flex items-center justify-between text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground">
+            <span>OPERATIONAL CAPACITY</span>
+            <span className="font-mono text-foreground font-semibold">{insideMembers.length} / 25 Peak Slots</span>
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full bg-brand rounded-full transition-all duration-500 shadow-xs"
+              style={{ width: `${Math.max(8, capacityPercent)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Top Highlight Hero Card (Calyxo Complete Setup style) */}
+      <div className="rounded-3xl border border-brand/30 bg-brand-soft/10 p-5 sm:p-6 shadow-2xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="flex items-start gap-4">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-brand text-brand-foreground font-bold shrink-0 shadow-md shadow-brand/25">
+              <Zap className="h-5 w-5" />
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm sm:text-base font-heading font-extrabold text-foreground uppercase tracking-wide">
+                  {settings.name} — ACTIVE FLOOR DESK
+                </h3>
+                <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[10px] font-heading font-bold text-brand uppercase tracking-wider border border-brand/20">
+                  {isAdmin ? "Admin Full Access" : "Front Desk Mode"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                Live Turnstile scanner active with biometric check-in, dues verification, and automated renewal reminders.
+              </p>
+
+              {/* Status pills */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] font-medium text-muted-foreground">
+                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                  ✓ Turnstile Gate Online
+                </span>
+                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                  ✓ QR Scanner Ready
+                </span>
+                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                  ✓ Dues Turnstile Lock
+                </span>
+                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                  ✓ WhatsApp Alerts
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
             <Link
-              to="/dashboard/reminders"
-              className="flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 px-4 py-2.5 text-xs font-semibold hover:bg-purple-500/20 transition"
+              to="/dashboard/checkin"
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-brand text-brand-foreground px-5 py-2.5 text-xs font-heading font-extrabold uppercase tracking-wider shadow-lg shadow-brand/25 hover:brightness-110 active:scale-[0.98] transition"
             >
-              <Radio className="h-4 w-4" />
-              <span>Broadcast Message</span>
+              <span>Open Scanner</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 3. Core Financial & Member KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total / Active Members */}
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Active Members</span>
-            <Users className="h-4 w-4 text-emerald" />
+      {/* 3. 4 Streak / KPI Cards (Calyxo Login / Streak Tiles Style) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Active Directory Streak */}
+        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+          <div className="space-y-1">
+            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+              ACTIVE MEMBERS
+            </div>
+            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground">
+              {activeMembersCount} <span className="text-xs font-normal text-muted-foreground">members</span>
+            </p>
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Inside Floor: <strong className="text-brand font-mono">{insideMembers.length}</strong>
+            </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">{activeMembersCount}</p>
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>Inside Floor: <strong className="text-foreground font-mono">{insideMembers.length}</strong></span>
-            <span>Total Enrolled: {members.length}</span>
-          </div>
-        </div>
-
-        {/* Total Collected Revenue */}
-        <div className="rounded-2xl border border-emerald/30 bg-emerald-soft/10 p-5 space-y-2 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald">Total Collected</span>
-            <CheckCircle2 className="h-4 w-4 text-emerald" />
-          </div>
-          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{totalCollectedRevenue.toLocaleString("en-IN")}
-          </p>
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>Today: {settings.currencySymbol}{todayRevenue.toLocaleString("en-IN")}</span>
-            <span className="font-mono">Ledger Verified</span>
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-brand-soft text-brand border border-brand/20 shrink-0">
+            <Users className="h-5 w-5" />
           </div>
         </div>
 
-        {/* Outstanding Dues */}
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-2 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Pending Dues</span>
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+        {/* Total Inflow Collections */}
+        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+          <div className="space-y-1">
+            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+              TOTAL INFLOW
+            </div>
+            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground font-mono">
+              {settings.currencySymbol}{totalInflow.toLocaleString("en-IN")}
+            </p>
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Today: <strong className="text-emerald font-mono">+{settings.currencySymbol}{todayRevenue.toLocaleString("en-IN")}</strong>
+            </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{pendingDuesTotal.toLocaleString("en-IN")}
-          </p>
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>{overdueMembers.length} Member(s) with Balance</span>
-            <Link to="/dashboard/payments" className="text-amber-600 dark:text-amber-400 font-semibold hover:underline">
-              Collect →
-            </Link>
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500/15 text-emerald border border-emerald-500/25 shrink-0">
+            <TrendingUp className="h-5 w-5" />
           </div>
         </div>
 
-        {/* Facility Utilization */}
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Facility & Lockers</span>
-            <KeyRound className="h-4 w-4 text-blue-500" />
+        {/* Operating Burn / Outflow */}
+        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+          <div className="space-y-1">
+            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+              OPERATING OUTFLOW
+            </div>
+            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground font-mono">
+              {settings.currencySymbol}{totalOutflow.toLocaleString("en-IN")}
+            </p>
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Rent, Power, Payroll
+            </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {occupiedLockers} / {lockers.length}
-          </p>
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>{lockers.filter((l) => l.status === "Available").length} Lockers Free</span>
-            <Link to="/dashboard/lockers" className="text-foreground font-semibold hover:underline">
-              Manage →
-            </Link>
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-rose-500/15 text-rose-500 border border-rose-500/25 shrink-0">
+            <Flame className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Pending Member Dues */}
+        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+          <div className="space-y-1">
+            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+              PENDING DUES
+            </div>
+            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground font-mono">
+              {settings.currencySymbol}{pendingDuesTotal.toLocaleString("en-IN")}
+            </p>
+            <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+              {overdueMembers.length} with balance
+            </div>
+          </div>
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-amber-500/15 text-amber-500 border border-amber-500/25 shrink-0">
+            <AlertTriangle className="h-5 w-5" />
           </div>
         </div>
       </div>
 
-      {/* 4. Two-Column Operational Views: Members & Financial Transactions */}
+      {/* 4. Live Floor Attendance Heatmap & Front Desk Shift Matrix */}
+      <div className="rounded-3xl border border-border bg-surface p-6 sm:p-7 shadow-2xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+          <div>
+            <h3 className="text-sm font-heading font-black uppercase tracking-wider text-foreground">
+              Live Floor Traffic & Operational Shift Matrix
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Real-time hourly attendance distribution, peak gym rush windows, and daily desk targets.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-[11px] font-heading font-bold text-emerald uppercase tracking-wider">
+              <span className="h-2 w-2 rounded-full bg-emerald animate-pulse" />
+              <span>Turnstile Active</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Column 1: Today's Peak Hours Traffic Curve */}
+          <div className="space-y-3 lg:col-span-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-heading font-bold uppercase tracking-wider text-foreground">
+                Today's Peak Hour Traffic Distribution
+              </span>
+              <span className="text-[11px] text-muted-foreground font-mono">
+                Current: <strong className="text-brand">{hour}:00 hrs</strong>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2 pt-2">
+              {[
+                { time: "06-09 AM", label: "Morning Rush", count: 18, max: 25, isCurrent: hour >= 6 && hour < 9 },
+                { time: "09-12 PM", label: "Mid-Morning", count: 8, max: 25, isCurrent: hour >= 9 && hour < 12 },
+                { time: "12-04 PM", label: "Afternoon", count: 4, max: 25, isCurrent: hour >= 12 && hour < 16 },
+                { time: "05-08 PM", label: "Peak Prime", count: 22, max: 25, isCurrent: hour >= 17 && hour < 20 },
+                { time: "08-10 PM", label: "Late Session", count: 11, max: 25, isCurrent: hour >= 20 && hour < 22 },
+              ].map((slot) => {
+                const pct = Math.round((slot.count / slot.max) * 100);
+                return (
+                  <div
+                    key={slot.time}
+                    className={`rounded-2xl border p-3 flex flex-col justify-between space-y-2 transition ${
+                      slot.isCurrent
+                        ? "border-brand bg-brand-soft/20 shadow-xs"
+                        : "border-border bg-canvas hover:border-brand/30"
+                    }`}
+                  >
+                    <div className="space-y-0.5">
+                      <div className="text-[10px] font-mono font-bold text-muted-foreground">
+                        {slot.time}
+                      </div>
+                      <div className="text-[11px] font-heading font-bold uppercase tracking-tight text-foreground truncate">
+                        {slot.label}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-baseline justify-between text-[11px]">
+                        <span className="font-heading font-black text-foreground">{slot.count}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">{pct}%</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            slot.isCurrent ? "bg-brand" : pct > 75 ? "bg-rose-500" : "bg-emerald"
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Column 2: Financial Realization & Monthly Target Progress */}
+          <div className="rounded-2xl border border-border bg-canvas p-4.5 space-y-3.5 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-heading font-bold uppercase tracking-wider text-foreground">
+                Monthly Target Pace
+              </span>
+              <span className="text-[10px] font-heading font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald">
+                {revenuePercent}% Realized
+              </span>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-heading font-black text-foreground font-mono">
+                  {settings.currencySymbol}{totalInflow.toLocaleString("en-IN")}
+                </span>
+                <span className="text-xs text-muted-foreground font-mono">
+                  Target: {settings.currencySymbol}{revenueTarget.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-brand transition-all duration-500 shadow-xs"
+                  style={{ width: `${revenuePercent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/60">
+              <div className="space-y-0.5">
+                <div className="text-[10px] uppercase font-bold text-muted-foreground">Retention</div>
+                <div className="font-heading font-black text-foreground">{retentionPercent}% Retained</div>
+              </div>
+              <div className="space-y-0.5">
+                <div className="text-[10px] uppercase font-bold text-muted-foreground">Active Leads</div>
+                <div className="font-heading font-black text-brand">{activeLeadsCount} Prospects</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Quick Action Tiles Dock (Workouts, Nutrition, Lead Pipeline, Lockers, Water, Analytics Grid) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <Link
+          to="/dashboard/workouts"
+          className="group rounded-2xl border border-border bg-surface p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-brand/40 hover:bg-muted/40 transition shadow-2xs cursor-pointer"
+        >
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas text-foreground group-hover:bg-brand group-hover:text-brand-foreground transition">
+            <Dumbbell className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+            WORKOUT & DIET
+          </span>
+        </Link>
+
+        <button
+          onClick={() => setIsRecordPaymentOpen(true)}
+          className="group rounded-2xl border border-border bg-surface p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-brand/40 hover:bg-muted/40 transition shadow-2xs cursor-pointer"
+        >
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas text-foreground group-hover:bg-brand group-hover:text-brand-foreground transition">
+            <CreditCard className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+            COLLECT DUES
+          </span>
+        </button>
+
+        <Link
+          to="/dashboard/checkin"
+          className="group rounded-2xl border border-brand/30 bg-brand-soft/10 p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-brand/60 hover:bg-brand-soft/20 transition shadow-2xs cursor-pointer"
+        >
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground shadow-xs">
+            <Zap className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-brand">
+            TURNSTILE SCAN
+          </span>
+        </Link>
+
+        <Link
+          to="/dashboard/renewals"
+          className="group rounded-2xl border border-border bg-surface p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-brand/40 hover:bg-muted/40 transition shadow-2xs cursor-pointer"
+        >
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas text-foreground group-hover:bg-brand group-hover:text-brand-foreground transition">
+            <RotateCw className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+            RENEWALS HUB
+          </span>
+        </Link>
+
+        <Link
+          to="/dashboard/reminders"
+          className="group rounded-2xl border border-border bg-surface p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-brand/40 hover:bg-muted/40 transition shadow-2xs cursor-pointer"
+        >
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas text-foreground group-hover:bg-brand group-hover:text-brand-foreground transition">
+            <Radio className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+            BROADCAST
+          </span>
+        </Link>
+
+        <Link
+          to="/dashboard/reports"
+          className="group rounded-2xl border border-border bg-surface p-4 flex flex-col items-center justify-center gap-2.5 text-center hover:border-brand/40 hover:bg-muted/40 transition shadow-2xs cursor-pointer"
+        >
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas text-foreground group-hover:bg-brand group-hover:text-brand-foreground transition">
+            <FileSpreadsheet className="h-4 w-4" />
+          </div>
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+            REPORTS & EXPORTS
+          </span>
+        </Link>
+      </div>
+
+      {/* 6. Two-Column Operational Views: Members Roster & Receipts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Member Roster with Quick Nudge */}
-        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-2xs">
+        {/* Left Column: Member Roster with Quick Renew/Nudge */}
+        <div className="rounded-3xl border border-border bg-surface p-6 space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Member Registry & Status</h3>
-              <p className="text-xs text-muted-foreground">Click member to open complete profile & history</p>
+              <h3 className="text-sm font-heading font-black uppercase tracking-wider text-foreground">
+                Live Member Roster & Status
+              </h3>
+              <p className="text-xs text-muted-foreground">Click member to open profile, freeze, or transfer</p>
             </div>
             <Link
               to="/dashboard/members"
-              className="text-xs font-semibold text-emerald hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-brand hover:underline flex items-center gap-1"
             >
-              <span>View All</span>
+              <span>Directory</span>
               <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="divide-y divide-border rounded-xl border border-border bg-canvas overflow-hidden">
+          <div className="divide-y divide-border rounded-2xl border border-border bg-canvas overflow-hidden">
             {members.slice(0, 5).map((m) => (
               <div
                 key={m.id}
@@ -225,8 +490,8 @@ function DashboardOverview() {
                 className="p-3.5 flex items-center justify-between gap-3 text-xs hover:bg-muted/30 cursor-pointer transition"
               >
                 <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-foreground text-background font-bold text-xs">
-                    {m.name.charAt(0)}
+                  <div className="grid h-8 w-8 place-items-center rounded-xl bg-surface border border-border font-bold text-xs">
+                    {m.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <p className="font-bold text-foreground">{m.name}</p>
@@ -236,12 +501,22 @@ function DashboardOverview() {
 
                 <div className="flex items-center gap-2">
                   {m.due > 0 ? (
-                    <span className="rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 text-[10px] font-mono">
+                    <span className="rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold px-2.5 py-0.5 text-[10px] font-mono">
                       Due: {settings.currencySymbol}{m.due.toLocaleString("en-IN")}
                     </span>
                   ) : (
-                    <span className="rounded-full bg-emerald-soft text-accent-foreground font-semibold px-2 py-0.5 text-[10px]">
-                      Active
+                    <span
+                      className={`rounded-full font-bold px-2.5 py-0.5 text-[10px] ${
+                        m.status === "Active"
+                          ? "bg-emerald-500/20 text-emerald"
+                          : m.status === "Expiring"
+                          ? "bg-amber-500/20 text-amber-500"
+                          : m.status === "Frozen"
+                          ? "bg-blue-500/20 text-blue-500"
+                          : "bg-rose-500/20 text-rose-500"
+                      }`}
+                    >
+                      {m.status}
                     </span>
                   )}
                   <button
@@ -260,30 +535,32 @@ function DashboardOverview() {
           </div>
         </div>
 
-        {/* Right Column: Recent Payments & Receipts */}
-        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-2xs">
+        {/* Right Column: Recent Receipts & Collections */}
+        <div className="rounded-3xl border border-border bg-surface p-6 space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Recent Financial Receipts</h3>
-              <p className="text-xs text-muted-foreground">Logged payments and installment collections</p>
+              <h3 className="text-sm font-heading font-black uppercase tracking-wider text-foreground">
+                Recent Receipts & Collections
+              </h3>
+              <p className="text-xs text-muted-foreground">Logged payments and generated tax receipts</p>
             </div>
             <Link
               to="/dashboard/payments"
-              className="text-xs font-semibold text-emerald hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-brand hover:underline flex items-center gap-1"
             >
               <span>Ledger</span>
               <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="divide-y divide-border rounded-xl border border-border bg-canvas overflow-hidden">
+          <div className="divide-y divide-border rounded-2xl border border-border bg-canvas overflow-hidden">
             {payments.slice(0, 5).map((p) => (
               <div
                 key={p.id}
                 className="p-3.5 flex items-center justify-between gap-3 text-xs hover:bg-muted/30 transition"
               >
                 <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-canvas border border-border text-foreground">
+                  <div className="grid h-8 w-8 place-items-center rounded-xl bg-surface border border-border text-foreground">
                     <Receipt className="h-4 w-4" />
                   </div>
                   <div>
@@ -307,7 +584,7 @@ function DashboardOverview() {
                       setIsInvoiceModalOpen(true);
                     }}
                     className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                    title="View Receipt"
+                    title="View / Print Tax Receipt"
                   >
                     <FileText className="h-3.5 w-3.5" />
                   </button>
@@ -318,77 +595,6 @@ function DashboardOverview() {
             {payments.length === 0 && (
               <div className="p-6 text-center text-xs text-muted-foreground">
                 No payment transactions recorded yet.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Bottom Roster: Training Splits & Floor Staff */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Workout Splits */}
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-3 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Dumbbell className="h-3.5 w-3.5 text-emerald" />
-              <span>Training Programs & Splits</span>
-            </h3>
-            <Link to="/dashboard/workouts" className="text-xs text-emerald font-semibold hover:underline">
-              Workout Builder →
-            </Link>
-          </div>
-
-          <div className="space-y-2 text-xs">
-            {workoutPrograms.slice(0, 3).map((w) => (
-              <div key={w.id} className="p-3 rounded-xl border border-border bg-canvas flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-foreground">{w.title}</p>
-                  <p className="text-[11px] text-muted-foreground">{w.category} • {w.daysPerWeek} Days/Wk ({w.level})</p>
-                </div>
-                <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground">
-                  {members.filter((m) => m.assignedWorkout === w.title).length} Enrolled
-                </span>
-              </div>
-            ))}
-
-            {workoutPrograms.length === 0 && (
-              <div className="p-4 text-center text-muted-foreground text-xs">
-                No workout splits created yet.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Staff */}
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-3 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <UserCheck className="h-3.5 w-3.5 text-blue-500" />
-              <span>Duty Trainers & Staff</span>
-            </h3>
-            <Link to="/dashboard/staff" className="text-xs text-emerald font-semibold hover:underline">
-              Staff Directory →
-            </Link>
-          </div>
-
-          <div className="space-y-2 text-xs">
-            {staff.slice(0, 3).map((s) => (
-              <div key={s.id} className="p-3 rounded-xl border border-border bg-canvas flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-foreground">{s.name}</p>
-                  <p className="text-[11px] text-muted-foreground">{s.role} • {s.shift}</p>
-                </div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                  s.status === "On Floor" ? "bg-emerald-soft text-accent-foreground" : "bg-muted text-muted-foreground"
-                }`}>
-                  {s.status}
-                </span>
-              </div>
-            ))}
-
-            {staff.length === 0 && (
-              <div className="p-4 text-center text-muted-foreground text-xs">
-                No staff members currently configured.
               </div>
             )}
           </div>

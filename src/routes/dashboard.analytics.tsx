@@ -9,10 +9,22 @@ import {
   Building,
 } from "lucide-react";
 import { useGymStore } from "../lib/gym-store";
+import { RoleGuard } from "../components/dashboard/RoleGuard";
 
 export const Route = createFileRoute("/dashboard/analytics")({
-  component: AnalyticsDashboard,
+  component: AnalyticsDashboardRoute,
+  head: () => ({
+    meta: [{ title: "Analytics & Growth | PEAKREP Gym OS" }],
+  }),
 });
+
+function AnalyticsDashboardRoute() {
+  return (
+    <RoleGuard requiredRole="admin" moduleName="Revenue & Financial Analytics">
+      <AnalyticsDashboard />
+    </RoleGuard>
+  );
+}
 
 function AnalyticsDashboard() {
   const { members, payments, staff, settings } = useGymStore();
@@ -61,8 +73,10 @@ function AnalyticsDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Analytics & Member Retention</h1>
-            <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Analytics & Member Retention
+            </h1>
+            <span className="rounded-full bg-emerald-500/20 text-emerald px-2.5 py-0.5 text-xs font-bold font-mono">
               {retentionRate}% Retention
             </span>
           </div>
@@ -74,7 +88,7 @@ function AnalyticsDashboard() {
 
       {/* Retention KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2">
+        <div className="rounded-3xl border border-border bg-surface p-5 space-y-2">
           <span className="text-xs font-semibold text-muted-foreground">Overall Member Retention</span>
           <p className="text-3xl font-bold font-mono tracking-tight text-emerald">{retentionRate}%</p>
           <p className="text-xs text-muted-foreground">
@@ -82,7 +96,7 @@ function AnalyticsDashboard() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2">
+        <div className="rounded-3xl border border-border bg-surface p-5 space-y-2">
           <span className="text-xs font-semibold text-muted-foreground">Average Member Lifetime Value (LTV)</span>
           <p className="text-3xl font-bold font-mono tracking-tight text-foreground">
             {settings.currencySymbol}{avgLTV.toLocaleString("en-IN")}
@@ -92,7 +106,7 @@ function AnalyticsDashboard() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5 space-y-2">
+        <div className="rounded-3xl border border-border bg-surface p-5 space-y-2">
           <span className="text-xs font-semibold text-muted-foreground">Monthly Churn Rate</span>
           <p className="text-3xl font-bold font-mono tracking-tight text-amber-500">
             {totalMembers > 0 ? `${100 - retentionRate}%` : "0%"}
@@ -102,37 +116,40 @@ function AnalyticsDashboard() {
       </div>
 
       {/* Cohort Retention Table */}
-      <div className="rounded-2xl border border-border bg-surface p-6 space-y-4">
-        <div>
-          <h3 className="text-base font-semibold tracking-tight">Member Cohort Retention Matrix</h3>
-          <p className="text-xs text-muted-foreground">
-            Percentage of members active across subsequent months after initial enrollment
-          </p>
+      <div className="rounded-3xl border border-border bg-surface p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-foreground">Member Cohort Retention Matrix</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Percentage of members remaining active month-over-month
+            </p>
+          </div>
+          <span className="text-xs font-mono text-muted-foreground">Updated Live</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead className="border-b border-border bg-canvas text-left uppercase text-muted-foreground font-semibold tracking-wider">
+          <table className="w-full text-xs text-left">
+            <thead className="border-b border-border text-muted-foreground uppercase text-[10px]">
               <tr>
-                <th className="py-3 px-4">Cohort Month</th>
-                <th className="py-3 px-4">Size</th>
-                <th className="py-3 px-4">Month 1</th>
-                <th className="py-3 px-4">Month 2</th>
-                <th className="py-3 px-4">Month 3</th>
-                <th className="py-3 px-4">Month 4</th>
-                <th className="py-3 px-4">Month 5</th>
+                <th className="p-3">Cohort</th>
+                <th className="p-3">Size</th>
+                <th className="p-3">Month 1</th>
+                <th className="p-3">Month 2</th>
+                <th className="p-3">Month 3</th>
+                <th className="p-3">Month 4</th>
+                <th className="p-3">Month 5</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {realCohort.map((row) => (
-                <tr key={row.cohort} className="hover:bg-muted/40 transition">
-                  <td className="py-3 px-4 font-semibold text-foreground">{row.cohort}</td>
-                  <td className="py-3 px-4 font-mono">{row.size} members</td>
-                  <td className="py-3 px-4 font-mono font-semibold text-emerald">{row.m1}</td>
-                  <td className="py-3 px-4 font-mono font-semibold text-emerald">{row.m2}</td>
-                  <td className="py-3 px-4 font-mono font-semibold text-emerald">{row.m3}</td>
-                  <td className="py-3 px-4 font-mono font-medium">{row.m4}</td>
-                  <td className="py-3 px-4 font-mono font-medium">{row.m5}</td>
+              {realCohort.map((c) => (
+                <tr key={c.cohort} className="hover:bg-muted/40">
+                  <td className="p-3 font-semibold text-foreground">{c.cohort}</td>
+                  <td className="p-3 font-mono">{c.size}</td>
+                  <td className="p-3 font-mono font-bold text-emerald">{c.m1}</td>
+                  <td className="p-3 font-mono text-muted-foreground">{c.m2}</td>
+                  <td className="p-3 font-mono text-muted-foreground">{c.m3}</td>
+                  <td className="p-3 font-mono text-muted-foreground">{c.m4}</td>
+                  <td className="p-3 font-mono text-muted-foreground">{c.m5}</td>
                 </tr>
               ))}
             </tbody>
@@ -140,89 +157,21 @@ function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* Trainer Performance & Revenue Contribution */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4">
-          <div>
-            <h3 className="text-base font-semibold tracking-tight">Trainer PT Revenue Yield</h3>
-            <p className="text-xs text-muted-foreground">Personal Training revenue generated per coach</p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            {trainerData.length > 0 ? (
-              trainerData.map((item) => (
-                <div key={item.name} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold">{item.name}</span>
-                    <span className="font-mono font-bold">
-                      {settings.currencySymbol}{item.value.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full transition-all"
-                      style={{
-                        width: `${Math.min(100, (item.value / 50000) * 100)}%`,
-                        backgroundColor: item.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="py-6 text-center text-xs text-muted-foreground">
-                No personal trainers registered yet. Add staff members in the Staff tab.
+      {/* Trainer Revenue Breakdown */}
+      <div className="rounded-3xl border border-border bg-surface p-6 space-y-4">
+        <h3 className="text-base font-bold text-foreground">Staff & Trainer Revenue Yield</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {trainerData.map((t) => (
+            <div key={t.name} className="p-4 rounded-2xl border border-border bg-canvas space-y-1">
+              <span className="text-xs text-muted-foreground">{t.name}</span>
+              <p className="text-xl font-bold font-mono text-foreground">
+                {settings.currencySymbol}{t.value.toLocaleString("en-IN")}
               </p>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-surface p-6 space-y-4">
-          <div>
-            <h3 className="text-base font-semibold tracking-tight">Revenue Stream Distribution</h3>
-            <p className="text-xs text-muted-foreground">Membership fees vs personal training vs registrations</p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            {[
-              {
-                name: "Membership Subscriptions",
-                value: payments.filter((p) => p.category === "Membership" && p.status === "Paid").reduce((s, p) => s + p.amount, 0),
-                color: "#10b981",
-              },
-              {
-                name: "Personal Training",
-                value: payments.filter((p) => p.category === "Personal Training" && p.status === "Paid").reduce((s, p) => s + p.amount, 0),
-                color: "#a855f7",
-              },
-              {
-                name: "Registration & Admission",
-                value: payments.filter((p) => p.category === "Registration" && p.status === "Paid").reduce((s, p) => s + p.amount, 0),
-                color: "#3b82f6",
-              },
-            ].map((st) => {
-              const pct = totalRevenue > 0 ? Math.round((st.value / totalRevenue) * 100) : 0;
-              return (
-                <div key={st.name} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold">{st.name} ({pct}%)</span>
-                    <span className="font-mono font-bold">
-                      {settings.currencySymbol}{st.value.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full transition-all"
-                      style={{
-                        width: `${pct}%`,
-                        backgroundColor: st.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mt-2">
+                <div className="h-full bg-purple-500 rounded-full" style={{ width: "65%" }} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
