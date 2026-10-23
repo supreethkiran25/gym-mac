@@ -52,10 +52,23 @@ export interface SmartInsight {
   type: "warning" | "opportunity" | "info" | "alert";
   metricChange: string;
   actionLabel: string;
-  actionType: "nudge_expiring" | "assign_trainer" | "service_equipment" | "promote_pt" | "restock_pos" | "followup_leads";
+  actionType:
+    | "nudge_expiring"
+    | "assign_trainer"
+    | "service_equipment"
+    | "promote_pt"
+    | "restock_pos"
+    | "followup_leads";
 }
 
-export type LeadStage = "Inquiry" | "Trial Scheduled" | "Trial Booked" | "Trial Completed" | "Offer Sent" | "Won" | "Lost";
+export type LeadStage =
+  | "Inquiry"
+  | "Trial Scheduled"
+  | "Trial Booked"
+  | "Trial Completed"
+  | "Offer Sent"
+  | "Won"
+  | "Lost";
 
 export interface Lead {
   id: string;
@@ -206,7 +219,13 @@ export interface GymSettings {
 
 export interface FinancialTransaction {
   id: string;
-  type: "Subscription" | "Personal Training" | "POS Sale" | "Staff Salary" | "Equipment Maintenance" | "Utility Expense";
+  type:
+    | "Subscription"
+    | "Personal Training"
+    | "POS Sale"
+    | "Staff Salary"
+    | "Equipment Maintenance"
+    | "Utility Expense";
   category: "Income" | "Expense";
   amount: number;
   description: string;
@@ -236,7 +255,12 @@ const DEFAULT_MEMBERSHIP_PLANS: MembershipPlan[] = [
     price: 7500,
     durationMonths: 3,
     activeCount: 68,
-    perks: ["Full gym access", "1 Free 1-on-1 PT assessment", "Free body composition scan", "Locker access"],
+    perks: [
+      "Full gym access",
+      "1 Free 1-on-1 PT assessment",
+      "Free body composition scan",
+      "Locker access",
+    ],
     type: "Standard",
   },
   {
@@ -245,7 +269,13 @@ const DEFAULT_MEMBERSHIP_PLANS: MembershipPlan[] = [
     price: 22000,
     durationMonths: 12,
     activeCount: 89,
-    perks: ["Unlimited 24/7 access", "Steam & sauna suite", "12 Free guest passes", "Custom diet & workout split", "Dedicated locker"],
+    perks: [
+      "Unlimited 24/7 access",
+      "Steam & sauna suite",
+      "12 Free guest passes",
+      "Custom diet & workout split",
+      "Dedicated locker",
+    ],
     type: "Premium",
   },
   {
@@ -254,7 +284,11 @@ const DEFAULT_MEMBERSHIP_PLANS: MembershipPlan[] = [
     price: 18000,
     durationMonths: 2,
     activeCount: 14,
-    perks: ["24 Private sessions with Senior Coach", "Nutritional macro guidance", "Weekly body metric tracking"],
+    perks: [
+      "24 Private sessions with Senior Coach",
+      "Nutritional macro guidance",
+      "Weekly body metric tracking",
+    ],
     type: "PT Package",
   },
 ];
@@ -307,9 +341,29 @@ const DEFAULT_STAFF: StaffMember[] = [];
 const DEFAULT_EQUIPMENT: GymEquipment[] = [];
 
 const DEFAULT_LOCKERS: LockerItem[] = [
-  { id: "loc-1", number: "L-101", bay: "A (Men's Locker)", status: "Occupied", assignedMemberName: "Kariya", expiresOn: "2026-06-01", keyNumber: "K-101" },
-  { id: "loc-2", number: "L-102", bay: "A (Men's Locker)", status: "Available", keyNumber: "K-102" },
-  { id: "loc-3", number: "L-103", bay: "A (Men's Locker)", status: "Available", keyNumber: "K-103" },
+  {
+    id: "loc-1",
+    number: "L-101",
+    bay: "A (Men's Locker)",
+    status: "Occupied",
+    assignedMemberName: "Kariya",
+    expiresOn: "2026-06-01",
+    keyNumber: "K-101",
+  },
+  {
+    id: "loc-2",
+    number: "L-102",
+    bay: "A (Men's Locker)",
+    status: "Available",
+    keyNumber: "K-102",
+  },
+  {
+    id: "loc-3",
+    number: "L-103",
+    bay: "A (Men's Locker)",
+    status: "Available",
+    keyNumber: "K-103",
+  },
 ];
 
 const DEFAULT_SETTINGS: GymSettings = {
@@ -324,7 +378,8 @@ const DEFAULT_SETTINGS: GymSettings = {
   invoicePrefix: "INV-2026-",
   taxRatePercent: 18,
   autoSendWhatsAppOnRenewal: true,
-  reminderTemplateWhatsApp: "Hi {name}, your membership at {gym} for {plan} is due for renewal. Please tap here to pay: {link}",
+  reminderTemplateWhatsApp:
+    "Hi {name}, your membership at {gym} for {plan} is due for renewal. Please tap here to pay: {link}",
   reminderTemplateSMS: "Alert: {name}, your {gym} pass expires in 2 days. Settle dues: {link}",
   welcomeTemplateWhatsApp: "Welcome to {gym}, {name}! Your {plan} pass is active.",
   membershipPlans: DEFAULT_MEMBERSHIP_PLANS,
@@ -340,7 +395,12 @@ interface GymStoreContextType {
   setTheme: (theme: "dark" | "light") => void;
 
   members: Member[];
-  addMember: (m: Omit<Member, "id" | "attendanceRate" | "lastVisit" | "streakDays" | "totalVisitsThisMonth" | "invoices">) => void;
+  addMember: (
+    m: Omit<
+      Member,
+      "id" | "attendanceRate" | "lastVisit" | "streakDays" | "totalVisitsThisMonth" | "invoices"
+    >,
+  ) => void;
   updateMember: (id: string, updates: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   checkInMember: (id: string) => void;
@@ -356,7 +416,11 @@ interface GymStoreContextType {
   posProducts: POSProduct[];
   addPOSProduct: (p: Omit<POSProduct, "id" | "soldCount">) => void;
   updatePOSProductStock: (id: string, delta: number) => void;
-  processPOSSale: (sale: { memberName: string; items: POSSaleItem[]; paymentMethod: "UPI" | "Cash" | "Card" }) => void;
+  processPOSSale: (sale: {
+    memberName: string;
+    items: POSSaleItem[];
+    paymentMethod: "UPI" | "Cash" | "Card";
+  }) => void;
 
   equipment: GymEquipment[];
   addEquipment: (e: Omit<GymEquipment, "id" | "usageCount">) => void;
@@ -372,7 +436,12 @@ interface GymStoreContextType {
   toggleStaffStatus: (id: string, status: "On Floor" | "Off Duty" | "On Leave") => void;
 
   lockers: LockerItem[];
-  assignLocker: (lockerNumber: string, memberId: string, memberName: string, expiresOn: string) => void;
+  assignLocker: (
+    lockerNumber: string,
+    memberId: string,
+    memberName: string,
+    expiresOn: string,
+  ) => void;
   releaseLocker: (lockerNumber: string) => void;
 
   settings: GymSettings;
@@ -411,7 +480,12 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [selectedMember360, setSelectedMember360] = useState<Member | null>(null);
-  const [upiQRState, setUpiQRState] = useState({ isOpen: false, amount: 2800, memberName: "", description: "" });
+  const [upiQRState, setUpiQRState] = useState({
+    isOpen: false,
+    amount: 2800,
+    memberName: "",
+    description: "",
+  });
 
   const setTheme = (newTheme: "dark" | "light") => {
     setThemeState(newTheme);
@@ -422,7 +496,12 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Member CRUD Actions
-  const addMember = (m: Omit<Member, "id" | "attendanceRate" | "lastVisit" | "streakDays" | "totalVisitsThisMonth" | "invoices">) => {
+  const addMember = (
+    m: Omit<
+      Member,
+      "id" | "attendanceRate" | "lastVisit" | "streakDays" | "totalVisitsThisMonth" | "invoices"
+    >,
+  ) => {
     const newMember: Member = {
       ...m,
       id: `mem-${Date.now()}`,
@@ -466,8 +545,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
               lastVisit: `Today, ${timeStr}`,
               totalVisitsThisMonth: m.totalVisitsThisMonth + 1,
             }
-          : m
-      )
+          : m,
+      ),
     );
   };
 
@@ -480,8 +559,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
               isCurrentlyInside: false,
               checkInTime: undefined,
             }
-          : m
-      )
+          : m,
+      ),
     );
   };
 
@@ -509,7 +588,7 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
             },
           ],
         };
-      })
+      }),
     );
   };
 
@@ -530,7 +609,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   const convertLeadToMember = (leadId: string, planName: string) => {
     const lead = leads.find((l) => l.id === leadId);
     if (!lead) return;
-    const plan = settings.membershipPlans.find((p) => p.name === planName) || settings.membershipPlans[0];
+    const plan =
+      settings.membershipPlans.find((p) => p.name === planName) || settings.membershipPlans[0];
     const today = new Date().toISOString().split("T")[0];
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + plan.durationMonths);
@@ -570,11 +650,15 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
 
   const updatePOSProductStock = (id: string, delta: number) => {
     setPosProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, stock: Math.max(0, p.stock + delta) } : p))
+      prev.map((p) => (p.id === id ? { ...p, stock: Math.max(0, p.stock + delta) } : p)),
     );
   };
 
-  const processPOSSale = (sale: { memberName: string; items: POSSaleItem[]; paymentMethod: "UPI" | "Cash" | "Card" }) => {
+  const processPOSSale = (sale: {
+    memberName: string;
+    items: POSSaleItem[];
+    paymentMethod: "UPI" | "Cash" | "Card";
+  }) => {
     const totalAmount = sale.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     // Decrement stock
     sale.items.forEach((item) => {
@@ -613,8 +697,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
               lastServiced: today,
               nextServiceDate: nextDate.toISOString().split("T")[0],
             }
-          : e
-      )
+          : e,
+      ),
     );
   };
 
@@ -646,13 +730,24 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Lockers Actions
-  const assignLocker = (lockerNumber: string, memberId: string, memberName: string, expiresOn: string) => {
+  const assignLocker = (
+    lockerNumber: string,
+    memberId: string,
+    memberName: string,
+    expiresOn: string,
+  ) => {
     setLockers((prev) =>
       prev.map((l) =>
         l.number === lockerNumber
-          ? { ...l, status: "Occupied", assignedMemberId: memberId, assignedMemberName: memberName, expiresOn }
-          : l
-      )
+          ? {
+              ...l,
+              status: "Occupied",
+              assignedMemberId: memberId,
+              assignedMemberName: memberName,
+              expiresOn,
+            }
+          : l,
+      ),
     );
   };
 
@@ -660,9 +755,15 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
     setLockers((prev) =>
       prev.map((l) =>
         l.number === lockerNumber
-          ? { ...l, status: "Available", assignedMemberId: undefined, assignedMemberName: undefined, expiresOn: undefined }
-          : l
-      )
+          ? {
+              ...l,
+              status: "Available",
+              assignedMemberId: undefined,
+              assignedMemberName: undefined,
+              expiresOn: undefined,
+            }
+          : l,
+      ),
     );
   };
 

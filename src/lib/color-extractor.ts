@@ -106,12 +106,7 @@ export function hslToHex(h: number, s: number, l: number): string {
   const green = Math.round((g + m) * 255);
   const blue = Math.round((b + m) * 255);
 
-  return (
-    "#" +
-    [red, green, blue]
-      .map((val) => val.toString(16).padStart(2, "0"))
-      .join("")
-  );
+  return "#" + [red, green, blue].map((val) => val.toString(16).padStart(2, "0")).join("");
 }
 
 // Convert Hex string to RGB numbers
@@ -125,7 +120,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   }
   const num = parseInt(clean, 16);
   if (isNaN(num)) {
-    return { r: 239, g: 68, b: 68 }; // fallback radiant red
+    return { r: 59, g: 130, b: 246 }; // fallback enterprise tech blue
   }
   return {
     r: (num >> 16) & 255,
@@ -170,7 +165,11 @@ export function generateAdaptiveBrandTheme(baseHex: string): AdaptiveBrandTheme 
   const darkRgb = hexToRgb(darkPrimary);
 
   // Dark Text: Luminous lightness 72%-80%
-  const darkText = hslToHex(hsl.h, Math.min(1, hsl.s * 1.1), Math.min(0.82, Math.max(0.72, darkPrimaryLightness + 0.18)));
+  const darkText = hslToHex(
+    hsl.h,
+    Math.min(1, hsl.s * 1.1),
+    Math.min(0.82, Math.max(0.72, darkPrimaryLightness + 0.18)),
+  );
 
   return {
     primaryHex: baseHex,
@@ -200,7 +199,7 @@ export function generateAdaptiveBrandTheme(baseHex: string): AdaptiveBrandTheme 
 export function extractDominantColor(imageSrc: string): Promise<string> {
   return new Promise((resolve) => {
     if (typeof window === "undefined") {
-      resolve("#e11d48");
+      resolve("#3b82f6");
       return;
     }
 
@@ -212,7 +211,7 @@ export function extractDominantColor(imageSrc: string): Promise<string> {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-          resolve("#e11d48");
+          resolve("#3b82f6");
           return;
         }
 
@@ -222,7 +221,7 @@ export function extractDominantColor(imageSrc: string): Promise<string> {
         ctx.drawImage(img, 0, 0, size, size);
 
         const imgData = ctx.getImageData(0, 0, size, size).data;
-        
+
         interface ColorCluster {
           totalR: number;
           totalG: number;
@@ -234,7 +233,10 @@ export function extractDominantColor(imageSrc: string): Promise<string> {
         }
 
         const clusters: Map<number, ColorCluster> = new Map();
-        let fallbackR = 0, fallbackG = 0, fallbackB = 0, fallbackCount = 0;
+        let fallbackR = 0,
+          fallbackG = 0,
+          fallbackB = 0,
+          fallbackCount = 0;
 
         for (let i = 0; i < imgData.length; i += 4) {
           const r = imgData[i];
@@ -296,10 +298,11 @@ export function extractDominantColor(imageSrc: string): Promise<string> {
             const avgR = Math.round(fallbackR / fallbackCount);
             const avgG = Math.round(fallbackG / fallbackCount);
             const avgB = Math.round(fallbackB / fallbackCount);
-            const fallbackHex = "#" + [avgR, avgG, avgB].map((x) => x.toString(16).padStart(2, "0")).join("");
+            const fallbackHex =
+              "#" + [avgR, avgG, avgB].map((x) => x.toString(16).padStart(2, "0")).join("");
             resolve(fallbackHex);
           } else {
-            resolve("#e11d48");
+            resolve("#3b82f6");
           }
           return;
         }
@@ -313,8 +316,12 @@ export function extractDominantColor(imageSrc: string): Promise<string> {
           const avgSat = cluster.saturation / cluster.count;
           const avgLightness = cluster.lightness / cluster.count;
 
-          const lightnessWeight = 1 - Math.abs(avgLightness - 0.50) * 1.0;
-          const score = cluster.count * Math.pow(avgSat, 2.2) * (avgChroma / 255) * Math.max(0.3, lightnessWeight);
+          const lightnessWeight = 1 - Math.abs(avgLightness - 0.5) * 1.0;
+          const score =
+            cluster.count *
+            Math.pow(avgSat, 2.2) *
+            (avgChroma / 255) *
+            Math.max(0.3, lightnessWeight);
 
           if (score > highestScore) {
             highestScore = score;
@@ -328,23 +335,20 @@ export function extractDominantColor(imageSrc: string): Promise<string> {
           const finalB = Math.round(bestCluster.totalB / bestCluster.count);
 
           const finalHex =
-            "#" +
-            [finalR, finalG, finalB]
-              .map((x) => x.toString(16).padStart(2, "0"))
-              .join("");
+            "#" + [finalR, finalG, finalB].map((x) => x.toString(16).padStart(2, "0")).join("");
 
           resolve(finalHex);
         } else {
-          resolve("#e11d48");
+          resolve("#3b82f6");
         }
       } catch (err) {
         console.warn("[ColorExtractor Error]:", err);
-        resolve("#e11d48");
+        resolve("#3b82f6");
       }
     };
 
     img.onerror = () => {
-      resolve("#e11d48");
+      resolve("#3b82f6");
     };
 
     img.src = imageSrc;
@@ -367,7 +371,10 @@ export function applyBrandThemeCss(hexColor: string) {
     const activePrimaryRgb = hexToRgb(activePrimary);
 
     root.style.setProperty("--brand-primary", activePrimary);
-    root.style.setProperty("--brand-rgb", `${activePrimaryRgb.r}, ${activePrimaryRgb.g}, ${activePrimaryRgb.b}`);
+    root.style.setProperty(
+      "--brand-rgb",
+      `${activePrimaryRgb.r}, ${activePrimaryRgb.g}, ${activePrimaryRgb.b}`,
+    );
     root.style.setProperty("--brand-foreground", theme.foreground);
 
     // Light Mode Specific CSS Properties
@@ -394,7 +401,10 @@ export function applyBrandThemeCss(hexColor: string) {
       root.style.setProperty("--brand-text", theme.light.text);
       root.style.setProperty("--brand-soft", theme.light.softBg);
       root.style.setProperty("--brand-border", theme.light.border);
-      root.style.setProperty("--brand-glow", `rgba(${theme.primaryRgb.r}, ${theme.primaryRgb.g}, ${theme.primaryRgb.b}, 0.20)`);
+      root.style.setProperty(
+        "--brand-glow",
+        `rgba(${theme.primaryRgb.r}, ${theme.primaryRgb.g}, ${theme.primaryRgb.b}, 0.20)`,
+      );
       root.style.setProperty("--brand-hover", theme.light.hover);
     }
   } catch (err) {

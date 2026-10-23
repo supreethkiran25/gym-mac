@@ -11,14 +11,8 @@ import {
 import { useGymStore } from "../gym-store";
 
 export function InstantCheckInModal() {
-  const {
-    isCheckInOpen,
-    setIsCheckInOpen,
-    members,
-    checkInMember,
-    checkOutMember,
-    theme,
-  } = useGymStore();
+  const { isCheckInOpen, setIsCheckInOpen, members, checkInMember, checkOutMember, theme } =
+    useGymStore();
 
   const [search, setSearch] = useState("");
 
@@ -33,9 +27,7 @@ export function InstantCheckInModal() {
   const emerald = "#10b981";
 
   const matchingMembers = members.filter(
-    (m) =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.phone.includes(search)
+    (m) => m.name.toLowerCase().includes(search.toLowerCase()) || m.phone.includes(search),
   );
 
   return (
@@ -63,10 +55,7 @@ export function InstantCheckInModal() {
               const isInside = m.isCurrentlyInside;
 
               return (
-                <View
-                  key={m.id}
-                  style={[styles.memberRow, { borderBottomColor: border }]}
-                >
+                <View key={m.id} style={[styles.memberRow, { borderBottomColor: border }]}>
                   <View style={{ flex: 1, paddingRight: 8 }}>
                     <Text style={[styles.name, { color: textPrimary }]}>{m.name}</Text>
                     <Text style={[styles.sub, { color: textMuted }]}>
@@ -89,10 +78,7 @@ export function InstantCheckInModal() {
                     ]}
                   >
                     <Text
-                      style={[
-                        styles.actionBtnText,
-                        { color: isInside ? "#ef4444" : "#ffffff" },
-                      ]}
+                      style={[styles.actionBtnText, { color: isInside ? "#ef4444" : "#ffffff" }]}
                     >
                       {isInside ? "Check Out" : "Check In"}
                     </Text>

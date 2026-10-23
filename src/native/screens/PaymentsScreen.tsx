@@ -1,22 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useGymStore, Member } from "../gym-store";
 
 export function PaymentsScreen() {
-  const {
-    members,
-    settleMemberDue,
-    openUPIQRModal,
-    settings,
-    theme,
-  } = useGymStore();
+  const { members, settleMemberDue, openUPIQRModal, settings, theme } = useGymStore();
 
   const isDark = theme === "dark";
   const bg = isDark ? "#0f172a" : "#f8fafc";
@@ -28,7 +15,7 @@ export function PaymentsScreen() {
 
   const pendingMembers = members.filter((m) => m.due > 0);
   const allInvoices = members.flatMap((m) =>
-    m.invoices.map((inv) => ({ ...inv, memberName: m.name, phone: m.phone }))
+    m.invoices.map((inv) => ({ ...inv, memberName: m.name, phone: m.phone })),
   );
 
   const totalCollected = members.reduce((sum, m) => sum + m.amountPaid, 0);
@@ -40,13 +27,17 @@ export function PaymentsScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       {/* Top Financial Overview Cards */}
       <View style={styles.kpiRow}>
         <View style={[styles.kpiCard, { backgroundColor: surface, borderColor: border }]}>
           <Text style={[styles.kpiLabel, { color: textMuted }]}>Gross Collected (MTD)</Text>
           <Text style={[styles.kpiValue, { color: emerald }]}>
-            {settings.currencySymbol}{totalCollected.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {totalCollected.toLocaleString("en-IN")}
           </Text>
           <Text style={[styles.kpiSub, { color: emerald }]}>94.2% Collection Rate</Text>
         </View>
@@ -54,7 +45,8 @@ export function PaymentsScreen() {
         <View style={[styles.kpiCard, { backgroundColor: surface, borderColor: border }]}>
           <Text style={[styles.kpiLabel, { color: textMuted }]}>Pending Uncollected</Text>
           <Text style={[styles.kpiValue, { color: "#f59e0b" }]}>
-            {settings.currencySymbol}{totalPending.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {totalPending.toLocaleString("en-IN")}
           </Text>
           <Text style={[styles.kpiSub, { color: textMuted }]}>
             {pendingMembers.length} Outstanding Accounts
@@ -78,11 +70,11 @@ export function PaymentsScreen() {
                 <View style={styles.rowBetween}>
                   <View>
                     <Text style={[styles.name, { color: textPrimary }]}>{m.name}</Text>
-                    <Text style={[styles.sub, { color: textMuted }]}>{m.plan} • {m.phone}</Text>
+                    <Text style={[styles.sub, { color: textMuted }]}>
+                      {m.plan} • {m.phone}
+                    </Text>
                   </View>
-                  <Text style={[styles.dueAmount, { color: "#f59e0b" }]}>
-                    Due: ₹{m.due}
-                  </Text>
+                  <Text style={[styles.dueAmount, { color: "#f59e0b" }]}>Due: ₹{m.due}</Text>
                 </View>
 
                 <View style={styles.dueFooter}>
@@ -120,7 +112,8 @@ export function PaymentsScreen() {
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
                   <Text style={[styles.invAmount, { color: textPrimary }]}>
-                    {settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {inv.amount.toLocaleString("en-IN")}
                   </Text>
                   <Text style={[styles.invStatus, { color: emerald }]}>{inv.status}</Text>
                 </View>

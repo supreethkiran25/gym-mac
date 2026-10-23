@@ -17,7 +17,9 @@ export function RecordPaymentModal() {
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<"UPI" | "Cash" | "Card" | "Bank">("UPI");
-  const [category, setCategory] = useState<"Membership" | "Personal Training" | "Registration">("Membership");
+  const [category, setCategory] = useState<"Membership" | "Personal Training" | "Registration">(
+    "Membership",
+  );
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
   const [installmentIndex, setInstallmentIndex] = useState(1);
@@ -79,7 +81,7 @@ export function RecordPaymentModal() {
     });
 
     toast.success(
-      `Recorded ${settings.currencySymbol}${paidAmount.toLocaleString("en-IN")} via ${method} for ${memberName}!`
+      `Recorded ${settings.currencySymbol}${paidAmount.toLocaleString("en-IN")} via ${method} for ${memberName}!`,
     );
     handleClose();
   };
@@ -98,7 +100,9 @@ export function RecordPaymentModal() {
             </div>
             <div>
               <h2 className="text-base font-semibold">Record Payment & Generate Invoice</h2>
-              <p className="text-xs text-muted-foreground">Recognize collected funds & update member ledger</p>
+              <p className="text-xs text-muted-foreground">
+                Recognize collected funds & update member ledger
+              </p>
             </div>
           </div>
           <button
@@ -124,7 +128,8 @@ export function RecordPaymentModal() {
             >
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.name} ({m.plan} · {m.phone}) {m.due > 0 ? `[Due: ${settings.currencySymbol}${m.due}]` : "[Paid]"}
+                  {m.name} ({m.plan} · {m.phone}){" "}
+                  {m.due > 0 ? `[Due: ${settings.currencySymbol}${m.due}]` : "[Paid]"}
                 </option>
               ))}
             </select>
@@ -135,16 +140,23 @@ export function RecordPaymentModal() {
             <div className="rounded-xl border border-border bg-canvas p-3 text-xs space-y-1">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total Plan Fee:</span>
-                <span className="font-mono font-bold text-foreground">{settings.currencySymbol}{currentMember.planPrice.toLocaleString("en-IN")}</span>
+                <span className="font-mono font-bold text-foreground">
+                  {settings.currencySymbol}
+                  {currentMember.planPrice.toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Previously Paid:</span>
-                <span className="font-mono font-bold text-emerald">{settings.currencySymbol}{currentMember.collectedAmount.toLocaleString("en-IN")}</span>
+                <span className="font-mono font-bold text-emerald">
+                  {settings.currencySymbol}
+                  {currentMember.collectedAmount.toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between border-t border-border pt-1">
                 <span className="text-muted-foreground">Outstanding Pending Due:</span>
                 <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
-                  {settings.currencySymbol}{currentMember.due.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {currentMember.due.toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
@@ -174,7 +186,7 @@ export function RecordPaymentModal() {
               </label>
               <select
                 value={method}
-                onChange={(e) => setMethod(e.target.value as any)}
+                onChange={(e) => setMethod(e.target.value as "UPI" | "Cash" | "Card" | "Bank")}
                 className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-emerald transition"
               >
                 <option value="UPI">UPI (Google Pay / PhonePe / Paytm)</option>
@@ -193,7 +205,9 @@ export function RecordPaymentModal() {
               </label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
+                onChange={(e) =>
+                  setCategory(e.target.value as "Membership" | "Personal Training" | "Registration")
+                }
                 className="w-full rounded-xl border border-border bg-canvas px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-emerald transition"
               >
                 <option value="Membership">Membership Pass</option>

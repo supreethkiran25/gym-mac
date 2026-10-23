@@ -72,7 +72,7 @@ export function RenewMemberModal() {
       durationMonths,
       selectedPlan,
       paidAmount,
-      paymentMethod
+      paymentMethod,
     );
     toast.success(`Successfully renewed membership for ${selectedMemberForRenewal.name}!`);
     handleClose();
@@ -103,11 +103,15 @@ export function RenewMemberModal() {
             <div>
               <h3 className="text-base font-bold text-foreground">Membership Renewals Hub</h3>
               <p className="text-xs text-muted-foreground">
-                Member: <strong className="text-foreground">{selectedMemberForRenewal.name}</strong> ({selectedMemberForRenewal.phone})
+                Member: <strong className="text-foreground">{selectedMemberForRenewal.name}</strong>{" "}
+                ({selectedMemberForRenewal.phone})
               </p>
             </div>
           </div>
-          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-muted text-muted-foreground">
+          <button
+            onClick={handleClose}
+            className="p-1 rounded-lg hover:bg-muted text-muted-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -118,7 +122,9 @@ export function RenewMemberModal() {
             type="button"
             onClick={() => setActiveTab("renew")}
             className={`flex-1 py-1.5 rounded-lg font-semibold transition ${
-              activeTab === "renew" ? "bg-surface text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+              activeTab === "renew"
+                ? "bg-surface text-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Renew Plan Subscription
@@ -127,7 +133,9 @@ export function RenewMemberModal() {
             type="button"
             onClick={() => setActiveTab("extend")}
             className={`flex-1 py-1.5 rounded-lg font-semibold transition ${
-              activeTab === "extend" ? "bg-surface text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+              activeTab === "extend"
+                ? "bg-surface text-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Add Grace Days (+7/+15/+30)
@@ -139,9 +147,12 @@ export function RenewMemberModal() {
             {/* Current Status Preview */}
             <div className="flex items-center justify-between p-3 rounded-2xl bg-canvas border border-border">
               <div>
-                <span className="text-muted-foreground block text-[11px]">Current Plan & Expiry</span>
+                <span className="text-muted-foreground block text-[11px]">
+                  Current Plan & Expiry
+                </span>
                 <span className="font-bold text-foreground">
-                  {selectedMemberForRenewal.plan} · Expired/Expires: {selectedMemberForRenewal.expiry}
+                  {selectedMemberForRenewal.plan} · Expired/Expires:{" "}
+                  {selectedMemberForRenewal.expiry}
                 </span>
               </div>
               <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-[10px]">
@@ -172,7 +183,8 @@ export function RenewMemberModal() {
                 <span>Renewal Discount</span>
                 {discountPercent > 0 && (
                   <span className="text-emerald font-bold">
-                    -{discountPercent}% ({settings.currencySymbol}{discountAmount.toLocaleString("en-IN")})
+                    -{discountPercent}% ({settings.currencySymbol}
+                    {discountAmount.toLocaleString("en-IN")})
                   </span>
                 )}
               </label>
@@ -214,7 +226,9 @@ export function RenewMemberModal() {
                 <label className="font-semibold text-foreground">Payment Method</label>
                 <select
                   value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as any)}
+                  onChange={(e) =>
+                    setPaymentMethod(e.target.value as "UPI" | "Cash" | "Card" | "Bank")
+                  }
                   className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs focus:border-foreground focus:outline-hidden"
                 >
                   <option value="UPI">UPI / Dynamic QR</option>
@@ -229,11 +243,20 @@ export function RenewMemberModal() {
             {paymentMethod === "UPI" && (
               <button
                 type="button"
-                onClick={() => openUPIQRModal(paidAmount, selectedMemberForRenewal.name, `Renewal: ${selectedPlan}`)}
+                onClick={() =>
+                  openUPIQRModal(
+                    paidAmount,
+                    selectedMemberForRenewal.name,
+                    `Renewal: ${selectedPlan}`,
+                  )
+                }
                 className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold"
               >
                 <QrCode className="h-4 w-4" />
-                <span>Show Member Dynamic UPI QR Code ({settings.currencySymbol}{paidAmount.toLocaleString("en-IN")})</span>
+                <span>
+                  Show Member Dynamic UPI QR Code ({settings.currencySymbol}
+                  {paidAmount.toLocaleString("en-IN")})
+                </span>
               </button>
             )}
 
@@ -256,8 +279,8 @@ export function RenewMemberModal() {
         ) : (
           <form onSubmit={handleExtendSubmit} className="space-y-4 text-xs">
             <p className="text-muted-foreground leading-relaxed">
-              Grant complimentary grace days (e.g. for travel, illness, or member retention). Expiry date will be pushed
-              forward without creating an invoice.
+              Grant complimentary grace days (e.g. for travel, illness, or member retention). Expiry
+              date will be pushed forward without creating an invoice.
             </p>
 
             <div className="space-y-1.5">
@@ -281,7 +304,9 @@ export function RenewMemberModal() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-semibold text-foreground">Extension Reason / Authorization</label>
+              <label className="font-semibold text-foreground">
+                Extension Reason / Authorization
+              </label>
               <input
                 type="text"
                 value={extendReason}

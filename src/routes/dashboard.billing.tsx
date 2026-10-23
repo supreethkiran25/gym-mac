@@ -11,7 +11,9 @@ function Billing() {
   const { members, settings } = useGymStore();
 
   const perMemberRate = 10;
-  const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
+  const activeMembersCount = members.filter(
+    (m) => m.status === "Active" || m.status === "Expiring",
+  ).length;
   const currentMonthBill = activeMembersCount * perMemberRate;
   const estNextMonthBill = (activeMembersCount + 2) * perMemberRate;
 
@@ -21,7 +23,9 @@ function Billing() {
     <div className="space-y-6 animate-in fade-in duration-150">
       <div>
         <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Platform Subscription & Invoices</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Platform Subscription & Invoices
+          </h1>
           <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
             Enterprise Unlimited Tier
           </span>
@@ -33,7 +37,9 @@ function Billing() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-border bg-surface p-6 md:col-span-2 space-y-4">
-          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Current Billing Cycle</p>
+          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+            Current Billing Cycle
+          </p>
           <div className="flex items-baseline gap-2">
             <span className="font-mono text-4xl sm:text-5xl font-bold">
               {settings.currencySymbol}
@@ -52,7 +58,9 @@ function Billing() {
         </div>
 
         <div className="rounded-2xl border border-border bg-surface p-6 space-y-3">
-          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Estimated Next Cycle</p>
+          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+            Estimated Next Cycle
+          </p>
           <p className="font-mono text-3xl font-bold">
             {settings.currencySymbol}
             {estNextMonthBill.toLocaleString("en-IN")}
@@ -79,12 +87,15 @@ function Billing() {
             </thead>
             <tbody className="divide-y divide-border">
               <tr className="hover:bg-muted/40 transition">
-                <td className="px-5 py-3.5 text-muted-foreground font-mono">1 {currentMonthName}</td>
+                <td className="px-5 py-3.5 text-muted-foreground font-mono">
+                  1 {currentMonthName}
+                </td>
                 <td className="px-5 py-3.5 font-medium text-foreground">
                   Current Usage · {activeMembersCount} active member(s)
                 </td>
                 <td className="px-5 py-3.5 font-mono font-semibold">
-                  {settings.currencySymbol}{currentMonthBill.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {currentMonthBill.toLocaleString("en-IN")}
                 </td>
                 <td className="px-5 py-3.5 text-right">
                   <span className="inline-flex rounded-full bg-emerald-soft px-2.5 py-0.5 text-xs text-accent-foreground font-semibold">

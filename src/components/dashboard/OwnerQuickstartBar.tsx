@@ -74,8 +74,10 @@ export function OwnerQuickstartBar() {
           </div>
 
           <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
-            <span>PeakRep OS <b>v8.0</b></span>
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+            <span>
+              PeakRep OS <b>v8.0</b>
+            </span>
           </div>
         </div>
 
@@ -100,11 +102,17 @@ export function OwnerQuickstartBar() {
           </button>
 
           <button
-            onClick={() => openUPIQRModal(settings.membershipPlans[0]?.price || 3000, "Walk-in Member", "Gym Fee")}
+            onClick={() =>
+              openUPIQRModal(
+                settings.membershipPlans[0]?.price || 3000,
+                "Walk-in Member",
+                "Gym Fee",
+              )
+            }
             className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-semibold hover:bg-muted transition"
             title="Show dynamic UPI QR"
           >
-            <QrCode className="h-3.5 w-3.5 text-emerald" />
+            <QrCode className="h-3.5 w-3.5 text-brand" />
             <span>UPI QR</span>
           </button>
 
@@ -113,7 +121,7 @@ export function OwnerQuickstartBar() {
             className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-canvas px-3 py-1.5 text-xs font-semibold hover:bg-muted transition"
             title="Open Broadcast Messaging Center"
           >
-            <Radio className="h-3.5 w-3.5 text-purple-500" />
+            <Radio className="h-3.5 w-3.5 text-brand" />
             <span>Broadcast ({pendingDuesCount} Dues)</span>
           </Link>
         </div>

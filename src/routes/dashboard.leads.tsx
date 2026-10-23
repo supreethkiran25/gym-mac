@@ -24,34 +24,26 @@ export const Route = createFileRoute("/dashboard/leads")({
   component: LeadsCRM,
 });
 
-const STAGES: LeadStage[] = [
-  "Inquiry",
-  "Trial Scheduled",
-  "Trial Completed",
-  "Offer Sent",
-  "Won",
-];
+const STAGES: LeadStage[] = ["Inquiry", "Trial Scheduled", "Trial Completed", "Offer Sent", "Won"];
 
 function LeadsCRM() {
-  const {
-    leads,
-    addLead,
-    updateLeadStage,
-    convertLeadToMember,
-    settings,
-  } = useGymStore();
+  const { leads, addLead, updateLeadStage, convertLeadToMember, settings } = useGymStore();
 
   const [search, setSearch] = useState("");
   const [selectedStage, setSelectedStage] = useState<string>("All");
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [convertingLead, setConvertingLead] = useState<Lead | null>(null);
-  const [convertPlan, setConvertPlan] = useState(settings.membershipPlans[0]?.name || "Monthly Flex");
+  const [convertPlan, setConvertPlan] = useState(
+    settings.membershipPlans[0]?.name || "Monthly Flex",
+  );
 
   // Form states
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+91 ");
   const [email, setEmail] = useState("");
-  const [source, setSource] = useState<"Walk-In" | "Instagram" | "Google Maps" | "Referral" | "Website">("Walk-In");
+  const [source, setSource] = useState<
+    "Walk-In" | "Instagram" | "Google Maps" | "Referral" | "Website"
+  >("Walk-In");
   const [goal, setGoal] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -90,7 +82,7 @@ function LeadsCRM() {
 
   const handleSendWhatsApp = (lead: Lead) => {
     const text = encodeURIComponent(
-      `Hi ${lead.name}, greetings from ${settings.name}! Thank you for your inquiry regarding our gym memberships & trial workouts. Would you like to schedule your free consultation pass today?`
+      `Hi ${lead.name}, greetings from ${settings.name}! Thank you for your inquiry regarding our gym memberships & trial workouts. Would you like to schedule your free consultation pass today?`,
     );
     const cleanPhone = lead.phone.replace(/[^0-9]/g, "");
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, "_blank");
@@ -112,13 +104,16 @@ function LeadsCRM() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Prospect & Trial CRM Funnel</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Prospect & Trial CRM Funnel
+            </h1>
             <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
               {leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length} Active Leads
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Track walk-in inquiries, Instagram trial passes, and convert prospects to paying members in 1 click.
+            Track walk-in inquiries, Instagram trial passes, and convert prospects to paying members
+            in 1 click.
           </p>
         </div>
 
@@ -212,7 +207,9 @@ function LeadsCRM() {
               <div className="rounded-xl border border-border bg-canvas p-3 text-xs space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Goal:</span>
-                  <span className="font-semibold text-foreground truncate max-w-[160px]">{lead.fitnessGoal}</span>
+                  <span className="font-semibold text-foreground truncate max-w-[160px]">
+                    {lead.fitnessGoal}
+                  </span>
                 </div>
                 {lead.trialDate && (
                   <div className="flex justify-between text-emerald font-medium">
@@ -269,7 +266,9 @@ function LeadsCRM() {
 
             <form onSubmit={handleConfirmConvert} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-medium mb-1">Select Membership Plan</label>
+                <label className="block text-muted-foreground font-medium mb-1">
+                  Select Membership Plan
+                </label>
                 <select
                   value={convertPlan}
                   onChange={(e) => setConvertPlan(e.target.value)}
@@ -277,7 +276,8 @@ function LeadsCRM() {
                 >
                   {settings.membershipPlans.map((p) => (
                     <option key={p.id} value={p.name}>
-                      {p.name} ({settings.currencySymbol}{p.price.toLocaleString("en-IN")})
+                      {p.name} ({settings.currencySymbol}
+                      {p.price.toLocaleString("en-IN")})
                     </option>
                   ))}
                 </select>
@@ -285,8 +285,12 @@ function LeadsCRM() {
 
               <div className="rounded-xl border border-border bg-canvas p-3 space-y-1">
                 <p className="font-semibold text-foreground">{convertingLead.name}</p>
-                <p className="text-muted-foreground">{convertingLead.phone} · {convertingLead.email || "No email"}</p>
-                <p className="text-[11px] text-muted-foreground">Goal: {convertingLead.fitnessGoal}</p>
+                <p className="text-muted-foreground">
+                  {convertingLead.phone} · {convertingLead.email || "No email"}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Goal: {convertingLead.fitnessGoal}
+                </p>
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
@@ -322,7 +326,9 @@ function LeadsCRM() {
 
             <form onSubmit={handleAddLead} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Full Name *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Full Name *
+                </label>
                 <input
                   type="text"
                   required
@@ -349,7 +355,12 @@ function LeadsCRM() {
                   <label className="block text-muted-foreground font-semibold mb-1">Source</label>
                   <select
                     value={source}
-                    onChange={(e) => setSource(e.target.value as any)}
+                    onChange={(e) =>
+                      setSource(
+                        e.target.value as
+                          "Walk-In" | "Instagram" | "Google Maps" | "Referral" | "Website",
+                      )
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-emerald"
                   >
                     <option value="Walk-In">Walk-In</option>
@@ -362,7 +373,9 @@ function LeadsCRM() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Fitness Goal</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Fitness Goal
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Fat loss, Muscle Gain, Rehab"
@@ -373,7 +386,9 @@ function LeadsCRM() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Inquiry Notes</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Inquiry Notes
+                </label>
                 <textarea
                   rows={2}
                   placeholder="Details about consultation..."

@@ -24,15 +24,12 @@ export const Route = createFileRoute("/dashboard/renewals")({
 });
 
 function RenewalsPage() {
-  const {
-    members,
-    renewals,
-    settings,
-    setIsRenewModalOpen,
-    setSelectedMemberForRenewal,
-  } = useGymStore();
+  const { members, renewals, settings, setIsRenewModalOpen, setSelectedMemberForRenewal } =
+    useGymStore();
 
-  const [filterTab, setFilterTab] = useState<"expiring" | "expired" | "all" | "history">("expiring");
+  const [filterTab, setFilterTab] = useState<"expiring" | "expired" | "all" | "history">(
+    "expiring",
+  );
   const [search, setSearch] = useState("");
 
   const expiringMembers = members.filter((m) => m.status === "Expiring");
@@ -48,7 +45,7 @@ function RenewalsPage() {
       (m) =>
         m.name.toLowerCase().includes(search.toLowerCase()) ||
         m.phone.includes(search) ||
-        m.plan.toLowerCase().includes(search.toLowerCase())
+        m.plan.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
@@ -61,7 +58,7 @@ function RenewalsPage() {
     const text = encodeURIComponent(
       `Hi ${m.name}, your ${m.plan} membership at ${settings.name} ${
         m.status === "Expired" ? "expired on" : "is expiring on"
-      } ${m.expiry}. Renew today to keep your fitness momentum going!`
+      } ${m.expiry}. Renew today to keep your fitness momentum going!`,
     );
     const cleanPhone = m.phone.replace(/[^0-9]/g, "");
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, "_blank");
@@ -83,7 +80,8 @@ function RenewalsPage() {
             Membership Renewals
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Identify expiring subscriptions, grant grace days, collect renewal payments, and retain gym members.
+            Identify expiring subscriptions, grant grace days, collect renewal payments, and retain
+            gym members.
           </p>
         </div>
       </div>
@@ -95,7 +93,9 @@ function RenewalsPage() {
             <span>Expiring Within 7 Days</span>
             <Clock className="h-4 w-4" />
           </div>
-          <div className="text-3xl font-bold text-foreground font-mono">{expiringMembers.length}</div>
+          <div className="text-3xl font-bold text-foreground font-mono">
+            {expiringMembers.length}
+          </div>
           <p className="text-[11px] text-muted-foreground">High-priority renewal candidates</p>
         </div>
 
@@ -104,8 +104,12 @@ function RenewalsPage() {
             <span>Already Expired (Past Due)</span>
             <AlertTriangle className="h-4 w-4" />
           </div>
-          <div className="text-3xl font-bold text-foreground font-mono">{expiredMembers.length}</div>
-          <p className="text-[11px] text-muted-foreground">Turnstile entry locked awaiting payment</p>
+          <div className="text-3xl font-bold text-foreground font-mono">
+            {expiredMembers.length}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Turnstile entry locked awaiting payment
+          </p>
         </div>
 
         <div className="rounded-3xl border border-border bg-surface p-5 space-y-1">
@@ -124,7 +128,9 @@ function RenewalsPage() {
           <button
             onClick={() => setFilterTab("expiring")}
             className={`px-4 py-2 rounded-xl transition ${
-              filterTab === "expiring" ? "bg-foreground text-background shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+              filterTab === "expiring"
+                ? "bg-foreground text-background shadow-xs font-bold"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Expiring Soon ({expiringMembers.length})
@@ -132,7 +138,9 @@ function RenewalsPage() {
           <button
             onClick={() => setFilterTab("expired")}
             className={`px-4 py-2 rounded-xl transition ${
-              filterTab === "expired" ? "bg-foreground text-background shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+              filterTab === "expired"
+                ? "bg-foreground text-background shadow-xs font-bold"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Expired ({expiredMembers.length})
@@ -140,7 +148,9 @@ function RenewalsPage() {
           <button
             onClick={() => setFilterTab("all")}
             className={`px-4 py-2 rounded-xl transition ${
-              filterTab === "all" ? "bg-foreground text-background shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+              filterTab === "all"
+                ? "bg-foreground text-background shadow-xs font-bold"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             All Members ({members.length})
@@ -148,7 +158,9 @@ function RenewalsPage() {
           <button
             onClick={() => setFilterTab("history")}
             className={`px-4 py-2 rounded-xl transition ${
-              filterTab === "history" ? "bg-foreground text-background shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+              filterTab === "history"
+                ? "bg-foreground text-background shadow-xs font-bold"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Renewal Log ({renewals.length})
@@ -170,9 +182,13 @@ function RenewalsPage() {
       {/* Table Content */}
       {filterTab === "history" ? (
         <div className="rounded-3xl border border-border bg-surface p-6 space-y-4 shadow-xs">
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Renewal Transactions Log</h3>
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            Renewal Transactions Log
+          </h3>
           {renewals.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-8 text-center">No renewal records logged yet.</p>
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              No renewal records logged yet.
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -212,10 +228,12 @@ function RenewalsPage() {
               {filterTab === "expiring"
                 ? "Expiring Soon Queue"
                 : filterTab === "expired"
-                ? "Expired Subscriptions"
-                : "Active Members Directory"}
+                  ? "Expired Subscriptions"
+                  : "Active Members Directory"}
             </h3>
-            <span className="text-xs text-muted-foreground">{displayedMembers.length} Members Listed</span>
+            <span className="text-xs text-muted-foreground">
+              {displayedMembers.length} Members Listed
+            </span>
           </div>
 
           {displayedMembers.length === 0 ? (
@@ -250,10 +268,10 @@ function RenewalsPage() {
                             m.status === "Active"
                               ? "bg-emerald-500/20 text-emerald"
                               : m.status === "Expiring"
-                              ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                              : m.status === "Frozen"
-                              ? "bg-blue-500/20 text-blue-500"
-                              : "bg-rose-500/20 text-rose-500"
+                                ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                                : m.status === "Frozen"
+                                  ? "bg-blue-500/20 text-blue-500"
+                                  : "bg-rose-500/20 text-rose-500"
                           }`}
                         >
                           {m.status}

@@ -50,7 +50,7 @@ export function RoleGuard({ requiredRole = "admin", moduleName, children }: Role
 
           <button
             onClick={() => requestRoleSwitch("admin")}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 text-xs font-bold transition shadow-md shrink-0"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand hover:bg-brand-hover text-white px-4 py-2.5 text-xs font-bold transition shadow-md shrink-0"
           >
             <Lock className="h-3.5 w-3.5" />
             <span>Unlock with Admin Password</span>
@@ -60,9 +60,10 @@ export function RoleGuard({ requiredRole = "admin", moduleName, children }: Role
         {/* Reason / Context */}
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            You are currently logged in with the <strong className="text-emerald-500">Reception (Front Desk)</strong> role.
-            Under the Gym RBAC Security Policy, front desk accounts have strictly isolated access to walk-in registrations,
-            floor check-ins, renewal collection, and member profiles.
+            You are currently logged in with the{" "}
+            <strong className="text-foreground">Reception (Front Desk)</strong> role. Under the Gym
+            RBAC Security Policy, front desk accounts have strictly isolated access to walk-in
+            registrations, floor check-ins, renewal collection, and member profiles.
           </p>
         </div>
 
@@ -72,7 +73,9 @@ export function RoleGuard({ requiredRole = "admin", moduleName, children }: Role
             <span className="text-xs font-bold uppercase tracking-wider text-foreground">
               Security Matrix: Restricted Reception Modules
             </span>
-            <span className="text-[10px] font-mono text-muted-foreground">Gym RBAC Standard v9.0</span>
+            <span className="text-[10px] font-mono text-muted-foreground">
+              Gym RBAC Standard v9.0
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">

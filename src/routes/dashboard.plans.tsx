@@ -72,7 +72,7 @@ function MembershipPlansMatrix() {
     const membersInPlan = members.filter((m) => m.plan === plan.name);
     if (membersInPlan.length > 0) {
       const confirmDelete = window.confirm(
-        `Warning: There are ${membersInPlan.length} active member(s) currently enrolled in "${plan.name}". Are you sure you want to delete this plan?`
+        `Warning: There are ${membersInPlan.length} active member(s) currently enrolled in "${plan.name}". Are you sure you want to delete this plan?`,
       );
       if (!confirmDelete) return;
     } else {
@@ -98,7 +98,8 @@ function MembershipPlansMatrix() {
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Configure subscription tiers, fee structures, included member privileges, and upgrade pipelines.
+            Configure subscription tiers, fee structures, included member privileges, and upgrade
+            pipelines.
           </p>
         </div>
 
@@ -124,7 +125,9 @@ function MembershipPlansMatrix() {
       {/* Aggregate Distribution Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-2xs">
-          <span className="text-xs font-semibold text-muted-foreground">Active Enrolled Members</span>
+          <span className="text-xs font-semibold text-muted-foreground">
+            Active Enrolled Members
+          </span>
           <p className="text-2xl font-bold font-mono text-emerald-500">{totalActive}</p>
           <p className="text-[11px] text-muted-foreground">Active subscriptions across all tiers</p>
         </div>
@@ -132,11 +135,15 @@ function MembershipPlansMatrix() {
         <div className="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-2xs">
           <span className="text-xs font-semibold text-muted-foreground">Expiring This Week</span>
           <p className="text-2xl font-bold font-mono text-amber-500">{totalExpiring}</p>
-          <p className="text-[11px] text-muted-foreground">Queued for automated renewal follow-up</p>
+          <p className="text-[11px] text-muted-foreground">
+            Queued for automated renewal follow-up
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-2xs">
-          <span className="text-xs font-semibold text-muted-foreground">Frozen / Paused Passes</span>
+          <span className="text-xs font-semibold text-muted-foreground">
+            Frozen / Paused Passes
+          </span>
           <p className="text-2xl font-bold font-mono text-muted-foreground">{totalFrozen}</p>
           <p className="text-[11px] text-muted-foreground">Travel / Medical temporary holds</p>
         </div>
@@ -144,7 +151,9 @@ function MembershipPlansMatrix() {
         <div className="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-2xs">
           <span className="text-xs font-semibold text-muted-foreground">Upgrade Opportunities</span>
           <p className="text-2xl font-bold font-mono text-brand">{totalHighAttendance}</p>
-          <p className="text-[11px] text-muted-foreground">Members with &gt;70% attendance ready to upgrade</p>
+          <p className="text-[11px] text-muted-foreground">
+            Members with &gt;70% attendance ready to upgrade
+          </p>
         </div>
       </div>
 
@@ -152,7 +161,10 @@ function MembershipPlansMatrix() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {settings.membershipPlans.map((plan) => {
           const membersInPlan = members.filter((m) => m.plan === plan.name);
-          const isPopular = plan.type === "VIP Pass" || plan.name.toLowerCase().includes("vip") || plan.name.toLowerCase().includes("pro");
+          const isPopular =
+            plan.type === "VIP Pass" ||
+            plan.name.toLowerCase().includes("vip") ||
+            plan.name.toLowerCase().includes("pro");
           const monthlyEquiv = Math.round(plan.price / Math.max(1, plan.durationMonths));
 
           return (
@@ -183,13 +195,17 @@ function MembershipPlansMatrix() {
                 </div>
 
                 {/* Name & Pricing */}
-                <h3 className="text-xl font-bold text-foreground mt-3 tracking-tight">{plan.name}</h3>
+                <h3 className="text-xl font-bold text-foreground mt-3 tracking-tight">
+                  {plan.name}
+                </h3>
                 <div className="mt-2 flex items-baseline gap-1.5">
                   <span className="text-3xl font-extrabold font-mono text-foreground">
-                    {settings.currencySymbol}{plan.price.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {plan.price.toLocaleString("en-IN")}
                   </span>
                   <span className="text-xs text-muted-foreground font-mono">
-                    ({settings.currencySymbol}{monthlyEquiv.toLocaleString("en-IN")}/mo)
+                    ({settings.currencySymbol}
+                    {monthlyEquiv.toLocaleString("en-IN")}/mo)
                   </span>
                 </div>
 
@@ -210,7 +226,8 @@ function MembershipPlansMatrix() {
                       Upgrade Prospects:
                     </span>
                     <span className="font-mono font-semibold text-brand">
-                      {members.filter((m) => m.plan === plan.name && m.attendanceRate >= 70).length} prime
+                      {members.filter((m) => m.plan === plan.name && m.attendanceRate >= 70).length}{" "}
+                      prime
                     </span>
                   </div>
                 </div>

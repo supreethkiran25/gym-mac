@@ -79,7 +79,7 @@ function MembersManagement() {
   const handleSendNudge = (e: React.MouseEvent, m: Member) => {
     e.stopPropagation();
     const text = encodeURIComponent(
-      `Hi ${m.name}, your ${settings.name} gym membership is currently ${m.status.toLowerCase()}. Outstanding balance is ${settings.currencySymbol}${m.due.toLocaleString("en-IN")}. Please pay online or at front desk.`
+      `Hi ${m.name}, your ${settings.name} gym membership is currently ${m.status.toLowerCase()}. Outstanding balance is ${settings.currencySymbol}${m.due.toLocaleString("en-IN")}. Please pay online or at front desk.`,
     );
     const cleanPhone = m.phone.replace(/[^0-9]/g, "");
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, "_blank");
@@ -100,13 +100,16 @@ function MembersManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Member Directory</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Member Directory
+            </h1>
             <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-mono font-semibold text-muted-foreground">
               {members.length} Total
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Complete member records, subscription status, freeze/transfer management, and instant turnstile attendance.
+            Complete member records, subscription status, freeze/transfer management, and instant
+            turnstile attendance.
           </p>
         </div>
 
@@ -178,9 +181,11 @@ function MembersManagement() {
                     : "border-border bg-surface text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {st === "Inside" ? `Inside Floor (${members.filter((m) => m.isCurrentlyInside).length})` : st}
+                {st === "Inside"
+                  ? `Inside Floor (${members.filter((m) => m.isCurrentlyInside).length})`
+                  : st}
               </button>
-            )
+            ),
           )}
         </div>
       </div>
@@ -192,7 +197,9 @@ function MembersManagement() {
             filteredMembers.map((m) => {
               const expiryDate = new Date(m.expiry);
               const today = new Date();
-              const diffDays = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+              const diffDays = Math.ceil(
+                (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24),
+              );
 
               return (
                 <div
@@ -242,8 +249,8 @@ function MembersManagement() {
                           diffDays < 0
                             ? "text-rose-500"
                             : diffDays <= 7
-                            ? "text-amber-500"
-                            : "text-foreground"
+                              ? "text-amber-500"
+                              : "text-foreground"
                         }`}
                       >
                         {diffDays < 0 ? "Expired" : `${diffDays} days left`}
@@ -266,13 +273,19 @@ function MembersManagement() {
                   </div>
 
                   {/* Card Footer: Action Shortcuts */}
-                  <div className="flex items-center justify-between border-t border-border pt-3" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="flex items-center justify-between border-t border-border pt-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div>
                       {m.due > 0 ? (
                         <div>
-                          <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">Due Balance</span>
+                          <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">
+                            Due Balance
+                          </span>
                           <p className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
-                            {settings.currencySymbol}{m.due.toLocaleString("en-IN")}
+                            {settings.currencySymbol}
+                            {m.due.toLocaleString("en-IN")}
                           </p>
                         </div>
                       ) : (
@@ -305,7 +318,11 @@ function MembersManagement() {
                         title={m.status === "Frozen" ? "Unfreeze Member" : "Freeze Member"}
                         className="p-1.5 rounded-lg border border-border bg-canvas hover:bg-muted text-blue-500 transition"
                       >
-                        {m.status === "Frozen" ? <PlayCircle className="h-3.5 w-3.5" /> : <PauseCircle className="h-3.5 w-3.5" />}
+                        {m.status === "Frozen" ? (
+                          <PlayCircle className="h-3.5 w-3.5" />
+                        ) : (
+                          <PauseCircle className="h-3.5 w-3.5" />
+                        )}
                       </button>
 
                       {/* Transfer Modal Shortcut (Admin) */}
@@ -316,7 +333,7 @@ function MembersManagement() {
                             setIsTransferModalOpen(true);
                           }}
                           title="Transfer Membership"
-                          className="p-1.5 rounded-lg border border-border bg-canvas hover:bg-muted text-purple-500 transition"
+                          className="p-1.5 rounded-lg border border-border bg-canvas hover:bg-muted text-brand transition"
                         >
                           <ArrowRightLeft className="h-3.5 w-3.5" />
                         </button>
@@ -401,13 +418,12 @@ function MembersManagement() {
                         {m.status}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 font-mono font-bold">
-                      {m.attendanceRate}%
-                    </td>
+                    <td className="py-3.5 px-4 font-mono font-bold">{m.attendanceRate}%</td>
                     <td className="py-3.5 px-4 text-right font-mono font-bold">
                       {m.due > 0 ? (
                         <span className="text-amber-600 dark:text-amber-400">
-                          {settings.currencySymbol}{m.due.toLocaleString("en-IN")}
+                          {settings.currencySymbol}
+                          {m.due.toLocaleString("en-IN")}
                         </span>
                       ) : (
                         <span className="text-emerald">Cleared</span>

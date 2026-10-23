@@ -35,7 +35,7 @@ function CheckInPage() {
         (m) =>
           m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           m.phone.includes(searchQuery) ||
-          m.id.toLowerCase().includes(searchQuery.toLowerCase())
+          m.id.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : [];
 
@@ -58,7 +58,9 @@ function CheckInPage() {
     setSimulatedScanActive(true);
     setTimeout(() => {
       setSimulatedScanActive(false);
-      const candidates = outsideMembers.filter((m) => m.status === "Active" || m.status === "Expiring" || m.status === "Partial");
+      const candidates = outsideMembers.filter(
+        (m) => m.status === "Active" || m.status === "Expiring" || m.status === "Partial",
+      );
       if (candidates.length > 0) {
         const randomMember = candidates[Math.floor(Math.random() * candidates.length)];
         handleQuickCheckIn(randomMember);
@@ -120,7 +122,7 @@ function CheckInPage() {
         <div className="rounded-3xl border border-border bg-surface p-5 space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Gate Operator Session</span>
-            <ShieldCheck className="h-4 w-4 text-purple-500" />
+            <ShieldCheck className="h-4 w-4 text-brand" />
           </div>
           <div className="text-sm font-bold text-foreground truncate">{currentUser.name}</div>
           <p className="text-[11px] text-muted-foreground">
@@ -138,7 +140,9 @@ function CheckInPage() {
               <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                 Fast Search & Floor Entry
               </h3>
-              <span className="text-[10px] font-mono text-muted-foreground">Search by Name, Phone, or ID</span>
+              <span className="text-[10px] font-mono text-muted-foreground">
+                Search by Name, Phone, or ID
+              </span>
             </div>
 
             <div className="relative">
@@ -168,7 +172,9 @@ function CheckInPage() {
                   Found {filteredMembers.length} Matching Members:
                 </p>
                 {filteredMembers.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-4 text-center">No member matches found.</p>
+                  <p className="text-xs text-muted-foreground py-4 text-center">
+                    No member matches found.
+                  </p>
                 ) : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {filteredMembers.map((m) => (
@@ -184,10 +190,10 @@ function CheckInPage() {
                                 m.status === "Active"
                                   ? "bg-emerald-500/20 text-emerald"
                                   : m.status === "Expiring"
-                                  ? "bg-amber-500/20 text-amber-500"
-                                  : m.status === "Frozen"
-                                  ? "bg-blue-500/20 text-blue-500"
-                                  : "bg-rose-500/20 text-rose-500"
+                                    ? "bg-amber-500/20 text-amber-500"
+                                    : m.status === "Frozen"
+                                      ? "bg-blue-500/20 text-blue-500"
+                                      : "bg-rose-500/20 text-rose-500"
                               }`}
                             >
                               {m.status}
@@ -221,7 +227,9 @@ function CheckInPage() {
             {/* Quick Check-in from Outside Members Roster */}
             {!searchQuery && (
               <div className="space-y-2 pt-2">
-                <p className="text-xs font-semibold text-muted-foreground">Recent Outside Members (1-Click Entry):</p>
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Recent Outside Members (1-Click Entry):
+                </p>
                 <div className="space-y-2 max-h-72 overflow-y-auto">
                   {outsideMembers.slice(0, 5).map((m) => (
                     <div
@@ -259,14 +267,18 @@ function CheckInPage() {
                   Inside Gym Now ({insideMembers.length})
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground">Live Attendance Roster</span>
+              <span className="text-[10px] font-mono text-muted-foreground">
+                Live Attendance Roster
+              </span>
             </div>
 
             {insideMembers.length === 0 ? (
               <div className="py-8 text-center space-y-2">
                 <Clock className="h-8 w-8 text-muted-foreground mx-auto opacity-40" />
                 <p className="text-xs font-semibold text-foreground">No members currently inside</p>
-                <p className="text-[11px] text-muted-foreground">Use the search box or scan QR to check in members.</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Use the search box or scan QR to check in members.
+                </p>
               </div>
             ) : (
               <div className="space-y-2.5 max-h-96 overflow-y-auto">

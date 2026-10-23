@@ -28,7 +28,9 @@ export function StaffScreen() {
 
   // Form
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"Head Coach" | "Personal Trainer" | "Nutritionist" | "Front Desk Manager" | "Floor Trainer">("Personal Trainer");
+  const [role, setRole] = useState<
+    "Head Coach" | "Personal Trainer" | "Nutritionist" | "Front Desk Manager" | "Floor Trainer"
+  >("Personal Trainer");
   const [phone, setPhone] = useState("+91 ");
   const [email, setEmail] = useState("");
   const [salary, setSalary] = useState("45000");
@@ -99,7 +101,10 @@ export function StaffScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       <View style={styles.header}>
         <View>
           <Text style={[styles.title, { color: textPrimary }]}>Staff & Payroll</Text>
@@ -126,8 +131,12 @@ export function StaffScreen() {
             >
               <View style={styles.rowBetween}>
                 <View style={styles.avatarRow}>
-                  <View style={[styles.avatar, { backgroundColor: isDark ? "#334155" : "#e2e8f0" }]}>
-                    <Text style={[styles.avatarText, { color: textPrimary }]}>{s.avatar || "ST"}</Text>
+                  <View
+                    style={[styles.avatar, { backgroundColor: isDark ? "#334155" : "#e2e8f0" }]}
+                  >
+                    <Text style={[styles.avatarText, { color: textPrimary }]}>
+                      {s.avatar || "ST"}
+                    </Text>
                   </View>
                   <View>
                     <Text style={[styles.name, { color: textPrimary }]}>{s.name}</Text>
@@ -139,7 +148,15 @@ export function StaffScreen() {
                   onPress={() => toggleStaffStatus(s.id, isOnFloor ? "Off Duty" : "On Floor")}
                   style={[
                     styles.statusBadge,
-                    { backgroundColor: isOnFloor ? (isDark ? "#064e3b" : "#d1fae5") : (isDark ? "#334155" : "#e2e8f0") },
+                    {
+                      backgroundColor: isOnFloor
+                        ? isDark
+                          ? "#064e3b"
+                          : "#d1fae5"
+                        : isDark
+                          ? "#334155"
+                          : "#e2e8f0",
+                    },
                   ]}
                 >
                   <Text style={[styles.statusText, { color: isOnFloor ? emerald : textMuted }]}>
@@ -153,7 +170,12 @@ export function StaffScreen() {
                   Shift: <Text style={{ color: textPrimary }}>{s.shift}</Text>
                 </Text>
                 <Text style={[styles.bodyText, { color: textMuted }]}>
-                  Salary: <Text style={{ color: textPrimary, fontWeight: "700" }}>{settings.currencySymbol}{s.salary.toLocaleString("en-IN")}/mo</Text> • 📞 {s.phone}
+                  Salary:{" "}
+                  <Text style={{ color: textPrimary, fontWeight: "700" }}>
+                    {settings.currencySymbol}
+                    {s.salary.toLocaleString("en-IN")}/mo
+                  </Text>{" "}
+                  • 📞 {s.phone}
                 </Text>
               </View>
 
@@ -176,7 +198,10 @@ export function StaffScreen() {
                 <TouchableOpacity
                   onPress={() => {
                     payStaffSalary(s.id);
-                    Alert.alert("Salary Disbursed", `Disbursed ${settings.currencySymbol}${s.salary} to ${s.name}!`);
+                    Alert.alert(
+                      "Salary Disbursed",
+                      `Disbursed ${settings.currencySymbol}${s.salary} to ${s.name}!`,
+                    );
                   }}
                   style={[styles.payBtn, { backgroundColor: textPrimary }]}
                 >
@@ -203,7 +228,10 @@ export function StaffScreen() {
                 placeholderTextColor={textMuted}
                 value={name}
                 onChangeText={setName}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.inputLabel, { color: textMuted }]}>Phone Number</Text>
@@ -212,7 +240,10 @@ export function StaffScreen() {
                 placeholderTextColor={textMuted}
                 value={phone}
                 onChangeText={setPhone}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.inputLabel, { color: textMuted }]}>Monthly Salary (₹)</Text>
@@ -222,7 +253,10 @@ export function StaffScreen() {
                 value={salary}
                 onChangeText={setSalary}
                 keyboardType="numeric"
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.inputLabel, { color: textMuted }]}>Shift Hours</Text>
@@ -231,7 +265,10 @@ export function StaffScreen() {
                 placeholderTextColor={textMuted}
                 value={shift}
                 onChangeText={setShift}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
             </View>
 

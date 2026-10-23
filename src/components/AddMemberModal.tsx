@@ -17,8 +17,8 @@ export function AddMemberModal() {
 
   if (!isAddMemberOpen) return null;
 
-  const currentPlan =
-    settings.membershipPlans.find((p) => p.id === selectedPlanId) || settings.membershipPlans[0] || {
+  const currentPlan = settings.membershipPlans.find((p) => p.id === selectedPlanId) ||
+    settings.membershipPlans[0] || {
       id: "default",
       name: "Monthly Flex",
       price: 3000,
@@ -97,7 +97,9 @@ export function AddMemberModal() {
             </div>
             <div>
               <h2 className="text-base font-semibold text-foreground">Enroll New Member</h2>
-              <p className="text-xs text-muted-foreground">Register membership and configure initial payment schedule</p>
+              <p className="text-xs text-muted-foreground">
+                Register membership and configure initial payment schedule
+              </p>
             </div>
           </div>
           <button
@@ -112,9 +114,7 @@ export function AddMemberModal() {
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
           {/* Member Name */}
           <div>
-            <label className="block font-semibold text-muted-foreground mb-1">
-              Full Name *
-            </label>
+            <label className="block font-semibold text-muted-foreground mb-1">Full Name *</label>
             <input
               type="text"
               required
@@ -166,7 +166,8 @@ export function AddMemberModal() {
             >
               {settings.membershipPlans.map((plan) => (
                 <option key={plan.id} value={plan.id}>
-                  {plan.name} — {settings.currencySymbol}{plan.price.toLocaleString("en-IN")} ({plan.durationMonths} Mo)
+                  {plan.name} — {settings.currencySymbol}
+                  {plan.price.toLocaleString("en-IN")} ({plan.durationMonths} Mo)
                 </option>
               ))}
             </select>
@@ -203,7 +204,8 @@ export function AddMemberModal() {
               >
                 <div className="font-bold">Full Payment</div>
                 <div className="text-[10px] mt-0.5 opacity-80">
-                  {settings.currencySymbol}{currentPlan.price.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {currentPlan.price.toLocaleString("en-IN")}
                 </div>
               </button>
 
@@ -237,7 +239,9 @@ export function AddMemberModal() {
             {paymentOption === "Partial" && (
               <div className="rounded-xl border border-border bg-canvas p-3 space-y-2 mt-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-semibold">Initial Deposit Amount ({settings.currencySymbol}):</span>
+                  <span className="text-muted-foreground font-semibold">
+                    Initial Deposit Amount ({settings.currencySymbol}):
+                  </span>
                   <input
                     type="number"
                     min={1}
@@ -250,7 +254,11 @@ export function AddMemberModal() {
                 <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
                   <span>Remaining Pending Due:</span>
                   <span className="font-bold text-amber-600 dark:text-amber-400">
-                    {settings.currencySymbol}{Math.max(0, currentPlan.price - (parseFloat(initialPaidAmount) || 0)).toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {Math.max(
+                      0,
+                      currentPlan.price - (parseFloat(initialPaidAmount) || 0),
+                    ).toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>

@@ -50,7 +50,10 @@ function BroadcastCenterPage() {
   const [recipientsType, setRecipientsType] = useState<BroadcastMessage["recipientsType"]>("all");
   const [targetPlanName, setTargetPlanName] = useState(settings.membershipPlans[0]?.name || "");
   const [targetMemberId, setTargetMemberId] = useState(members[0]?.id || "");
-  const [channels, setChannels] = useState<("WhatsApp" | "SMS" | "In-App" | "Push")[]>(["WhatsApp", "In-App"]);
+  const [channels, setChannels] = useState<("WhatsApp" | "SMS" | "In-App" | "Push")[]>([
+    "WhatsApp",
+    "In-App",
+  ]);
 
   // Calculate matching recipient count
   const getRecipientMembers = (): Member[] => {
@@ -97,7 +100,7 @@ function BroadcastCenterPage() {
     title: string,
     body: string,
     category: BroadcastMessage["category"],
-    recipientGroup: BroadcastMessage["recipientsType"] = "all"
+    recipientGroup: BroadcastMessage["recipientsType"] = "all",
   ) => {
     setMsgTitle(title);
     setMsgBody(body);
@@ -179,13 +182,16 @@ function BroadcastCenterPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Broadcast Messaging Center</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Broadcast Messaging Center
+            </h1>
             <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
               Multi-Channel Dispatch
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Send studio announcements, dues alerts, schedule changes, and transformation challenges across WhatsApp, SMS, In-App, and Push.
+            Send studio announcements, dues alerts, schedule changes, and transformation challenges
+            across WhatsApp, SMS, In-App, and Push.
           </p>
         </div>
 
@@ -253,7 +259,9 @@ function BroadcastCenterPage() {
             </div>
             <h4 className="text-sm font-bold text-foreground">Membership Expiry in 3 Days</h4>
             <p className="text-xs text-muted-foreground bg-canvas p-3 rounded-xl border border-border">
-              "Hi &#123;name&#125;, your &#123;gym&#125; membership (&#123;plan&#125;) expires on &#123;expiry&#125;. Please renew your plan at the front desk or via UPI to keep your access uninterrupted!"
+              "Hi &#123;name&#125;, your &#123;gym&#125; membership (&#123;plan&#125;) expires on
+              &#123;expiry&#125;. Please renew your plan at the front desk or via UPI to keep your
+              access uninterrupted!"
             </p>
             <button
               onClick={() =>
@@ -261,7 +269,7 @@ function BroadcastCenterPage() {
                   "Membership Renewal Reminder",
                   "Hi {name}, your {gym} membership ({plan}) expires on {expiry}. Please renew your plan at the front desk or via UPI to keep your access uninterrupted!",
                   "Renewal Notice",
-                  "expiring"
+                  "expiring",
                 )
               }
               className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition"
@@ -279,7 +287,8 @@ function BroadcastCenterPage() {
             </div>
             <h4 className="text-sm font-bold text-foreground">Holiday / Sunday Facility Notice</h4>
             <p className="text-xs text-muted-foreground bg-canvas p-3 rounded-xl border border-border">
-              "Dear &#123;gym&#125; Family, please note that our gym will remain closed this Sunday for scheduled deep sanitization and floor maintenance. We reopen Monday at 5:30 AM."
+              "Dear &#123;gym&#125; Family, please note that our gym will remain closed this Sunday
+              for scheduled deep sanitization and floor maintenance. We reopen Monday at 5:30 AM."
             </p>
             <button
               onClick={() =>
@@ -287,7 +296,7 @@ function BroadcastCenterPage() {
                   "Gym Maintenance Closure Notice",
                   "Dear {gym} Family, please note that our gym will remain closed this Sunday for scheduled deep sanitization and floor maintenance. We reopen Monday at 5:30 AM.",
                   "Gym Closure",
-                  "all"
+                  "all",
                 )
               }
               className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition"
@@ -305,7 +314,8 @@ function BroadcastCenterPage() {
             </div>
             <h4 className="text-sm font-bold text-foreground">Early Morning 6 AM Session</h4>
             <p className="text-xs text-muted-foreground bg-canvas p-3 rounded-xl border border-border">
-              "Rise & grind! Tomorrow's HIIT & Core conditioning batch begins promptly at 6:00 AM. Bring your hydration and energy. See you on the floor!"
+              "Rise & grind! Tomorrow's HIIT & Core conditioning batch begins promptly at 6:00 AM.
+              Bring your hydration and energy. See you on the floor!"
             </p>
             <button
               onClick={() =>
@@ -313,7 +323,7 @@ function BroadcastCenterPage() {
                   "Tomorrow's 6:00 AM HIIT Conditioning Session",
                   "Rise & grind! Tomorrow's HIIT & Core conditioning batch begins promptly at 6:00 AM. Bring your hydration and energy. See you on the floor!",
                   "Class Update",
-                  "active"
+                  "active",
                 )
               }
               className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition"
@@ -324,14 +334,16 @@ function BroadcastCenterPage() {
 
           <div className="rounded-2xl border border-border bg-surface p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold px-2 py-0.5 text-xs">
+              <span className="rounded-md bg-brand-soft text-brand font-bold px-2 py-0.5 text-xs">
                 Challenge / Promo
               </span>
               <span className="text-[11px] text-muted-foreground">Target: All Members</span>
             </div>
             <h4 className="text-sm font-bold text-foreground">60-Day Transformation Challenge</h4>
             <p className="text-xs text-muted-foreground bg-canvas p-3 rounded-xl border border-border">
-              "Registrations are officially open for the &#123;gym&#125; 60-Day Transformation Challenge! Win cash prizes, free annual memberships, and personalized trainer guidance. Sign up at the reception."
+              "Registrations are officially open for the &#123;gym&#125; 60-Day Transformation
+              Challenge! Win cash prizes, free annual memberships, and personalized trainer
+              guidance. Sign up at the reception."
             </p>
             <button
               onClick={() =>
@@ -339,7 +351,7 @@ function BroadcastCenterPage() {
                   "60-Day Transformation Challenge Registrations Open!",
                   "Registrations are officially open for the {gym} 60-Day Transformation Challenge! Win cash prizes, free annual memberships, and personalized trainer guidance. Sign up at the reception.",
                   "Promotion",
-                  "all"
+                  "all",
                 )
               }
               className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition"
@@ -408,7 +420,10 @@ function BroadcastCenterPage() {
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <span>Channels:</span>
                     {b.channels.map((ch) => (
-                      <span key={ch} className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-foreground font-semibold">
+                      <span
+                        key={ch}
+                        className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-foreground font-semibold"
+                      >
                         {ch}
                       </span>
                     ))}
@@ -440,11 +455,18 @@ function BroadcastCenterPage() {
                   <Radio className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-foreground">Compose Broadcast Announcement</h3>
-                  <p className="text-[11px] text-muted-foreground">Directly reach targeted gym audiences</p>
+                  <h3 className="text-base font-bold text-foreground">
+                    Compose Broadcast Announcement
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    Directly reach targeted gym audiences
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setIsComposerOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setIsComposerOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -452,7 +474,9 @@ function BroadcastCenterPage() {
             <form onSubmit={handleSendBroadcast} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Message Subject / Title *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Message Subject / Title *
+                  </label>
                   <input
                     type="text"
                     required
@@ -464,10 +488,22 @@ function BroadcastCenterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Message Category</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Message Category
+                  </label>
                   <select
                     value={msgCategory}
-                    onChange={(e) => setMsgCategory(e.target.value as any)}
+                    onChange={(e) =>
+                      setMsgCategory(
+                        e.target.value as
+                          | "Announcement"
+                          | "Renewal Notice"
+                          | "Gym Closure"
+                          | "Class Update"
+                          | "Promotion"
+                          | "Urgent Alert",
+                      )
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-emerald"
                   >
                     <option value="Announcement">General Announcement</option>
@@ -483,17 +519,32 @@ function BroadcastCenterPage() {
               {/* Target Audience Selector */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Target Audience</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Target Audience
+                  </label>
                   <select
                     value={recipientsType}
-                    onChange={(e) => setRecipientsType(e.target.value as any)}
-                    className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-emerald"
+                    onChange={(e) =>
+                      setRecipientsType(
+                        e.target.value as BroadcastMessage["recipientsType"],
+                      )
+                    }
+                    className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-brand"
                   >
                     <option value="all">All Members ({members.length})</option>
-                    <option value="active">Active Members Only ({members.filter((m) => m.status === "Active").length})</option>
-                    <option value="expiring">Expiring Soon Members ({members.filter((m) => m.status === "Expiring").length})</option>
-                    <option value="expired">Expired Members ({members.filter((m) => m.status === "Expired").length})</option>
-                    <option value="partial_due">Members with Pending Dues ({members.filter((m) => m.due > 0).length})</option>
+                    <option value="active">
+                      Active Members Only ({members.filter((m) => m.status === "Active").length})
+                    </option>
+                    <option value="expiring">
+                      Expiring Soon Members ({members.filter((m) => m.status === "Expiring").length}
+                      )
+                    </option>
+                    <option value="expired">
+                      Expired Members ({members.filter((m) => m.status === "Expired").length})
+                    </option>
+                    <option value="partial_due">
+                      Members with Pending Dues ({members.filter((m) => m.due > 0).length})
+                    </option>
                     <option value="plan">Specific Membership Plan</option>
                     <option value="individual">Single Individual Member</option>
                   </select>
@@ -501,7 +552,9 @@ function BroadcastCenterPage() {
 
                 {recipientsType === "plan" && (
                   <div>
-                    <label className="block text-muted-foreground font-semibold mb-1">Select Membership Plan</label>
+                    <label className="block text-muted-foreground font-semibold mb-1">
+                      Select Membership Plan
+                    </label>
                     <select
                       value={targetPlanName}
                       onChange={(e) => setTargetPlanName(e.target.value)}
@@ -518,7 +571,9 @@ function BroadcastCenterPage() {
 
                 {recipientsType === "individual" && (
                   <div>
-                    <label className="block text-muted-foreground font-semibold mb-1">Select Member</label>
+                    <label className="block text-muted-foreground font-semibold mb-1">
+                      Select Member
+                    </label>
                     <select
                       value={targetMemberId}
                       onChange={(e) => setTargetMemberId(e.target.value)}
@@ -536,7 +591,9 @@ function BroadcastCenterPage() {
 
               {/* Delivery Channels */}
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1.5">Delivery Channels</label>
+                <label className="block text-muted-foreground font-semibold mb-1.5">
+                  Delivery Channels
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {(["WhatsApp", "SMS", "In-App", "Push"] as const).map((ch) => {
                     const isSelected = channels.includes(ch);

@@ -4,13 +4,8 @@ import { useGymStore } from "../../lib/gym-store";
 import { toast } from "sonner";
 
 export function DynamicUPIQRModal() {
-  const {
-    isUPIQRModalOpen,
-    setIsUPIQRModalOpen,
-    upiQRPaymentDetails,
-    recordPayment,
-    settings,
-  } = useGymStore();
+  const { isUPIQRModalOpen, setIsUPIQRModalOpen, upiQRPaymentDetails, recordPayment, settings, members } =
+    useGymStore();
 
   if (!isUPIQRModalOpen || !upiQRPaymentDetails) return null;
 
@@ -27,16 +22,21 @@ export function DynamicUPIQRModal() {
   };
 
   const handleMarkAsPaid = () => {
+    const matchedMember = members.find(
+      (m) => m.name.toLowerCase() === memberName.toLowerCase(),
+    );
     recordPayment({
+      memberId: matchedMember?.id || "walk-in",
       member: memberName,
       amount,
       date: new Date().toISOString().split("T")[0],
       method: "UPI",
       category: "Membership",
-      status: "Paid",
       notes: `Settled via UPI QR (${note})`,
     });
-    toast.success(`Payment of ${settings.currencySymbol}${amount.toLocaleString("en-IN")} settled via UPI!`);
+    toast.success(
+      `Payment of ${settings.currencySymbol}${amount.toLocaleString("en-IN")} settled via UPI!`,
+    );
     setIsUPIQRModalOpen(false);
   };
 
@@ -66,18 +66,17 @@ export function DynamicUPIQRModal() {
             <p className="text-xs text-muted-foreground">Paying To</p>
             <h3 className="text-base font-bold text-foreground mt-0.5">{settings.name}</h3>
             <p className="text-3xl font-bold font-mono text-emerald mt-2">
-              {settings.currencySymbol}{amount.toLocaleString("en-IN")}
+              {settings.currencySymbol}
+              {amount.toLocaleString("en-IN")}
             </p>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">{memberName} · {note}</p>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">
+              {memberName} · {note}
+            </p>
           </div>
 
           {/* QR Code Frame */}
           <div className="mx-auto flex h-60 w-60 items-center justify-center rounded-2xl border border-border bg-white p-3 shadow-inner">
-            <img
-              src={qrApiUrl}
-              alt="UPI QR Code"
-              className="h-full w-full object-contain"
-            />
+            <img src={qrApiUrl} alt="UPI QR Code" className="h-full w-full object-contain" />
           </div>
 
           {/* Supported Apps pill */}

@@ -40,7 +40,7 @@ export function Member360Modal() {
 
   const handleWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hi ${m.name}, greetings from ${settings.name}! Let us know if you need help with your workout schedule or diet plan.`
+      `Hi ${m.name}, greetings from ${settings.name}! Let us know if you need help with your workout schedule or diet plan.`,
     );
     const cleanPhone = m.phone.replace(/[^0-9]/g, "");
     Linking.openURL(`https://wa.me/${cleanPhone}?text=${text}`);
@@ -98,7 +98,9 @@ export function Member360Modal() {
               </View>
               <View style={styles.vitalItem}>
                 <Text style={[styles.vitalLabel, { color: textMuted }]}>Monthly Visits</Text>
-                <Text style={[styles.vitalValue, { color: textPrimary }]}>{m.totalVisitsThisMonth}</Text>
+                <Text style={[styles.vitalValue, { color: textPrimary }]}>
+                  {m.totalVisitsThisMonth}
+                </Text>
               </View>
               <View style={styles.vitalItem}>
                 <Text style={[styles.vitalLabel, { color: textMuted }]}>Active Streak</Text>
@@ -117,10 +119,16 @@ export function Member360Modal() {
                   Email: <Text style={{ color: textPrimary }}>{m.email}</Text>
                 </Text>
                 <Text style={[styles.infoRow, { color: textMuted }]}>
-                  Plan Validity: <Text style={{ color: textPrimary }}>{m.startDate} → {m.endDate}</Text>
+                  Plan Validity:{" "}
+                  <Text style={{ color: textPrimary }}>
+                    {m.startDate} → {m.endDate}
+                  </Text>
                 </Text>
                 <Text style={[styles.infoRow, { color: textMuted }]}>
-                  Outstanding Dues: <Text style={{ color: isPending ? "#f59e0b" : emerald, fontWeight: "700" }}>₹{m.due}</Text>
+                  Outstanding Dues:{" "}
+                  <Text style={{ color: isPending ? "#f59e0b" : emerald, fontWeight: "700" }}>
+                    ₹{m.due}
+                  </Text>
                 </Text>
                 {m.assignedWorkout && (
                   <Text style={[styles.infoRow, { color: textMuted }]}>
@@ -149,14 +157,23 @@ export function Member360Modal() {
                   { backgroundColor: isInside ? (isDark ? "#451a03" : "#fee2e2") : emerald },
                 ]}
               >
-                <Text style={{ color: isInside ? "#ef4444" : "#ffffff", fontWeight: "700", fontSize: 12 }}>
+                <Text
+                  style={{
+                    color: isInside ? "#ef4444" : "#ffffff",
+                    fontWeight: "700",
+                    fontSize: 12,
+                  }}
+                >
                   {isInside ? "Check Out of Floor" : "Check In to Floor"}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleWhatsApp}
-                style={[styles.btn, { backgroundColor: surface, borderColor: border, borderWidth: 1 }]}
+                style={[
+                  styles.btn,
+                  { backgroundColor: surface, borderColor: border, borderWidth: 1 },
+                ]}
               >
                 <Text style={{ color: textPrimary, fontWeight: "700", fontSize: 12 }}>
                   💬 WhatsApp Direct

@@ -40,14 +40,16 @@ export function RefundModal() {
       return;
     }
     if (refundAmount <= 0 || refundAmount > selectedPaymentForRefund.amount) {
-      toast.error(`Refund amount must be between 1 and ${settings.currencySymbol}${selectedPaymentForRefund.amount}`);
+      toast.error(
+        `Refund amount must be between 1 and ${settings.currencySymbol}${selectedPaymentForRefund.amount}`,
+      );
       return;
     }
 
     const success = refundPayment(selectedPaymentForRefund.id, refundAmount, reason);
     if (success) {
       toast.success(
-        `Refund of ${settings.currencySymbol}${refundAmount.toLocaleString("en-IN")} processed successfully!`
+        `Refund of ${settings.currencySymbol}${refundAmount.toLocaleString("en-IN")} processed successfully!`,
       );
       handleClose();
     } else {
@@ -67,19 +69,22 @@ export function RefundModal() {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-soft text-brand border border-brand/20">
               <RotateCcw className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-soft text-brand border border-brand/20">
                   Admin Authority Required
                 </span>
               </div>
               <h3 className="text-base font-bold text-foreground mt-0.5">Issue Payment Refund</h3>
             </div>
           </div>
-          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-muted text-muted-foreground">
+          <button
+            onClick={handleClose}
+            className="p-1 rounded-lg hover:bg-muted text-muted-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -88,7 +93,9 @@ export function RefundModal() {
         <div className="rounded-2xl border border-border bg-canvas p-4 space-y-2 text-xs">
           <div className="flex items-center justify-between text-muted-foreground">
             <span>Invoice Number:</span>
-            <span className="font-mono font-bold text-foreground">{selectedPaymentForRefund.invoiceNumber}</span>
+            <span className="font-mono font-bold text-foreground">
+              {selectedPaymentForRefund.invoiceNumber}
+            </span>
           </div>
           <div className="flex items-center justify-between text-muted-foreground">
             <span>Member Name:</span>
@@ -98,7 +105,8 @@ export function RefundModal() {
             <span>Original Paid Amount:</span>
             <span className="font-mono font-bold text-foreground">
               {settings.currencySymbol}
-              {selectedPaymentForRefund.amount.toLocaleString("en-IN")} ({selectedPaymentForRefund.method})
+              {selectedPaymentForRefund.amount.toLocaleString("en-IN")} (
+              {selectedPaymentForRefund.method})
             </span>
           </div>
           <div className="flex items-center justify-between text-muted-foreground">
@@ -110,7 +118,9 @@ export function RefundModal() {
         {/* Form */}
         <form onSubmit={handleProcessRefund} className="space-y-4 text-xs">
           <div className="space-y-1.5">
-            <label className="font-semibold text-foreground">Refund Amount ({settings.currencySymbol})</label>
+            <label className="font-semibold text-foreground">
+              Refund Amount ({settings.currencySymbol})
+            </label>
             <input
               type="number"
               min="1"
@@ -133,10 +143,16 @@ export function RefundModal() {
               onChange={(e) => setReason(e.target.value)}
               className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs focus:border-foreground focus:outline-hidden"
             >
-              <option value="Member relocated / medical cancellation">Member relocated / medical cancellation</option>
+              <option value="Member relocated / medical cancellation">
+                Member relocated / medical cancellation
+              </option>
               <option value="Accidental duplicate charge">Accidental duplicate charge</option>
-              <option value="Dissatisfaction / Plan downgrade adjustment">Dissatisfaction / Plan downgrade adjustment</option>
-              <option value="Executive Director discretionary refund">Executive Director discretionary refund</option>
+              <option value="Dissatisfaction / Plan downgrade adjustment">
+                Dissatisfaction / Plan downgrade adjustment
+              </option>
+              <option value="Executive Director discretionary refund">
+                Executive Director discretionary refund
+              </option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -145,8 +161,8 @@ export function RefundModal() {
           <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300">
             <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
             <p className="text-[11px] leading-tight">
-              This action will adjust the member's collected balance and permanently log an audit entry under Director{" "}
-              <strong>{currentUser.name}</strong>.
+              This action will adjust the member's collected balance and permanently log an audit
+              entry under Director <strong>{currentUser.name}</strong>.
             </p>
           </div>
 

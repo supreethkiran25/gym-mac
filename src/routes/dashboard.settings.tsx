@@ -70,7 +70,9 @@ function BusinessSettingsPage() {
     systemLogs,
   } = useGymStore();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "brand" | "plans" | "billing" | "security" | "backup" | "audit">("profile");
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "brand" | "plans" | "billing" | "security" | "backup" | "audit"
+  >("profile");
 
   // Profile Form State
   const [gymName, setGymName] = useState(settings.name);
@@ -88,7 +90,7 @@ function BusinessSettingsPage() {
   const [googleMaps, setGoogleMaps] = useState(settings.socialLinks?.googleMaps || "");
 
   // Brand Theme State
-  const [customBrandColor, setCustomBrandColor] = useState(settings.brandColor || "#8b5cf6");
+  const [customBrandColor, setCustomBrandColor] = useState(settings.brandColor || "#3b82f6");
 
   // Security Form State
   const [adminPassword, setAdminPassword] = useState(settings.adminPassword || "admin123");
@@ -320,7 +322,8 @@ function BusinessSettingsPage() {
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Configure gym identity, dynamic logo color extraction, plan pricing, security passcodes, and backups.
+            Configure gym identity, dynamic logo color extraction, plan pricing, security passcodes,
+            and backups.
           </p>
         </div>
 
@@ -414,7 +417,7 @@ function BusinessSettingsPage() {
               : "text-muted-foreground hover:text-foreground hover:bg-accent"
           }`}
         >
-          <Shield className="h-3.5 w-3.5 text-purple-500" />
+          <Shield className="h-3.5 w-3.5 text-brand" />
           <span>Audit Trail ({systemLogs.length})</span>
         </button>
       </div>
@@ -434,7 +437,9 @@ function BusinessSettingsPage() {
                   Gym Logo Dominant Color Extraction
                 </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  When you upload your gym logo, PeakRep automatically extracts the dominant brand color and recalculates glowing accents, soft tints, and button borders across your entire dashboard.
+                  When you upload your gym logo, PeakRep automatically extracts the dominant brand
+                  color and recalculates glowing accents, soft tints, and button borders across your
+                  entire dashboard.
                 </p>
               </div>
 
@@ -468,7 +473,9 @@ function BusinessSettingsPage() {
                     className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-md shadow-brand/20 hover:brightness-110 transition-all"
                   >
                     <Upload className="h-3.5 w-3.5" />
-                    <span>{settings.logoUrl ? "Change Logo & Extract" : "Upload Logo & Extract"}</span>
+                    <span>
+                      {settings.logoUrl ? "Change Logo & Extract" : "Upload Logo & Extract"}
+                    </span>
                   </button>
                   {settings.logoUrl && (
                     <button
@@ -490,12 +497,14 @@ function BusinessSettingsPage() {
                 <div className="flex items-center gap-2 bg-background border border-border px-3 py-1.5 rounded-xl">
                   <span
                     className="h-4 w-4 rounded-full border border-white/20 shadow-xs"
-                    style={{ backgroundColor: settings.brandColor || "#8b5cf6" }}
+                    style={{ backgroundColor: settings.brandColor || "#3b82f6" }}
                   />
                   <span className="font-mono font-bold text-foreground">
-                    {settings.brandColor || "#8b5cf6"}
+                    {settings.brandColor || "#3b82f6"}
                   </span>
-                  <span className="text-muted-foreground">({settings.brandThemeName || "Custom"})</span>
+                  <span className="text-muted-foreground">
+                    ({settings.brandThemeName || "Custom"})
+                  </span>
                 </div>
               </div>
 
@@ -505,23 +514,23 @@ function BusinessSettingsPage() {
                 <div className="flex items-center gap-1.5">
                   <span
                     className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white shadow-xs"
-                    style={{ backgroundColor: "var(--brand-primary, #8b5cf6)" }}
+                    style={{ backgroundColor: "var(--brand-primary, #3b82f6)" }}
                   >
                     Primary
                   </span>
                   <span
                     className="px-2.5 py-1 rounded-lg text-[10px] font-bold border"
                     style={{
-                      backgroundColor: "var(--brand-soft, rgba(139, 92, 246, 0.15))",
-                      borderColor: "var(--brand-border, rgba(139, 92, 246, 0.3))",
-                      color: "var(--brand-primary, #8b5cf6)",
+                      backgroundColor: "var(--brand-soft, rgba(59, 130, 246, 0.15))",
+                      borderColor: "var(--brand-border, rgba(59, 130, 246, 0.3))",
+                      color: "var(--brand-primary, #3b82f6)",
                     }}
                   >
                     Soft Tint
                   </span>
                   <span
                     className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-foreground border"
-                    style={{ borderColor: "var(--brand-border, rgba(139, 92, 246, 0.3))" }}
+                    style={{ borderColor: "var(--brand-border, rgba(59, 130, 246, 0.3))" }}
                   >
                     Border
                   </span>
@@ -548,7 +557,9 @@ function BusinessSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {BRAND_THEMES.map((theme) => {
-                  const isSelected = (settings.brandColor || "#8b5cf6").toLowerCase() === theme.primary.toLowerCase();
+                  const isSelected =
+                    (settings.brandColor || "#3b82f6").toLowerCase() ===
+                    theme.primary.toLowerCase();
 
                   return (
                     <button
@@ -581,7 +592,9 @@ function BusinessSettingsPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono text-muted-foreground">{theme.primary}</span>
+                        <span className="text-[11px] font-mono text-muted-foreground">
+                          {theme.primary}
+                        </span>
                         {isSelected && (
                           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white shadow-xs">
                             <Check className="h-3 w-3 stroke-[3]" />
@@ -603,7 +616,8 @@ function BusinessSettingsPage() {
                   <span>Custom Color Palette</span>
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Pick any custom hex color code from your gym's official marketing brand guidelines.
+                  Pick any custom hex color code from your gym's official marketing brand
+                  guidelines.
                 </p>
 
                 <form onSubmit={handleApplyCustomColor} className="space-y-3">
@@ -654,7 +668,9 @@ function BusinessSettingsPage() {
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-amber-300 space-y-1 leading-relaxed">
             <p className="font-semibold text-amber-200">Security Requirement Note</p>
             <p className="text-muted-foreground/90">
-              When front desk receptionists operate PeakRep, they are blocked from viewing director analytics, payroll, and plan pricing. Entering this master password allows switching back into full Admin privileges.
+              When front desk receptionists operate PeakRep, they are blocked from viewing director
+              analytics, payroll, and plan pricing. Entering this master password allows switching
+              back into full Admin privileges.
             </p>
           </div>
 
@@ -705,7 +721,8 @@ function BusinessSettingsPage() {
               <span>Gym Brand Logo</span>
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Upload your official gym logo. It will automatically propagate to the Top Header, Desktop Sidebar, Invoices, and Official Reports.
+              Upload your official gym logo. It will automatically propagate to the Top Header,
+              Desktop Sidebar, Invoices, and Official Reports.
             </p>
 
             <div className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-border bg-background/50 space-y-3">
@@ -774,10 +791,12 @@ function BusinessSettingsPage() {
               <div className="flex items-center gap-2">
                 <span
                   className="h-4 w-4 rounded-full border border-white/20 shadow-xs"
-                  style={{ backgroundColor: settings.brandColor || "#8B5CF6" }}
+                  style={{ backgroundColor: settings.brandColor || "#3b82f6" }}
                 />
                 <span className="font-semibold text-brand">Extracted Color:</span>
-                <span className="font-mono font-bold text-foreground">{settings.brandColor || "#8B5CF6"}</span>
+                <span className="font-mono font-bold text-foreground">
+                  {settings.brandColor || "#3b82f6"}
+                </span>
               </div>
               {settings.logoUrl && (
                 <button
@@ -809,7 +828,9 @@ function BusinessSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Gym Name *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Gym Name *
+                  </label>
                   <input
                     type="text"
                     required
@@ -817,11 +838,15 @@ function BusinessSettingsPage() {
                     onChange={(e) => setGymName(e.target.value)}
                     className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-brand font-bold"
                   />
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Displayed in top header & app title</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Displayed in top header & app title
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Director / Owner Name *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Director / Owner Name *
+                  </label>
                   <input
                     type="text"
                     required
@@ -834,7 +859,9 @@ function BusinessSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Contact Phone *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Contact Phone *
+                  </label>
                   <input
                     type="text"
                     required
@@ -845,7 +872,9 @@ function BusinessSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Official Email *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Official Email *
+                  </label>
                   <input
                     type="email"
                     required
@@ -858,7 +887,9 @@ function BusinessSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Branch / Location Hub</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Branch / Location Hub
+                  </label>
                   <input
                     type="text"
                     value={location}
@@ -868,7 +899,9 @@ function BusinessSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">GSTIN Number</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    GSTIN Number
+                  </label>
                   <input
                     type="text"
                     value={gstNumber}
@@ -879,7 +912,9 @@ function BusinessSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Physical Address</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Physical Address
+                </label>
                 <input
                   type="text"
                   value={address}
@@ -889,7 +924,9 @@ function BusinessSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Operating Hours</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Operating Hours
+                </label>
                 <input
                   type="text"
                   value={operatingHours}
@@ -931,8 +968,12 @@ function BusinessSettingsPage() {
         <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 space-y-5 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Membership Plans & Pricing Matrix</h3>
-              <p className="text-xs text-muted-foreground">Manage fees, billing cycles, and package perks</p>
+              <h3 className="text-sm font-bold text-foreground">
+                Membership Plans & Pricing Matrix
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Manage fees, billing cycles, and package perks
+              </p>
             </div>
             <button
               onClick={handleOpenCreatePlan}
@@ -945,7 +986,10 @@ function BusinessSettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settings.membershipPlans.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-border bg-background p-4 space-y-3">
+              <div
+                key={p.id}
+                className="rounded-2xl border border-border bg-background p-4 space-y-3"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-brand font-mono">
                     {p.type}
@@ -969,8 +1013,12 @@ function BusinessSettingsPage() {
                 <div>
                   <h4 className="font-bold text-foreground text-sm">{p.name}</h4>
                   <p className="text-xl font-bold font-mono text-foreground mt-0.5">
-                    {settings.currencySymbol}{p.price.toLocaleString("en-IN")}
-                    <span className="text-xs text-muted-foreground font-normal"> / {p.durationMonths} mo</span>
+                    {settings.currencySymbol}
+                    {p.price.toLocaleString("en-IN")}
+                    <span className="text-xs text-muted-foreground font-normal">
+                      {" "}
+                      / {p.durationMonths} mo
+                    </span>
                   </p>
                 </div>
 
@@ -996,7 +1044,9 @@ function BusinessSettingsPage() {
           </h3>
           <form onSubmit={handleSaveBilling} className="space-y-4 text-xs">
             <div>
-              <label className="block text-muted-foreground font-semibold mb-1">Invoice Prefix *</label>
+              <label className="block text-muted-foreground font-semibold mb-1">
+                Invoice Prefix *
+              </label>
               <input
                 type="text"
                 required
@@ -1004,11 +1054,15 @@ function BusinessSettingsPage() {
                 onChange={(e) => setInvoicePrefix(e.target.value)}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-mono outline-none focus:border-brand font-bold"
               />
-              <p className="text-[10px] text-muted-foreground mt-0.5">e.g. PEAK-2026- will generate PEAK-2026-0001</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                e.g. PEAK-2026- will generate PEAK-2026-0001
+              </p>
             </div>
 
             <div>
-              <label className="block text-muted-foreground font-semibold mb-1">GST Tax Rate (%)</label>
+              <label className="block text-muted-foreground font-semibold mb-1">
+                GST Tax Rate (%)
+              </label>
               <input
                 type="number"
                 min={0}
@@ -1020,7 +1074,9 @@ function BusinessSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-muted-foreground font-semibold mb-1">Gym UPI VPA ID</label>
+              <label className="block text-muted-foreground font-semibold mb-1">
+                Gym UPI VPA ID
+              </label>
               <input
                 type="text"
                 value={upiId}
@@ -1028,7 +1084,9 @@ function BusinessSettingsPage() {
                 placeholder="gym@upi"
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-mono outline-none focus:border-brand"
               />
-              <p className="text-[10px] text-muted-foreground mt-0.5">Used for dynamic QR code generation</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Used for dynamic QR code generation
+              </p>
             </div>
 
             <div className="pt-2">
@@ -1062,7 +1120,8 @@ function BusinessSettingsPage() {
                   <span>Download Backup</span>
                 </h4>
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  Export complete encrypted JSON archive of all gym members, billing records, and audit logs.
+                  Export complete encrypted JSON archive of all gym members, billing records, and
+                  audit logs.
                 </p>
               </div>
               <button
@@ -1106,7 +1165,9 @@ function BusinessSettingsPage() {
             <button
               type="button"
               onClick={() => {
-                if (window.confirm("Are you sure you want to reset all data to default demo state?")) {
+                if (
+                  window.confirm("Are you sure you want to reset all data to default demo state?")
+                ) {
                   resetToDefaultData();
                   toast.success("Database restored to default demo state");
                 }
@@ -1125,12 +1186,16 @@ function BusinessSettingsPage() {
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Shield className="h-4 w-4 text-purple-500" />
+                <Shield className="h-4 w-4 text-brand" />
                 <span>Real-Time Audit Trail</span>
               </h3>
-              <p className="text-xs text-muted-foreground">Chronological log of all administrative and financial actions</p>
+              <p className="text-xs text-muted-foreground">
+                Chronological log of all administrative and financial actions
+              </p>
             </div>
-            <span className="text-xs font-mono text-muted-foreground">{systemLogs.length} Records</span>
+            <span className="text-xs font-mono text-muted-foreground">
+              {systemLogs.length} Records
+            </span>
           </div>
 
           <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
@@ -1150,7 +1215,9 @@ function BusinessSettingsPage() {
                 </div>
                 <div className="text-right shrink-0 text-[10px] text-muted-foreground">
                   <p>{log.timestamp}</p>
-                  <p className="font-medium text-foreground">{log.userName} ({log.userRole})</p>
+                  <p className="font-medium text-foreground">
+                    {log.userName} ({log.userRole})
+                  </p>
                 </div>
               </div>
             ))}
@@ -1166,14 +1233,19 @@ function BusinessSettingsPage() {
               <h3 className="text-sm font-bold text-foreground">
                 {editingPlan ? `Edit ${editingPlan.name}` : "Create Membership Plan"}
               </h3>
-              <button onClick={() => setIsPlanModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setIsPlanModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleSavePlan} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Plan Name *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Plan Name *
+                </label>
                 <input
                   type="text"
                   required
@@ -1186,7 +1258,9 @@ function BusinessSettingsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Price ({settings.currencySymbol}) *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Price ({settings.currencySymbol}) *
+                  </label>
                   <input
                     type="number"
                     required
@@ -1198,7 +1272,9 @@ function BusinessSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Duration (Months)</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Duration (Months)
+                  </label>
                   <input
                     type="number"
                     required
@@ -1215,7 +1291,11 @@ function BusinessSettingsPage() {
                 <label className="block text-muted-foreground font-semibold mb-1">Plan Tier</label>
                 <select
                   value={planType}
-                  onChange={(e) => setPlanType(e.target.value as any)}
+                  onChange={(e) =>
+                    setPlanType(
+                      e.target.value as "Standard" | "Premium" | "PT Package" | "VIP Pass",
+                    )
+                  }
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-brand"
                 >
                   <option value="Standard">Standard Pass</option>
@@ -1226,7 +1306,9 @@ function BusinessSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Perks (Comma Separated)</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Perks (Comma Separated)
+                </label>
                 <input
                   type="text"
                   placeholder="Full floor access, Shower, Locker"

@@ -100,10 +100,14 @@ function PaymentsAndRevenueEngine() {
   const [isInstallmentModalOpen, setIsInstallmentModalOpen] = useState(false);
   const [targetMemberId, setTargetMemberId] = useState(members[0]?.id || "");
   const [installmentAmount, setInstallmentAmount] = useState("");
-  const [installmentMethod, setInstallmentMethod] = useState<"UPI" | "Cash" | "Card" | "Bank">("UPI");
+  const [installmentMethod, setInstallmentMethod] = useState<"UPI" | "Cash" | "Card" | "Bank">(
+    "UPI",
+  );
   const [installmentNumber, setInstallmentNumber] = useState(1);
   const [totalInstallmentsEst, setTotalInstallmentsEst] = useState(2);
-  const [installmentDate, setInstallmentDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [installmentDate, setInstallmentDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
   const [installmentNotes, setInstallmentNotes] = useState("");
 
   // Record Expense Modal State
@@ -112,7 +116,9 @@ function PaymentsAndRevenueEngine() {
   const [expCategory, setExpCategory] = useState<ExpenseCategory>("Building Rent");
   const [expAmount, setExpAmount] = useState("");
   const [expDate, setExpDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [expMethod, setExpMethod] = useState<"UPI" | "Bank Transfer" | "Cash" | "Card" | "Cheque">("Bank Transfer");
+  const [expMethod, setExpMethod] = useState<"UPI" | "Bank Transfer" | "Cash" | "Card" | "Cheque">(
+    "Bank Transfer",
+  );
   const [expRecipient, setExpRecipient] = useState("");
   const [expReceiptNo, setExpReceiptNo] = useState("");
   const [expNotes, setExpNotes] = useState("");
@@ -124,11 +130,14 @@ function PaymentsAndRevenueEngine() {
 
   // Financial Analytics Calculations
   const expectedRevenue = members.reduce((sum, m) => sum + (m.planPrice || 0), 0);
-  const totalInflow = payments.reduce((sum, p) => sum + (p.status === "Refunded" ? 0 : p.amount), 0);
+  const totalInflow = payments.reduce(
+    (sum, p) => sum + (p.status === "Refunded" ? 0 : p.amount),
+    0,
+  );
   const totalOutflow = expenses.reduce((sum, e) => sum + (e.status === "Paid" ? e.amount : 0), 0);
   const pendingRevenue = members.reduce(
     (sum, m) => sum + Math.max(0, (m.planPrice || 0) - (m.collectedAmount || 0)),
-    0
+    0,
   );
   const overdueMembersCount = members.filter((m) => m.due > 0).length;
 
@@ -215,10 +224,14 @@ function PaymentsAndRevenueEngine() {
       category: "Membership",
       installmentNumber,
       totalInstallments: totalInstallmentsEst,
-      notes: installmentNotes.trim() || `Installment ${installmentNumber} of ${totalInstallmentsEst} for ${targetMember.plan}`,
+      notes:
+        installmentNotes.trim() ||
+        `Installment ${installmentNumber} of ${totalInstallmentsEst} for ${targetMember.plan}`,
     });
 
-    toast.success(`Logged ${settings.currencySymbol}${paidNum.toLocaleString("en-IN")} via ${installmentMethod} for ${targetMember.name}!`);
+    toast.success(
+      `Logged ${settings.currencySymbol}${paidNum.toLocaleString("en-IN")} via ${installmentMethod} for ${targetMember.name}!`,
+    );
     setIsInstallmentModalOpen(false);
   };
 
@@ -259,7 +272,9 @@ function PaymentsAndRevenueEngine() {
       recordedBy: currentUser.name,
     });
 
-    toast.success(`Logged expense of ${settings.currencySymbol}${numAmount.toLocaleString("en-IN")} for ${expTitle}!`);
+    toast.success(
+      `Logged expense of ${settings.currencySymbol}${numAmount.toLocaleString("en-IN")} for ${expTitle}!`,
+    );
     setIsRecordExpenseModalOpen(false);
   };
 
@@ -284,7 +299,18 @@ function PaymentsAndRevenueEngine() {
     }
 
     if (activeTab === "expenses") {
-      const headers = ["ID", "Title", "Category", "Amount", "Date", "Payment Method", "Recipient", "Receipt #", "Recorded By", "Notes"];
+      const headers = [
+        "ID",
+        "Title",
+        "Category",
+        "Amount",
+        "Date",
+        "Payment Method",
+        "Recipient",
+        "Receipt #",
+        "Recorded By",
+        "Notes",
+      ];
       const rows = filteredExpenses.map((e) => [
         e.id,
         `"${e.title}"`,
@@ -297,7 +323,9 @@ function PaymentsAndRevenueEngine() {
         `"${e.recordedBy}"`,
         `"${e.notes || ""}"`,
       ]);
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -307,7 +335,17 @@ function PaymentsAndRevenueEngine() {
       document.body.removeChild(link);
       toast.success("Expenses ledger exported to CSV!");
     } else {
-      const headers = ["Invoice #", "Member", "Date", "Method", "Category", "Amount", "Installment", "Status", "Notes"];
+      const headers = [
+        "Invoice #",
+        "Member",
+        "Date",
+        "Method",
+        "Category",
+        "Amount",
+        "Installment",
+        "Status",
+        "Notes",
+      ];
       const rows = filteredPayments.map((p) => [
         p.invoiceNumber,
         `"${p.member}"`,
@@ -319,7 +357,9 @@ function PaymentsAndRevenueEngine() {
         p.status,
         `"${p.notes || ""}"`,
       ]);
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -334,17 +374,17 @@ function PaymentsAndRevenueEngine() {
   const getCategoryIcon = (category: ExpenseCategory) => {
     switch (category) {
       case "Building Rent":
-        return <Building className="h-4 w-4 text-amber-500" />;
+        return <Building className="h-4 w-4 text-brand" />;
       case "Electricity & Water":
-        return <Zap className="h-4 w-4 text-yellow-500" />;
+        return <Zap className="h-4 w-4 text-brand" />;
       case "Staff Salary":
-        return <Briefcase className="h-4 w-4 text-emerald-500" />;
+        return <Briefcase className="h-4 w-4 text-brand" />;
       case "Equipment Maintenance":
-        return <Wrench className="h-4 w-4 text-sky-500" />;
+        return <Wrench className="h-4 w-4 text-brand" />;
       case "Supplements & Inventory":
-        return <ShoppingBag className="h-4 w-4 text-purple-500" />;
+        return <ShoppingBag className="h-4 w-4 text-brand" />;
       case "Software & Marketing":
-        return <Megaphone className="h-4 w-4 text-rose-500" />;
+        return <Megaphone className="h-4 w-4 text-brand" />;
       default:
         return <CreditCard className="h-4 w-4 text-muted-foreground" />;
     }
@@ -364,7 +404,8 @@ function PaymentsAndRevenueEngine() {
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Complete gym financial engine tracking Member Collections (Inflow), Operational Bills & Staff Payroll (Outflow), and Net Profit & Loss.
+            Complete gym financial engine tracking Member Collections (Inflow), Operational Bills &
+            Staff Payroll (Outflow), and Net Profit & Loss.
           </p>
         </div>
 
@@ -409,10 +450,17 @@ function PaymentsAndRevenueEngine() {
             </div>
           </div>
           <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{totalInflow.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {totalInflow.toLocaleString("en-IN")}
           </p>
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>Today: <strong className="text-emerald font-mono">{settings.currencySymbol}{todayCollected.toLocaleString("en-IN")}</strong></span>
+            <span>
+              Today:{" "}
+              <strong className="text-emerald font-mono">
+                {settings.currencySymbol}
+                {todayCollected.toLocaleString("en-IN")}
+              </strong>
+            </span>
             <span>{payments.length} receipts</span>
           </div>
         </div>
@@ -420,14 +468,17 @@ function PaymentsAndRevenueEngine() {
         {/* Total Outflow (Expenses & Salaries) */}
         <div className="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-5 space-y-2 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Total Outflow (Expenses & Bills)</span>
+            <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+              Total Outflow (Expenses & Bills)
+            </span>
             <div className="flex items-center gap-1 text-rose-500">
               <TrendingDown className="h-4 w-4" />
               <span className="text-[10px] font-bold">Burn</span>
             </div>
           </div>
           <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{totalOutflow.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {totalOutflow.toLocaleString("en-IN")}
           </p>
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>Rent, Power, Salaries</span>
@@ -453,7 +504,9 @@ function PaymentsAndRevenueEngine() {
             </span>
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                isLoss ? "bg-rose-500/20 text-rose-600 dark:text-rose-400" : "bg-emerald-500/20 text-emerald"
+                isLoss
+                  ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
+                  : "bg-emerald-500/20 text-emerald"
               }`}
             >
               {isLoss ? "Outflow > Inflow" : "Profitable"}
@@ -465,7 +518,8 @@ function PaymentsAndRevenueEngine() {
             }`}
           >
             {isLoss ? "-" : "+"}
-            {settings.currencySymbol}{Math.abs(netBalance).toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {Math.abs(netBalance).toLocaleString("en-IN")}
           </p>
           <p className="text-[11px] text-muted-foreground">
             {isLoss
@@ -477,11 +531,14 @@ function PaymentsAndRevenueEngine() {
         {/* Pending Member Dues */}
         <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-2 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Pending Member Dues</span>
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+              Pending Member Dues
+            </span>
             <AlertTriangle className="h-4 w-4 text-amber-500" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{pendingRevenue.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {pendingRevenue.toLocaleString("en-IN")}
           </p>
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>{overdueMembersCount} member(s) with dues</span>
@@ -573,7 +630,8 @@ function PaymentsAndRevenueEngine() {
                         </div>
                         <div className="mt-2 text-[11px] text-muted-foreground font-mono">
                           Collected: {settings.currencySymbol}
-                          {m.collectedAmount.toLocaleString("en-IN")} ({(m.installments || []).length} installment(s) paid)
+                          {m.collectedAmount.toLocaleString("en-IN")} (
+                          {(m.installments || []).length} installment(s) paid)
                         </div>
                       </div>
 
@@ -585,7 +643,9 @@ function PaymentsAndRevenueEngine() {
                           Collect Installment
                         </button>
                         <button
-                          onClick={() => openUPIQRModal(m.due, m.name, `Membership Due - ${m.plan}`)}
+                          onClick={() =>
+                            openUPIQRModal(m.due, m.name, `Membership Due - ${m.plan}`)
+                          }
                           className="px-2.5 py-1.5 rounded-xl border border-border text-xs font-medium hover:bg-muted transition"
                         >
                           <QrCode className="h-3.5 w-3.5 text-emerald" />
@@ -690,8 +750,8 @@ function PaymentsAndRevenueEngine() {
                               p.status === "Paid"
                                 ? "bg-emerald-500/20 text-emerald"
                                 : p.status === "Partial"
-                                ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                                : "bg-rose-500/20 text-rose-600 dark:text-rose-400"
+                                  ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                                  : "bg-rose-500/20 text-rose-600 dark:text-rose-400"
                             }`}
                           >
                             {p.status}
@@ -733,15 +793,21 @@ function PaymentsAndRevenueEngine() {
           {/* Quick Expense Highlights */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {expenseByCategory.map((c) => (
-              <div key={c.category} className="rounded-2xl border border-border bg-surface p-4 space-y-1">
+              <div
+                key={c.category}
+                className="rounded-2xl border border-border bg-surface p-4 space-y-1"
+              >
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   {getCategoryIcon(c.category as ExpenseCategory)}
                   <span className="text-[11px] font-semibold truncate">{c.category}</span>
                 </div>
                 <p className="text-lg font-bold font-mono text-foreground">
-                  {settings.currencySymbol}{c.total.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {c.total.toLocaleString("en-IN")}
                 </p>
-                <div className="text-[10px] text-muted-foreground">{c.percentage}% of total outflow</div>
+                <div className="text-[10px] text-muted-foreground">
+                  {c.percentage}% of total outflow
+                </div>
               </div>
             ))}
           </div>
@@ -827,7 +893,9 @@ function PaymentsAndRevenueEngine() {
                         <td className="py-3.5 px-4">
                           <p className="font-bold text-foreground">{e.title}</p>
                           {e.recipientName && (
-                            <p className="text-[11px] text-muted-foreground">Payee: {e.recipientName}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              Payee: {e.recipientName}
+                            </p>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
@@ -849,7 +917,9 @@ function PaymentsAndRevenueEngine() {
                           -{settings.currencySymbol}
                           {e.amount.toLocaleString("en-IN")}
                         </td>
-                        <td className="py-3.5 px-4 text-muted-foreground text-[11px]">{e.recordedBy}</td>
+                        <td className="py-3.5 px-4 text-muted-foreground text-[11px]">
+                          {e.recordedBy}
+                        </td>
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
@@ -908,11 +978,14 @@ function PaymentsAndRevenueEngine() {
               {/* Gross Inflow */}
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald uppercase tracking-wider">Gross Inflow (A)</span>
+                  <span className="text-xs font-bold text-emerald uppercase tracking-wider">
+                    Gross Inflow (A)
+                  </span>
                   <TrendingUp className="h-5 w-5 text-emerald" />
                 </div>
                 <p className="text-3xl font-black font-mono text-foreground">
-                  {settings.currencySymbol}{totalInflow.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {totalInflow.toLocaleString("en-IN")}
                 </p>
                 <div className="space-y-1 text-xs text-muted-foreground border-t border-emerald-500/20 pt-2">
                   <div className="flex justify-between">
@@ -941,11 +1014,14 @@ function PaymentsAndRevenueEngine() {
               {/* Gross Outflow */}
               <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Gross Outflow (B)</span>
+                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                    Gross Outflow (B)
+                  </span>
                   <TrendingDown className="h-5 w-5 text-rose-500" />
                 </div>
                 <p className="text-3xl font-black font-mono text-foreground">
-                  {settings.currencySymbol}{totalOutflow.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {totalOutflow.toLocaleString("en-IN")}
                 </p>
                 <div className="space-y-1 text-xs text-muted-foreground border-t border-rose-500/20 pt-2">
                   <div className="flex justify-between">
@@ -963,7 +1039,12 @@ function PaymentsAndRevenueEngine() {
                     <span className="font-mono text-foreground font-semibold">
                       {settings.currencySymbol}
                       {expenses
-                        .filter((e) => (e.category === "Building Rent" || e.category === "Electricity & Water") && e.status === "Paid")
+                        .filter(
+                          (e) =>
+                            (e.category === "Building Rent" ||
+                              e.category === "Electricity & Water") &&
+                            e.status === "Paid",
+                        )
                         .reduce((s, e) => s + e.amount, 0)
                         .toLocaleString("en-IN")}
                     </span>
@@ -973,7 +1054,13 @@ function PaymentsAndRevenueEngine() {
                     <span className="font-mono text-foreground font-semibold">
                       {settings.currencySymbol}
                       {expenses
-                        .filter((e) => e.category !== "Staff Salary" && e.category !== "Building Rent" && e.category !== "Electricity & Water" && e.status === "Paid")
+                        .filter(
+                          (e) =>
+                            e.category !== "Staff Salary" &&
+                            e.category !== "Building Rent" &&
+                            e.category !== "Electricity & Water" &&
+                            e.status === "Paid",
+                        )
                         .reduce((s, e) => s + e.amount, 0)
                         .toLocaleString("en-IN")}
                     </span>
@@ -999,7 +1086,9 @@ function PaymentsAndRevenueEngine() {
                   </span>
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      isLoss ? "bg-rose-500/20 text-rose-600 dark:text-rose-400" : "bg-emerald-500/20 text-emerald"
+                      isLoss
+                        ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
+                        : "bg-emerald-500/20 text-emerald"
                     }`}
                   >
                     {isLoss ? "Deficit" : "Surplus"}
@@ -1011,7 +1100,8 @@ function PaymentsAndRevenueEngine() {
                   }`}
                 >
                   {isLoss ? "-" : "+"}
-                  {settings.currencySymbol}{Math.abs(netBalance).toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {Math.abs(netBalance).toLocaleString("en-IN")}
                 </p>
                 <p className="text-xs text-muted-foreground border-t border-border pt-2">
                   {isLoss
@@ -1043,7 +1133,9 @@ function PaymentsAndRevenueEngine() {
 
             <form onSubmit={handleConfirmInstallmentPayment} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Select Member</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Select Member
+                </label>
                 <select
                   value={targetMemberId}
                   onChange={(e) => {
@@ -1061,7 +1153,8 @@ function PaymentsAndRevenueEngine() {
                 >
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.name} ({m.plan} — Due: {settings.currencySymbol}{m.due.toLocaleString("en-IN")})
+                      {m.name} ({m.plan} — Due: {settings.currencySymbol}
+                      {m.due.toLocaleString("en-IN")})
                     </option>
                   ))}
                 </select>
@@ -1069,7 +1162,9 @@ function PaymentsAndRevenueEngine() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Amount to Collect ({settings.currencySymbol}) *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Amount to Collect ({settings.currencySymbol}) *
+                  </label>
                   <input
                     type="number"
                     value={installmentAmount}
@@ -1080,10 +1175,14 @@ function PaymentsAndRevenueEngine() {
                   />
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Payment Method</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Payment Method
+                  </label>
                   <select
                     value={installmentMethod}
-                    onChange={(e) => setInstallmentMethod(e.target.value as any)}
+                    onChange={(e) =>
+                      setInstallmentMethod(e.target.value as "UPI" | "Cash" | "Card" | "Bank")
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-foreground font-semibold outline-hidden focus:border-brand"
                   >
                     <option value="UPI">UPI / GPay / PhonePe</option>
@@ -1096,7 +1195,9 @@ function PaymentsAndRevenueEngine() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Installment #</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Installment #
+                  </label>
                   <input
                     type="number"
                     value={installmentNumber}
@@ -1106,7 +1207,9 @@ function PaymentsAndRevenueEngine() {
                   />
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Total Installments Est.</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Total Installments Est.
+                  </label>
                   <input
                     type="number"
                     value={totalInstallmentsEst}
@@ -1118,7 +1221,9 @@ function PaymentsAndRevenueEngine() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Payment Date</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Payment Date
+                </label>
                 <input
                   type="date"
                   value={installmentDate}
@@ -1128,7 +1233,9 @@ function PaymentsAndRevenueEngine() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Notes / Transaction Reference</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Notes / Transaction Reference
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. UPI Ref # 9928103, 1st installment"
@@ -1165,7 +1272,9 @@ function PaymentsAndRevenueEngine() {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <ArrowDownRight className="h-5 w-5 text-rose-500" />
-                <h3 className="text-sm font-bold text-foreground">Record Gym Operational Expense / Bill</h3>
+                <h3 className="text-sm font-bold text-foreground">
+                  Record Gym Operational Expense / Bill
+                </h3>
               </div>
               <button
                 onClick={() => setIsRecordExpenseModalOpen(false)}
@@ -1177,7 +1286,9 @@ function PaymentsAndRevenueEngine() {
 
             <form onSubmit={handleSaveExpense} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Expense Title *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Expense Title *
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Monthly Facility Rent, BESCOM Electricity Bill"
@@ -1193,7 +1304,9 @@ function PaymentsAndRevenueEngine() {
                   <label className="block text-muted-foreground font-semibold mb-1">Category</label>
                   <select
                     value={expCategory}
-                    onChange={(e) => setExpCategory(e.target.value as any)}
+                    onChange={(e) =>
+                      setExpCategory(e.target.value as (typeof EXPENSE_CATEGORIES)[number])
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-foreground font-semibold outline-hidden focus:border-brand"
                   >
                     {EXPENSE_CATEGORIES.map((cat) => (
@@ -1204,7 +1317,9 @@ function PaymentsAndRevenueEngine() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Amount ({settings.currencySymbol}) *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Amount ({settings.currencySymbol}) *
+                  </label>
                   <input
                     type="number"
                     placeholder="e.g. 65000"
@@ -1219,10 +1334,16 @@ function PaymentsAndRevenueEngine() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Payment Method</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Payment Method
+                  </label>
                   <select
                     value={expMethod}
-                    onChange={(e) => setExpMethod(e.target.value as any)}
+                    onChange={(e) =>
+                      setExpMethod(
+                        e.target.value as "Bank Transfer" | "UPI" | "Cash" | "Card" | "Cheque",
+                      )
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-foreground outline-hidden focus:border-brand"
                   >
                     <option value="Bank Transfer">Bank Transfer / NEFT</option>
@@ -1233,7 +1354,9 @@ function PaymentsAndRevenueEngine() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Payment Date</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Payment Date
+                  </label>
                   <input
                     type="date"
                     value={expDate}
@@ -1245,7 +1368,9 @@ function PaymentsAndRevenueEngine() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Payee / Vendor Name</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Payee / Vendor Name
+                  </label>
                   <input
                     type="text"
                     placeholder="e.g. Habitat Properties, BESCOM"
@@ -1255,7 +1380,9 @@ function PaymentsAndRevenueEngine() {
                   />
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Bill / Receipt #</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Bill / Receipt #
+                  </label>
                   <input
                     type="text"
                     placeholder="e.g. RENT-MAY-26"
@@ -1267,7 +1394,9 @@ function PaymentsAndRevenueEngine() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Notes / Description</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Notes / Description
+                </label>
                 <textarea
                   rows={2}
                   placeholder="Additional billing context..."
@@ -1322,7 +1451,9 @@ function PaymentsAndRevenueEngine() {
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-muted-foreground">Voucher Ref:</span>
-                  <p className="font-bold text-foreground">{selectedExpenseVoucher.receiptNumber || selectedExpenseVoucher.id}</p>
+                  <p className="font-bold text-foreground">
+                    {selectedExpenseVoucher.receiptNumber || selectedExpenseVoucher.id}
+                  </p>
                 </div>
               </div>
 
@@ -1337,18 +1468,23 @@ function PaymentsAndRevenueEngine() {
                 </div>
                 <div>
                   <span className="text-muted-foreground text-[10px]">Recipient / Payee:</span>
-                  <p className="font-bold text-foreground">{selectedExpenseVoucher.recipientName || "—"}</p>
+                  <p className="font-bold text-foreground">
+                    {selectedExpenseVoucher.recipientName || "—"}
+                  </p>
                 </div>
                 <div>
                   <span className="text-muted-foreground text-[10px]">Payment Date & Mode:</span>
-                  <p className="font-bold text-foreground">{selectedExpenseVoucher.date} • {selectedExpenseVoucher.paymentMethod}</p>
+                  <p className="font-bold text-foreground">
+                    {selectedExpenseVoucher.date} • {selectedExpenseVoucher.paymentMethod}
+                  </p>
                 </div>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-3 flex items-center justify-between">
                 <span className="font-bold text-foreground">Total Disbursed:</span>
                 <span className="font-black text-rose-600 dark:text-rose-400 text-base">
-                  {settings.currencySymbol}{selectedExpenseVoucher.amount.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {selectedExpenseVoucher.amount.toLocaleString("en-IN")}
                 </span>
               </div>
 

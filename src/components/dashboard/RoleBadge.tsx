@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Shield, ShieldAlert, Crown, Headphones, ChevronDown, Check, RefreshCw, LogOut } from "lucide-react";
+import {
+  Shield,
+  ShieldAlert,
+  Crown,
+  Headphones,
+  ChevronDown,
+  Check,
+  RefreshCw,
+  LogOut,
+} from "lucide-react";
 import { useGymStore, UserRole } from "../../lib/gym-store";
 import { toast } from "sonner";
 
@@ -27,24 +36,26 @@ export function RoleBadge({ variant = "header" }: RoleBadgeProps) {
       <div
         className={`flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl border text-xs ${
           isAdmin
-            ? "bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-300"
-            : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+            ? "bg-brand-soft border-brand/30 text-brand"
+            : "bg-surface border-border text-foreground"
         }`}
       >
         <div className="flex items-center gap-2.5 font-medium">
           {isAdmin ? (
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-600 text-white shadow-xs">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand text-white shadow-xs">
               <Crown className="h-3.5 w-3.5" />
             </span>
           ) : (
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white text-black shadow-xs">
               <Headphones className="h-3.5 w-3.5" />
             </span>
           )}
           <span>
             Active Role:{" "}
             <strong className="font-bold">
-              {isAdmin ? "Admin (Gym Owner) — Full Access" : "Reception (Front Desk) — Limited Access"}
+              {isAdmin
+                ? "Admin (Gym Owner) — Full Access"
+                : "Reception (Front Desk) — Limited Access"}
             </strong>
           </span>
           <span className="hidden sm:inline-block text-[11px] opacity-75">
@@ -72,14 +83,14 @@ export function RoleBadge({ variant = "header" }: RoleBadgeProps) {
         className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition shadow-2xs ${
           isAdmin
             ? "bg-brand-soft border-brand/30 text-brand hover:brightness-105"
-            : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20"
+            : "bg-surface border-border text-foreground hover:bg-muted"
         }`}
         title="Role-Based Access Control Switcher"
       >
         {isAdmin ? (
           <Crown className="h-3.5 w-3.5 text-brand" />
         ) : (
-          <Headphones className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <Headphones className="h-3.5 w-3.5 text-foreground" />
         )}
         <span className="hidden sm:inline">{isAdmin ? "Admin (Owner)" : "Reception"}</span>
         <ChevronDown className="h-3 w-3 opacity-60" />
@@ -100,7 +111,8 @@ export function RoleBadge({ variant = "header" }: RoleBadgeProps) {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Logged in as <span className="font-semibold text-foreground">{currentUser.name}</span>
+                Logged in as{" "}
+                <span className="font-semibold text-foreground">{currentUser.name}</span>
               </p>
             </div>
 
@@ -128,16 +140,18 @@ export function RoleBadge({ variant = "header" }: RoleBadgeProps) {
               <button
                 onClick={() => handleSwitch("reception")}
                 className={`flex w-full items-start gap-2.5 p-2 rounded-xl text-left transition ${
-                  !isAdmin ? "bg-emerald-500/15 border border-emerald-500/30" : "hover:bg-muted"
+                  !isAdmin ? "bg-muted border border-border" : "hover:bg-muted"
                 }`}
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-black font-bold">
                   <Headphones className="h-4 w-4" />
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-foreground">Reception (Front Desk)</span>
-                    {!isAdmin && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+                    {!isAdmin && (
+                      <Check className="h-3.5 w-3.5 text-brand" />
+                    )}
                   </div>
                   <p className="text-[11px] text-muted-foreground">
                     Front desk access: Check-ins, Attendance, Renewals, Payments
@@ -147,14 +161,16 @@ export function RoleBadge({ variant = "header" }: RoleBadgeProps) {
             </div>
 
             <div className="pt-2 border-t border-border flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">Active Session: {currentUser.role.toUpperCase()}</span>
+              <span className="text-[10px] text-muted-foreground">
+                Active Session: {currentUser.role.toUpperCase()}
+              </span>
               <button
                 onClick={() => {
                   setDropdownOpen(false);
                   logout();
                   window.location.href = "/";
                 }}
-                className="flex items-center gap-1 text-[11px] text-rose-500 hover:text-rose-600 font-semibold p-1"
+                className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground font-semibold p-1"
               >
                 <LogOut className="h-3 w-3" />
                 <span>Log Out</span>

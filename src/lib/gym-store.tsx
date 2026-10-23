@@ -140,7 +140,17 @@ export interface SystemLog {
   userName: string;
   userRole: UserRole;
   action: string;
-  category: "Auth" | "Member" | "Payment" | "Plan" | "Staff" | "Locker" | "Settings" | "Attendance" | "Renewal" | "Refund";
+  category:
+    | "Auth"
+    | "Member"
+    | "Payment"
+    | "Plan"
+    | "Staff"
+    | "Locker"
+    | "Settings"
+    | "Attendance"
+    | "Renewal"
+    | "Refund";
   details: string;
   ipAddress?: string;
 }
@@ -206,7 +216,8 @@ export interface GymExpense {
 }
 
 // Lead CRM Model
-export type LeadStage = "Inquiry" | "Trial Scheduled" | "Trial Completed" | "Offer Sent" | "Won" | "Lost";
+export type LeadStage =
+  "Inquiry" | "Trial Scheduled" | "Trial Completed" | "Offer Sent" | "Won" | "Lost";
 
 export interface Lead {
   id: string;
@@ -318,7 +329,13 @@ export interface BroadcastMessage {
   id: string;
   title: string;
   body: string;
-  category: "Announcement" | "Renewal Notice" | "Gym Closure" | "Class Update" | "Promotion" | "Urgent Alert";
+  category:
+    | "Announcement"
+    | "Renewal Notice"
+    | "Gym Closure"
+    | "Class Update"
+    | "Promotion"
+    | "Urgent Alert";
   recipientsType: "all" | "active" | "expiring" | "expired" | "partial_due" | "plan" | "individual";
   targetPlanName?: string;
   targetMemberId?: string;
@@ -349,14 +366,34 @@ export interface BrandThemePreset {
 }
 
 export const BRAND_THEMES: BrandThemePreset[] = [
-  { id: "violet", name: "Ultra Violet", primary: "#8b5cf6", accent: "#a78bfa", description: "Modern luxury purple" },
-  { id: "gold", name: "Gold Prestige", primary: "#f59e0b", accent: "#fbbf24", description: "Elite championship gold" },
-  { id: "emerald", name: "Cyber Emerald", primary: "#10b981", accent: "#34d399", description: "Energetic athletic green" },
-  { id: "crimson", name: "Crimson Power", primary: "#ef4444", accent: "#f87171", description: "Aggressive bodybuilding red" },
-  { id: "cobalt", name: "Cobalt Pulse", primary: "#3b82f6", accent: "#60a5fa", description: "High-tech performance blue" },
-  { id: "sunset", name: "Sunset Blaze", primary: "#f97316", accent: "#fb923c", description: "Dynamic fiery orange" },
-  { id: "cyan", name: "Aqua Cyan", primary: "#06b6d4", accent: "#22d3ee", description: "Clean futuristic cyan" },
-  { id: "lime", name: "Neon Lime", primary: "#84cc16", accent: "#a3e635", description: "High-voltage endurance lime" },
+  {
+    id: "sovereign-sky",
+    name: "Sovereign Sky (Official)",
+    primary: "#0ea5e9",
+    accent: "#38bdf8",
+    description: "Luminous sky blue gradient with frosted glass radiance",
+  },
+  {
+    id: "glacier-frost",
+    name: "Glacier Frost",
+    primary: "#38bdf8",
+    accent: "#bae6fd",
+    description: "Ultra-crisp cyan sky frost for executive displays",
+  },
+  {
+    id: "cobalt",
+    name: "Cobalt Enterprise",
+    primary: "#3b82f6",
+    accent: "#60a5fa",
+    description: "Official enterprise tech blue",
+  },
+  {
+    id: "obsidian-azure",
+    name: "Obsidian Deep Blue",
+    primary: "#1d4ed8",
+    accent: "#38bdf8",
+    description: "High-contrast midnight performance blue",
+  },
 ];
 
 export interface GymSettings {
@@ -386,6 +423,8 @@ export interface GymSettings {
   broadcastTemplateRenewal: string;
   broadcastTemplateDue: string;
   broadcastTemplateWelcome: string;
+  reminderTemplateWhatsApp?: string;
+  reminderTemplateSMS?: string;
 }
 
 // Role Permissions Matrix
@@ -476,7 +515,12 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     price: 24000,
     durationMonths: 12,
     type: "VIP Pass",
-    perks: ["All-hours unlimited access", "2 Free PT Sessions / mo", "Custom Nutrition chart", "Free towel service"],
+    perks: [
+      "All-hours unlimited access",
+      "2 Free PT Sessions / mo",
+      "Custom Nutrition chart",
+      "Free towel service",
+    ],
     activeCount: 2,
     expiringCount: 0,
     frozenCount: 0,
@@ -488,7 +532,12 @@ const DEFAULT_PLANS: MembershipPlan[] = [
     price: 15000,
     durationMonths: 1,
     type: "PT Package",
-    perks: ["Dedicated Senior Coach", "Custom biometric tracking", "Weekly diet adjust", "Recovery zone access"],
+    perks: [
+      "Dedicated Senior Coach",
+      "Custom biometric tracking",
+      "Weekly diet adjust",
+      "Recovery zone access",
+    ],
     activeCount: 1,
     expiringCount: 0,
     frozenCount: 0,
@@ -535,12 +584,37 @@ const DEFAULT_MEMBERS: Member[] = [
       },
     ],
     timeline: [
-      { id: "t-1", type: "attendance", title: "Checked in at Main Floor Gate", timestamp: "Today, 6:30 AM" },
-      { id: "t-2", type: "payment", title: "Paid ₹3,000 for Monthly Flex Pass via UPI", timestamp: "May 01, 2026", amount: 3000 },
-      { id: "t-3", type: "registration", title: "Enrolled in Gold's Gym Mysore", timestamp: "May 01, 2026" },
+      {
+        id: "t-1",
+        type: "attendance",
+        title: "Checked in at Main Floor Gate",
+        timestamp: "Today, 6:30 AM",
+      },
+      {
+        id: "t-2",
+        type: "payment",
+        title: "Paid ₹3,000 for Monthly Flex Pass via UPI",
+        timestamp: "May 01, 2026",
+        amount: 3000,
+      },
+      {
+        id: "t-3",
+        type: "registration",
+        title: "Enrolled in Gold's Gym Mysore",
+        timestamp: "May 01, 2026",
+      },
     ],
     invoices: [
-      { id: "inv-kariya-1", invoiceNumber: "INV-2026-0001", date: "2026-05-01", amount: 3000, plan: "Monthly Flex", method: "UPI", status: "Paid", installmentInfo: "Single Full Payment" },
+      {
+        id: "inv-kariya-1",
+        invoiceNumber: "INV-2026-0001",
+        date: "2026-05-01",
+        amount: 3000,
+        plan: "Monthly Flex",
+        method: "UPI",
+        status: "Paid",
+        installmentInfo: "Single Full Payment",
+      },
     ],
   },
   {
@@ -575,11 +649,30 @@ const DEFAULT_MEMBERS: Member[] = [
       },
     ],
     timeline: [
-      { id: "t-a1", type: "attendance", title: "Checked in at Main Gate", timestamp: "Yesterday, 7:15 PM" },
-      { id: "t-a2", type: "payment", title: "Paid ₹8,000 for Quarterly Pro via Card", timestamp: "Mar 01, 2026", amount: 8000 },
+      {
+        id: "t-a1",
+        type: "attendance",
+        title: "Checked in at Main Gate",
+        timestamp: "Yesterday, 7:15 PM",
+      },
+      {
+        id: "t-a2",
+        type: "payment",
+        title: "Paid ₹8,000 for Quarterly Pro via Card",
+        timestamp: "Mar 01, 2026",
+        amount: 8000,
+      },
     ],
     invoices: [
-      { id: "inv-alex-1", invoiceNumber: "INV-2026-0002", date: "2026-03-01", amount: 8000, plan: "Quarterly Pro", method: "Card", status: "Paid" },
+      {
+        id: "inv-alex-1",
+        invoiceNumber: "INV-2026-0002",
+        date: "2026-03-01",
+        amount: 8000,
+        plan: "Quarterly Pro",
+        method: "Card",
+        status: "Paid",
+      },
     ],
   },
   {
@@ -616,11 +709,31 @@ const DEFAULT_MEMBERS: Member[] = [
       },
     ],
     timeline: [
-      { id: "t-r1", type: "attendance", title: "Checked in at Main Floor Gate", timestamp: "Today, 7:45 AM" },
-      { id: "t-r2", type: "payment", title: "Paid ₹12,000 (Installment 1) via UPI", timestamp: "Apr 15, 2026", amount: 12000 },
+      {
+        id: "t-r1",
+        type: "attendance",
+        title: "Checked in at Main Floor Gate",
+        timestamp: "Today, 7:45 AM",
+      },
+      {
+        id: "t-r2",
+        type: "payment",
+        title: "Paid ₹12,000 (Installment 1) via UPI",
+        timestamp: "Apr 15, 2026",
+        amount: 12000,
+      },
     ],
     invoices: [
-      { id: "inv-rohan-1", invoiceNumber: "INV-2026-0003", date: "2026-04-15", amount: 12000, plan: "Annual Elite", method: "UPI", status: "Partial", installmentInfo: "Installment 1 of 2 (Due: ₹12,000)" },
+      {
+        id: "inv-rohan-1",
+        invoiceNumber: "INV-2026-0003",
+        date: "2026-04-15",
+        amount: 12000,
+        plan: "Annual Elite",
+        method: "UPI",
+        status: "Partial",
+        installmentInfo: "Installment 1 of 2 (Due: ₹12,000)",
+      },
     ],
   },
   {
@@ -642,7 +755,12 @@ const DEFAULT_MEMBERS: Member[] = [
     notes: "Expired membership. Follow up for renewal discount.",
     installments: [],
     timeline: [
-      { id: "t-s1", type: "registration", title: "Monthly Flex membership expired", timestamp: "May 01, 2026" },
+      {
+        id: "t-s1",
+        type: "registration",
+        title: "Monthly Flex membership expired",
+        timestamp: "May 01, 2026",
+      },
     ],
     invoices: [],
   },
@@ -667,7 +785,12 @@ const DEFAULT_MEMBERS: Member[] = [
     notes: "Membership temporarily paused until May 25.",
     installments: [],
     timeline: [
-      { id: "t-v1", type: "freeze", title: "Membership frozen until May 25 (Knee strain)", timestamp: "May 05, 2026" },
+      {
+        id: "t-v1",
+        type: "freeze",
+        title: "Membership frozen until May 25 (Knee strain)",
+        timestamp: "May 05, 2026",
+      },
     ],
     invoices: [],
   },
@@ -692,8 +815,19 @@ const DEFAULT_MEMBERS: Member[] = [
     notes: "VIP Client. Daily morning PT slot.",
     installments: [],
     timeline: [
-      { id: "t-p1", type: "attendance", title: "Checked in for PT with Marcus Vance", timestamp: "Today, 8:00 AM" },
-      { id: "t-p2", type: "payment", title: "Paid ₹15,000 for PT Package via UPI", timestamp: "May 10, 2026", amount: 15000 },
+      {
+        id: "t-p1",
+        type: "attendance",
+        title: "Checked in for PT with Marcus Vance",
+        timestamp: "Today, 8:00 AM",
+      },
+      {
+        id: "t-p2",
+        type: "payment",
+        title: "Paid ₹15,000 for PT Package via UPI",
+        timestamp: "May 10, 2026",
+        amount: 15000,
+      },
     ],
     invoices: [],
   },
@@ -715,31 +849,135 @@ const DEFAULT_WORKOUT_PROGRAMS: WorkoutProgram[] = [
         day: "Day 1: Push (Chest, Shoulders, Triceps)",
         focus: "Horizontal & vertical pressing",
         exercises: [
-          { id: "ex-1", name: "Incline Barbell Bench Press", sets: "4", reps: "8-10", weightTarget: "70-85 kg", restTime: "90s", instructions: "Touch upper chest, control 3-sec eccentric." },
-          { id: "ex-2", name: "Flat Dumbbell Press", sets: "3", reps: "10-12", weightTarget: "30 kg DBs", restTime: "75s", instructions: "Full stretch at bottom." },
-          { id: "ex-3", name: "Standing Overhead DB Press", sets: "3", reps: "8-10", weightTarget: "20 kg DBs", restTime: "90s", instructions: "Keep core locked." },
-          { id: "ex-4", name: "Cable Lateral Raises", sets: "4", reps: "12-15", weightTarget: "10 kg", restTime: "60s", instructions: "Pause at parallel." },
-          { id: "ex-5", name: "Tricep Rope Pushdowns", sets: "3", reps: "12-15", weightTarget: "25 kg", restTime: "60s", instructions: "Spread rope at full extension." },
+          {
+            id: "ex-1",
+            name: "Incline Barbell Bench Press",
+            sets: "4",
+            reps: "8-10",
+            weightTarget: "70-85 kg",
+            restTime: "90s",
+            instructions: "Touch upper chest, control 3-sec eccentric.",
+          },
+          {
+            id: "ex-2",
+            name: "Flat Dumbbell Press",
+            sets: "3",
+            reps: "10-12",
+            weightTarget: "30 kg DBs",
+            restTime: "75s",
+            instructions: "Full stretch at bottom.",
+          },
+          {
+            id: "ex-3",
+            name: "Standing Overhead DB Press",
+            sets: "3",
+            reps: "8-10",
+            weightTarget: "20 kg DBs",
+            restTime: "90s",
+            instructions: "Keep core locked.",
+          },
+          {
+            id: "ex-4",
+            name: "Cable Lateral Raises",
+            sets: "4",
+            reps: "12-15",
+            weightTarget: "10 kg",
+            restTime: "60s",
+            instructions: "Pause at parallel.",
+          },
+          {
+            id: "ex-5",
+            name: "Tricep Rope Pushdowns",
+            sets: "3",
+            reps: "12-15",
+            weightTarget: "25 kg",
+            restTime: "60s",
+            instructions: "Spread rope at full extension.",
+          },
         ],
       },
       {
         day: "Day 2: Pull (Back, Rear Delts, Biceps)",
         focus: "Vertical & horizontal pulling",
         exercises: [
-          { id: "ex-6", name: "Barbell Conventional Deadlift", sets: "4", reps: "6-8", weightTarget: "120 kg", restTime: "120s", instructions: "Brace core, neutral spine throughout." },
-          { id: "ex-7", name: "Wide Grip Lat Pulldown", sets: "3", reps: "10-12", weightTarget: "60 kg", restTime: "75s", instructions: "Pull to collarbone with elbow drive." },
-          { id: "ex-8", name: "Chest Supported Seated Cable Row", sets: "3", reps: "10-12", weightTarget: "55 kg", restTime: "75s", instructions: "Squeeze scapulae 1 sec." },
-          { id: "ex-9", name: "Incline DB Bicep Curls", sets: "3", reps: "10-12", weightTarget: "14 kg DBs", restTime: "60s", instructions: "Full supination at peak." },
+          {
+            id: "ex-6",
+            name: "Barbell Conventional Deadlift",
+            sets: "4",
+            reps: "6-8",
+            weightTarget: "120 kg",
+            restTime: "120s",
+            instructions: "Brace core, neutral spine throughout.",
+          },
+          {
+            id: "ex-7",
+            name: "Wide Grip Lat Pulldown",
+            sets: "3",
+            reps: "10-12",
+            weightTarget: "60 kg",
+            restTime: "75s",
+            instructions: "Pull to collarbone with elbow drive.",
+          },
+          {
+            id: "ex-8",
+            name: "Chest Supported Seated Cable Row",
+            sets: "3",
+            reps: "10-12",
+            weightTarget: "55 kg",
+            restTime: "75s",
+            instructions: "Squeeze scapulae 1 sec.",
+          },
+          {
+            id: "ex-9",
+            name: "Incline DB Bicep Curls",
+            sets: "3",
+            reps: "10-12",
+            weightTarget: "14 kg DBs",
+            restTime: "60s",
+            instructions: "Full supination at peak.",
+          },
         ],
       },
       {
         day: "Day 3: Legs (Quads, Hamstrings, Calves)",
         focus: "Lower body power and knee flexion",
         exercises: [
-          { id: "ex-10", name: "Barbell Back Squat", sets: "4", reps: "8-10", weightTarget: "100 kg", restTime: "120s", instructions: "Hit parallel depth, drive through midfoot." },
-          { id: "ex-11", name: "Romanian Deadlift", sets: "3", reps: "10-12", weightTarget: "80 kg", restTime: "90s", instructions: "Hinge at hips, slight knee bend." },
-          { id: "ex-12", name: "Leg Press 45-Degree", sets: "3", reps: "12-15", weightTarget: "180 kg", restTime: "75s", instructions: "No lockout at top." },
-          { id: "ex-13", name: "Standing Calf Raises", sets: "4", reps: "15-20", weightTarget: "60 kg", restTime: "45s", instructions: "2-sec deep stretch at bottom." },
+          {
+            id: "ex-10",
+            name: "Barbell Back Squat",
+            sets: "4",
+            reps: "8-10",
+            weightTarget: "100 kg",
+            restTime: "120s",
+            instructions: "Hit parallel depth, drive through midfoot.",
+          },
+          {
+            id: "ex-11",
+            name: "Romanian Deadlift",
+            sets: "3",
+            reps: "10-12",
+            weightTarget: "80 kg",
+            restTime: "90s",
+            instructions: "Hinge at hips, slight knee bend.",
+          },
+          {
+            id: "ex-12",
+            name: "Leg Press 45-Degree",
+            sets: "3",
+            reps: "12-15",
+            weightTarget: "180 kg",
+            restTime: "75s",
+            instructions: "No lockout at top.",
+          },
+          {
+            id: "ex-13",
+            name: "Standing Calf Raises",
+            sets: "4",
+            reps: "15-20",
+            weightTarget: "60 kg",
+            restTime: "45s",
+            instructions: "2-sec deep stretch at bottom.",
+          },
         ],
       },
     ],
@@ -758,11 +996,61 @@ const DEFAULT_DIET_PLANS: DietPlan[] = [
     assignedCount: 2,
     createdAt: "2026-05-01",
     meals: [
-      { time: "07:30 AM", name: "Breakfast Fuel", items: "4 Whole Eggs, 2 Slices Whole Grain Toast, 1 Banana", quantity: "1 Plate", calories: 580, protein: 32, carbs: 54, fats: 22, instructions: "Scramble eggs in olive oil spray." },
-      { time: "11:00 AM", name: "Mid-Morning Snack", items: "Greek Yogurt, 30g Mixed Almonds & Walnuts, Honey", quantity: "200g bowl", calories: 340, protein: 22, carbs: 24, fats: 16, instructions: "Mix with cinnamon." },
-      { time: "01:30 PM", name: "Power Lunch", items: "Grilled Chicken Breast / Paneer, 150g Steamed Basmati Rice, Green Salad", quantity: "1 Large Bowl", calories: 680, protein: 55, carbs: 70, fats: 14, instructions: "Season with lemon and herbs." },
-      { time: "05:00 PM", name: "Pre-Workout Fuel", items: "1 Scoop Whey Protein Isolate, 1 Apple, 1 tbsp Peanut Butter", quantity: "1 Shake + Fruit", calories: 300, protein: 28, carbs: 32, fats: 8, instructions: "Consume 45 min before training." },
-      { time: "08:30 PM", name: "Post-Workout Dinner", items: "Grilled Fish Fillet / Soya Chunks, 2 Multigrain Rotis, Steamed Broccoli & Beans", quantity: "1 Plate", calories: 500, protein: 43, carbs: 60, fats: 11, instructions: "Light oil preparation." },
+      {
+        time: "07:30 AM",
+        name: "Breakfast Fuel",
+        items: "4 Whole Eggs, 2 Slices Whole Grain Toast, 1 Banana",
+        quantity: "1 Plate",
+        calories: 580,
+        protein: 32,
+        carbs: 54,
+        fats: 22,
+        instructions: "Scramble eggs in olive oil spray.",
+      },
+      {
+        time: "11:00 AM",
+        name: "Mid-Morning Snack",
+        items: "Greek Yogurt, 30g Mixed Almonds & Walnuts, Honey",
+        quantity: "200g bowl",
+        calories: 340,
+        protein: 22,
+        carbs: 24,
+        fats: 16,
+        instructions: "Mix with cinnamon.",
+      },
+      {
+        time: "01:30 PM",
+        name: "Power Lunch",
+        items: "Grilled Chicken Breast / Paneer, 150g Steamed Basmati Rice, Green Salad",
+        quantity: "1 Large Bowl",
+        calories: 680,
+        protein: 55,
+        carbs: 70,
+        fats: 14,
+        instructions: "Season with lemon and herbs.",
+      },
+      {
+        time: "05:00 PM",
+        name: "Pre-Workout Fuel",
+        items: "1 Scoop Whey Protein Isolate, 1 Apple, 1 tbsp Peanut Butter",
+        quantity: "1 Shake + Fruit",
+        calories: 300,
+        protein: 28,
+        carbs: 32,
+        fats: 8,
+        instructions: "Consume 45 min before training.",
+      },
+      {
+        time: "08:30 PM",
+        name: "Post-Workout Dinner",
+        items: "Grilled Fish Fillet / Soya Chunks, 2 Multigrain Rotis, Steamed Broccoli & Beans",
+        quantity: "1 Plate",
+        calories: 500,
+        protein: 43,
+        carbs: 60,
+        fats: 11,
+        instructions: "Light oil preparation.",
+      },
     ],
   },
 ];
@@ -776,9 +1064,16 @@ const DEFAULT_LOCKERS: Locker[] = Array.from({ length: 24 }, (_, i) => {
     id: `loc-l-${num}`,
     number: num,
     section: num <= 10 ? "Men's Locker Room" : num <= 20 ? "Women's Locker Room" : "Executive VIP",
-    status: isKariya || isAlex || isRohan ? "Occupied" : num === 12 ? "Under Maintenance" : "Available",
+    status:
+      isKariya || isAlex || isRohan ? "Occupied" : num === 12 ? "Under Maintenance" : "Available",
     assignedMemberId: isKariya ? "m-kariya" : isAlex ? "m-alex" : isRohan ? "m-rohan" : undefined,
-    assignedMemberName: isKariya ? "Kariya" : isAlex ? "Alex Morgan" : isRohan ? "Rohan Sharma" : undefined,
+    assignedMemberName: isKariya
+      ? "Kariya"
+      : isAlex
+        ? "Alex Morgan"
+        : isRohan
+          ? "Rohan Sharma"
+          : undefined,
     expiresOn: isKariya ? "2026-06-01" : isAlex ? "2026-05-22" : undefined,
     maintenanceIssue: num === 12 ? "Electronic biometric lock keypad jammed" : undefined,
     repairHistory: [],
@@ -801,8 +1096,8 @@ const DEFAULT_SETTINGS: GymSettings = {
   phone: "+91 821 241 5566",
   email: "mysore@goldsgym.in",
   logoUrl: "",
-  brandColor: "#8b5cf6",
-  brandThemeName: "Ultra Violet",
+  brandColor: "#0ea5e9",
+  brandThemeName: "Sovereign Sky",
   adminPassword: "admin123",
   currencySymbol: "₹",
   operatingHours: "5:30 AM – 10:30 PM (Mon-Sat), 6:00 AM – 2:00 PM (Sun)",
@@ -1181,16 +1476,39 @@ interface GymStoreContextType {
   addSystemLog: (action: string, category: SystemLog["category"], details: string) => void;
 
   // Core Member Actions
-  addMember: (member: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside" | "installments" | "collectedAmount">) => void;
+  addMember: (
+    member: Omit<
+      Member,
+      | "id"
+      | "timeline"
+      | "invoices"
+      | "attendanceRate"
+      | "lastVisit"
+      | "isCurrentlyInside"
+      | "installments"
+      | "collectedAmount"
+    >,
+  ) => void;
   updateMember: (id: string, updates: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   checkInMember: (memberId: string) => void;
   checkOutMember: (memberId: string) => void;
-  renewMember: (memberId: string, durationMonths: number, planName?: string, paidAmount?: number, paymentMethod?: "UPI" | "Cash" | "Card" | "Bank") => void;
+  renewMember: (
+    memberId: string,
+    durationMonths: number,
+    planName?: string,
+    paidAmount?: number,
+    paymentMethod?: "UPI" | "Cash" | "Card" | "Bank",
+  ) => void;
   extendMembershipDays: (memberId: string, additionalDays: number, reason: string) => void;
   freezeMember: (memberId: string, days: number, reason: string) => void;
   unfreezeMember: (memberId: string) => void;
-  transferMembership: (fromMemberId: string, toName: string, toPhone: string, toEmail: string) => void;
+  transferMembership: (
+    fromMemberId: string,
+    toName: string,
+    toPhone: string,
+    toEmail: string,
+  ) => void;
   bulkImportMembers: (newMembers: Array<Partial<Member>>) => number;
 
   // Payment & Inflow Actions
@@ -1213,22 +1531,38 @@ interface GymStoreContextType {
   deleteExpense: (id: string) => void;
 
   // Staff CRUD & Payroll
-  addStaff: (staffMember: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">) => void;
+  addStaff: (
+    staffMember: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">,
+  ) => void;
   updateStaff: (id: string, updates: Partial<StaffMember>) => void;
   deleteStaff: (id: string) => void;
-  payStaffSalary: (staffId: string, paymentMethod?: "UPI" | "Bank Transfer" | "Cash" | "Cheque", notes?: string) => void;
+  payStaffSalary: (
+    staffId: string,
+    paymentMethod?: "UPI" | "Bank Transfer" | "Cash" | "Cheque",
+    notes?: string,
+  ) => void;
   toggleStaffStatus: (staffId: string, status: "On Floor" | "Off Duty" | "On Leave") => void;
   approveLeaveRequest: (staffId: string, leaveId: string) => void;
 
   // Plans CRUD
-  addPlan: (plan: Omit<MembershipPlan, "id" | "activeCount" | "expiringCount" | "frozenCount" | "upgradeOpportunities">) => void;
+  addPlan: (
+    plan: Omit<
+      MembershipPlan,
+      "id" | "activeCount" | "expiringCount" | "frozenCount" | "upgradeOpportunities"
+    >,
+  ) => void;
   updatePlan: (id: string, updates: Partial<MembershipPlan>) => void;
   deletePlan: (id: string) => void;
 
   // Lead CRM Actions
   addLead: (lead: Omit<Lead, "id" | "createdAt">) => void;
   updateLeadStage: (leadId: string, stage: LeadStage) => void;
-  convertLeadToMember: (leadId: string, planName: string, initialPaid?: number, method?: "UPI" | "Cash" | "Card" | "Bank") => void;
+  convertLeadToMember: (
+    leadId: string,
+    planName: string,
+    initialPaid?: number,
+    method?: "UPI" | "Cash" | "Card" | "Bank",
+  ) => void;
 
   // Workouts & Diets CRUD & Assignment
   addWorkoutProgram: (program: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">) => void;
@@ -1244,18 +1578,32 @@ interface GymStoreContextType {
   deleteDietPlan: (id: string) => void;
   archiveDietPlan: (id: string) => void;
   assignDietToMember: (memberId: string, dietId: string) => void;
-  assignProgramToMember: (memberId: string, workoutId?: string, dietId?: string, notes?: string) => void;
+  assignProgramToMember: (
+    memberId: string,
+    workoutId?: string,
+    dietId?: string,
+    notes?: string,
+  ) => void;
 
   // Locker Operations
-  assignLocker: (lockerNumber: number, memberId: string, memberName: string, durationDays?: number) => void;
+  assignLocker: (
+    lockerNumber: number,
+    memberId: string,
+    memberName: string,
+    durationDays?: number,
+  ) => void;
   reserveLocker: (lockerNumber: number, reservedFor: string, note?: string) => void;
   releaseLocker: (lockerNumber: number) => void;
   markLockerMaintenance: (lockerNumber: number, issue: string, date?: string) => void;
   completeLockerRepair: (lockerNumber: number, repairNotes?: string, repairedBy?: string) => void;
 
   // Broadcast Center Actions
-  sendBroadcastMessage: (broadcast: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => void;
-  saveDraftBroadcast: (broadcast: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => void;
+  sendBroadcastMessage: (
+    broadcast: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">,
+  ) => void;
+  saveDraftBroadcast: (
+    broadcast: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">,
+  ) => void;
   deleteBroadcastMessage: (id: string) => void;
 
   // Multi-Location Actions
@@ -1367,7 +1715,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [staff, setStaff] = useState<StaffMember[]>(DEFAULT_STAFF);
   const [settings, setSettings] = useState<GymSettings>(DEFAULT_SETTINGS);
   const [leads, setLeads] = useState<Lead[]>(DEFAULT_LEADS);
-  const [workoutPrograms, setWorkoutPrograms] = useState<WorkoutProgram[]>(DEFAULT_WORKOUT_PROGRAMS);
+  const [workoutPrograms, setWorkoutPrograms] =
+    useState<WorkoutProgram[]>(DEFAULT_WORKOUT_PROGRAMS);
   const [dietPlans, setDietPlans] = useState<DietPlan[]>(DEFAULT_DIET_PLANS);
   const [lockers, setLockers] = useState<Locker[]>(DEFAULT_LOCKERS);
   const [broadcasts, setBroadcasts] = useState<BroadcastMessage[]>(DEFAULT_BROADCASTS);
@@ -1382,7 +1731,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Modals & Panels UI State
   const [isUPIQRModalOpen, setIsUPIQRModalOpen] = useState(false);
-  const [upiQRPaymentDetails, setUpiQRPaymentDetails] = useState<{ amount: number; memberName: string; note: string } | null>(null);
+  const [upiQRPaymentDetails, setUpiQRPaymentDetails] = useState<{
+    amount: number;
+    memberName: string;
+    note: string;
+  } | null>(null);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [paymentForMember, setPaymentForMember] = useState<Member | null>(null);
@@ -1446,7 +1799,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Safe Storage persistence helper for Shared Database Entities
-  const safePersist = (key: string, data: any) => {
+  const safePersist = (key: string, data: unknown) => {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(key, typeof data === "string" ? data : JSON.stringify(data));
@@ -1482,7 +1835,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       action,
       category,
       details,
-      ipAddress: currentUser.role === "admin" ? "192.168.1.10 (Director Console)" : "192.168.1.45 (Front Desk PC)",
+      ipAddress:
+        currentUser.role === "admin"
+          ? "192.168.1.10 (Director Console)"
+          : "192.168.1.45 (Front Desk PC)",
     };
 
     setSystemLogs((prev) => {
@@ -1517,11 +1873,19 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setCurrentUser(user);
     safePersistSession(user);
-    addSystemLog(`User Login (${role.toUpperCase()})`, "Auth", `${user.name} logged in successfully`);
+    addSystemLog(
+      `User Login (${role.toUpperCase()})`,
+      "Auth",
+      `${user.name} logged in successfully`,
+    );
   };
 
   const logout = () => {
-    addSystemLog(`User Logout (${currentUser.role.toUpperCase()})`, "Auth", `${currentUser.name} logged out`);
+    addSystemLog(
+      `User Logout (${currentUser.role.toUpperCase()})`,
+      "Auth",
+      `${currentUser.name} logged out`,
+    );
     const defaultUser = DEFAULT_RECEPTION_USER;
     setCurrentUser(defaultUser);
     safePersistSession(defaultUser);
@@ -1533,20 +1897,29 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const adminUser: CurrentUser = {
         ...DEFAULT_ADMIN_USER,
         name: currentOwnerName,
-        avatar: currentOwnerName
-          .split(" ")
-          .map((w) => w[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase() || "AD",
+        avatar:
+          currentOwnerName
+            .split(" ")
+            .map((w) => w[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase() || "AD",
       };
       setCurrentUser(adminUser);
       safePersistSession(adminUser);
-      addSystemLog("Role Switched to Admin", "Auth", `Switched session to Gym Owner (${currentOwnerName})`);
+      addSystemLog(
+        "Role Switched to Admin",
+        "Auth",
+        `Switched session to Gym Owner (${currentOwnerName})`,
+      );
     } else {
       setCurrentUser(DEFAULT_RECEPTION_USER);
       safePersistSession(DEFAULT_RECEPTION_USER);
-      addSystemLog("Role Switched to Reception", "Auth", "Switched session to Front Desk (Limited Access)");
+      addSystemLog(
+        "Role Switched to Reception",
+        "Auth",
+        "Switched session to Front Desk (Limited Access)",
+      );
     }
   };
 
@@ -1596,7 +1969,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const loadedExpenses = safeLoad(`${STORAGE_KEY_PEAKREP}_expenses`, DEFAULT_EXPENSES);
       const loadedStaff = safeLoad(`${STORAGE_KEY_PEAKREP}_staff`, DEFAULT_STAFF);
       const loadedLeads = safeLoad(`${STORAGE_KEY_PEAKREP}_leads`, DEFAULT_LEADS);
-      const loadedWorkouts = safeLoad(`${STORAGE_KEY_PEAKREP}_workout_programs`, DEFAULT_WORKOUT_PROGRAMS);
+      const loadedWorkouts = safeLoad(
+        `${STORAGE_KEY_PEAKREP}_workout_programs`,
+        DEFAULT_WORKOUT_PROGRAMS,
+      );
       const loadedDiets = safeLoad(`${STORAGE_KEY_PEAKREP}_diet_plans`, DEFAULT_DIET_PLANS);
       const loadedLockers = safeLoad(`${STORAGE_KEY_PEAKREP}_lockers`, DEFAULT_LOCKERS);
       const loadedBroadcasts = safeLoad(`${STORAGE_KEY_PEAKREP}_broadcasts`, DEFAULT_BROADCASTS);
@@ -1607,7 +1983,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const loadedLocId = localStorage.getItem(`${STORAGE_KEY_PEAKREP}_current_loc`) || "loc-1";
 
       const finalUser =
-        loadedUser.role === "admin" && loadedSettings.ownerName && loadedUser.name !== loadedSettings.ownerName
+        loadedUser.role === "admin" &&
+        loadedSettings.ownerName &&
+        loadedUser.name !== loadedSettings.ownerName
           ? {
               ...loadedUser,
               name: loadedSettings.ownerName,
@@ -1639,10 +2017,22 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setRenewals(loadedRenewals);
       setCurrentLocationId(loadedLocId);
 
-      // Initialize Brand Theme CSS tokens
-      if (loadedSettings.brandColor) {
-        applyBrandThemeCss(loadedSettings.brandColor);
+      // Normalize legacy colors to company theme: Black, White, and Sovereign Sky Blue Highlight
+      if (
+        !loadedSettings.brandColor ||
+        loadedSettings.brandColor === "#8b5cf6" ||
+        loadedSettings.brandColor === "#10b981" ||
+        loadedSettings.brandColor === "#3b82f6" ||
+        loadedSettings.brandThemeName === "Ultra Violet" ||
+        loadedSettings.brandThemeName === "Cobalt Enterprise"
+      ) {
+        loadedSettings.brandColor = "#0ea5e9";
+        loadedSettings.brandThemeName = "Sovereign Sky";
+        safePersist(`${STORAGE_KEY_PEAKREP}_settings`, loadedSettings);
       }
+
+      // Initialize Brand Theme CSS tokens
+      applyBrandThemeCss(loadedSettings.brandColor || "#0ea5e9");
 
       setLastSaved(new Date());
     } catch (err) {
@@ -1670,7 +2060,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           document.documentElement.classList.remove("dark");
         }
         // Immediately re-harmonize brand CSS tokens for the new dark/light background
-        applyBrandThemeCss(settings.brandColor || "#8b5cf6");
+        applyBrandThemeCss(settings.brandColor || "#3b82f6");
       } catch (e) {
         console.warn(e);
       }
@@ -1682,21 +2072,52 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Guarded sync to LocalStorage for Shared State (Excluding currentUser for Tab-Isolation)
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_members`, members); }, [members]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_payments`, payments); }, [payments]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, expenses); }, [expenses]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_staff`, staff); }, [staff]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_settings`, settings); }, [settings]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_leads`, leads); }, [leads]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, workoutPrograms); }, [workoutPrograms]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, dietPlans); }, [dietPlans]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, lockers); }, [lockers]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, broadcasts); }, [broadcasts]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_locations`, locations); }, [locations]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_system_logs`, systemLogs); }, [systemLogs]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_refunds`, refunds); }, [refunds]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_renewals`, renewals); }, [renewals]);
-  useEffect(() => { if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, currentLocationId); }, [currentLocationId]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_members`, members);
+  }, [members]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_payments`, payments);
+  }, [payments]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, expenses);
+  }, [expenses]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_staff`, staff);
+  }, [staff]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_settings`, settings);
+  }, [settings]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_leads`, leads);
+  }, [leads]);
+  useEffect(() => {
+    if (isHydratedRef.current)
+      safePersist(`${STORAGE_KEY_PEAKREP}_workout_programs`, workoutPrograms);
+  }, [workoutPrograms]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_diet_plans`, dietPlans);
+  }, [dietPlans]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, lockers);
+  }, [lockers]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, broadcasts);
+  }, [broadcasts]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_locations`, locations);
+  }, [locations]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_system_logs`, systemLogs);
+  }, [systemLogs]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_refunds`, refunds);
+  }, [refunds]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_renewals`, renewals);
+  }, [renewals]);
+  useEffect(() => {
+    if (isHydratedRef.current) safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, currentLocationId);
+  }, [currentLocationId]);
 
   // Live Cross-Tab Multi-Window Synchronization (Excludes currentUser to allow isolated Admin and Reception tabs)
   useEffect(() => {
@@ -1712,21 +2133,24 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const parsedSettings = JSON.parse(e.newValue);
           setSettings(parsedSettings);
           if (parsedSettings.brandColor) applyBrandThemeCss(parsedSettings.brandColor);
-        }
-        else if (e.key === `${STORAGE_KEY_PEAKREP}_leads`) setLeads(JSON.parse(e.newValue));
-        else if (e.key === `${STORAGE_KEY_PEAKREP}_workout_programs`) setWorkoutPrograms(JSON.parse(e.newValue));
-        else if (e.key === `${STORAGE_KEY_PEAKREP}_diet_plans`) setDietPlans(JSON.parse(e.newValue));
+        } else if (e.key === `${STORAGE_KEY_PEAKREP}_leads`) setLeads(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_workout_programs`)
+          setWorkoutPrograms(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_diet_plans`)
+          setDietPlans(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_lockers`) setLockers(JSON.parse(e.newValue));
-        else if (e.key === `${STORAGE_KEY_PEAKREP}_broadcasts`) setBroadcasts(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_broadcasts`)
+          setBroadcasts(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_locations`) setLocations(JSON.parse(e.newValue));
-        else if (e.key === `${STORAGE_KEY_PEAKREP}_system_logs`) setSystemLogs(JSON.parse(e.newValue));
+        else if (e.key === `${STORAGE_KEY_PEAKREP}_system_logs`)
+          setSystemLogs(JSON.parse(e.newValue));
         else if (e.key === `${STORAGE_KEY_PEAKREP}_current_loc`) setCurrentLocationId(e.newValue);
         else if (e.key === "peakrep_theme") {
           if (e.newValue === "light" || e.newValue === "dark") {
             setThemeState(e.newValue);
             if (e.newValue === "dark") document.documentElement.classList.add("dark");
             else document.documentElement.classList.remove("dark");
-            applyBrandThemeCss(settings.brandColor || "#8b5cf6");
+            applyBrandThemeCss(settings.brandColor || "#3b82f6");
           }
         }
         setLastSaved(new Date());
@@ -1860,7 +2284,19 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Action: Add Member
-  const addMember = (memberData: Omit<Member, "id" | "timeline" | "invoices" | "attendanceRate" | "lastVisit" | "isCurrentlyInside" | "installments" | "collectedAmount">) => {
+  const addMember = (
+    memberData: Omit<
+      Member,
+      | "id"
+      | "timeline"
+      | "invoices"
+      | "attendanceRate"
+      | "lastVisit"
+      | "isCurrentlyInside"
+      | "installments"
+      | "collectedAmount"
+    >,
+  ) => {
     const newId = `m-${Date.now()}`;
     const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
     const today = new Date().toISOString().split("T")[0];
@@ -1915,7 +2351,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 plan: memberData.plan,
                 method: "UPI",
                 status: pendingDue === 0 ? "Paid" : "Partial",
-                installmentInfo: pendingDue > 0 ? `Installment 1 of 2 (Due: ${settings.currencySymbol}${pendingDue})` : "Full Paid",
+                installmentInfo:
+                  pendingDue > 0
+                    ? `Installment 1 of 2 (Due: ${settings.currencySymbol}${pendingDue})`
+                    : "Full Paid",
               },
             ]
           : [],
@@ -1950,7 +2389,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    addSystemLog("Member Added", "Member", `Added new member ${newMember.name} with ${newMember.plan} plan`);
+    addSystemLog(
+      "Member Added",
+      "Member",
+      `Added new member ${newMember.name} with ${newMember.plan} plan`,
+    );
   };
 
   const bulkImportMembers = (newMembersList: Array<Partial<Member>>): number => {
@@ -1974,7 +2417,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         collectedAmount: collected,
         due,
         joinDate: data.joinDate || today,
-        expiry: data.expiry || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        expiry:
+          data.expiry ||
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
         status: (data.status as MemberStatus) || (due > 0 ? "Partial" : "Active"),
         attendanceRate: 100,
         lastVisit: "Imported via CSV",
@@ -2001,7 +2446,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Bulk Member Import", "Member", `Successfully bulk-imported ${importedCount} members`);
+    addSystemLog(
+      "Bulk Member Import",
+      "Member",
+      `Successfully bulk-imported ${importedCount} members`,
+    );
     return importedCount;
   };
 
@@ -2070,7 +2519,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Member Check-In", "Attendance", `Checked in ${memberName || memberId} at ${timeNow}`);
+    addSystemLog(
+      "Member Check-In",
+      "Attendance",
+      `Checked in ${memberName || memberId} at ${timeNow}`,
+    );
   };
 
   const checkOutMember = (memberId: string) => {
@@ -2101,7 +2554,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Member Check-Out", "Attendance", `Checked out ${memberName || memberId} at ${timeNow}`);
+    addSystemLog(
+      "Member Check-Out",
+      "Attendance",
+      `Checked out ${memberName || memberId} at ${timeNow}`,
+    );
   };
 
   const renewMember = (
@@ -2109,7 +2566,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     durationMonths: number,
     planName?: string,
     paidAmount?: number,
-    paymentMethod: "UPI" | "Cash" | "Card" | "Bank" = "UPI"
+    paymentMethod: "UPI" | "Cash" | "Card" | "Bank" = "UPI",
   ) => {
     const today = new Date();
     today.setMonth(today.getMonth() + durationMonths);
@@ -2126,7 +2583,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           renewedMemberName = m.name;
           prevExp = m.expiry;
           const selectedPlan = planName || m.plan;
-          const planPrice = settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
+          const planPrice =
+            settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
           const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
           const remainingDue = Math.max(0, planPrice - actualPaid);
 
@@ -2149,7 +2607,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             plan: selectedPlan,
             method: paymentMethod,
             status: remainingDue === 0 ? "Paid" : "Partial",
-            installmentInfo: remainingDue > 0 ? `Renewal Installment 1 (Due: ${settings.currencySymbol}${remainingDue})` : "Full Renewal Paid",
+            installmentInfo:
+              remainingDue > 0
+                ? `Renewal Installment 1 (Due: ${settings.currencySymbol}${remainingDue})`
+                : "Full Renewal Paid",
           };
 
           return {
@@ -2226,7 +2687,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Membership Renewed", "Renewal", `Renewed ${renewedMemberName} for ${durationMonths} months until ${newExpiry}`);
+    addSystemLog(
+      "Membership Renewed",
+      "Renewal",
+      `Renewed ${renewedMemberName} for ${durationMonths} months until ${newExpiry}`,
+    );
   };
 
   const extendMembershipDays = (memberId: string, additionalDays: number, reason: string) => {
@@ -2262,7 +2727,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Membership Extended", "Renewal", `Extended ${memberName} by +${additionalDays} days until ${newExpiryStr} (${reason})`);
+    addSystemLog(
+      "Membership Extended",
+      "Renewal",
+      `Extended ${memberName} by +${additionalDays} days until ${newExpiryStr} (${reason})`,
+    );
   };
 
   const freezeMember = (memberId: string, days: number, reason: string) => {
@@ -2297,7 +2766,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Membership Frozen", "Member", `Froze membership for ${memberName} until ${freezeUntil} (${reason})`);
+    addSystemLog(
+      "Membership Frozen",
+      "Member",
+      `Froze membership for ${memberName} until ${freezeUntil} (${reason})`,
+    );
   };
 
   const unfreezeMember = (memberId: string) => {
@@ -2332,7 +2805,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addSystemLog("Membership Unfrozen", "Member", `Resumed/unfroze membership for ${memberName}`);
   };
 
-  const transferMembership = (fromMemberId: string, toName: string, toPhone: string, toEmail: string) => {
+  const transferMembership = (
+    fromMemberId: string,
+    toName: string,
+    toPhone: string,
+    toEmail: string,
+  ) => {
     const fromMember = members.find((m) => m.id === fromMemberId);
     if (!fromMember) return;
 
@@ -2383,7 +2861,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return final;
     });
 
-    addSystemLog("Membership Transferred", "Member", `Transferred membership from ${fromMember.name} to ${toName}`);
+    addSystemLog(
+      "Membership Transferred",
+      "Member",
+      `Transferred membership from ${fromMember.name} to ${toName}`,
+    );
   };
 
   // Payment Actions
@@ -2442,14 +2924,19 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             plan: m.plan,
             method: paymentData.method,
             status: newDue === 0 ? "Paid" : "Partial",
-            installmentInfo: newDue > 0 ? `Installment Payment (Remaining: ${settings.currencySymbol}${newDue})` : "Full Paid",
+            installmentInfo:
+              newDue > 0
+                ? `Installment Payment (Remaining: ${settings.currencySymbol}${newDue})`
+                : "Full Paid",
           };
 
           return {
             ...m,
             collectedAmount: newCollected,
             due: newDue,
-            status: (newDue === 0 && (m.status === "Partial" || m.status === "Expired") ? "Active" : m.status) as MemberStatus,
+            status: (newDue === 0 && (m.status === "Partial" || m.status === "Expired")
+              ? "Active"
+              : m.status) as MemberStatus,
             installments: [newInstallment, ...m.installments],
             invoices: [newInvoice, ...m.invoices],
             timeline: [
@@ -2470,7 +2957,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Payment Collected", "Payment", `Collected ${settings.currencySymbol}${paymentData.amount} from ${paymentData.member} via ${paymentData.method}`);
+    addSystemLog(
+      "Payment Collected",
+      "Payment",
+      `Collected ${settings.currencySymbol}${paymentData.amount} from ${paymentData.member} via ${paymentData.method}`,
+    );
   };
 
   const refundPayment = (paymentId: string, refundAmount: number, reason: string): boolean => {
@@ -2545,12 +3036,18 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Payment Refunded", "Refund", `Refunded ${settings.currencySymbol}${refundAmount} to ${targetPayment.member} (${reason})`);
+    addSystemLog(
+      "Payment Refunded",
+      "Refund",
+      `Refunded ${settings.currencySymbol}${refundAmount} to ${targetPayment.member} (${reason})`,
+    );
     return true;
   };
 
   // Staff CRUD
-  const addStaff = (staffData: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">) => {
+  const addStaff = (
+    staffData: Omit<StaffMember, "id" | "leaveRecords" | "assignedClientsCount">,
+  ) => {
     const newStaff: StaffMember = {
       ...staffData,
       id: `staff-${Date.now()}`,
@@ -2595,7 +3092,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_expenses`, updated);
       return updated;
     });
-    addSystemLog("Expense Logged", "Payment", `Recorded ${settings.currencySymbol}${newExpense.amount.toLocaleString("en-IN")} for ${newExpense.title} (${newExpense.category})`);
+    addSystemLog(
+      "Expense Logged",
+      "Payment",
+      `Recorded ${settings.currencySymbol}${newExpense.amount.toLocaleString("en-IN")} for ${newExpense.title} (${newExpense.category})`,
+    );
   };
 
   const updateExpense = (id: string, updates: Partial<GymExpense>) => {
@@ -2621,7 +3122,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const payStaffSalary = (
     staffId: string,
     paymentMethod: "UPI" | "Bank Transfer" | "Cash" | "Cheque" = "Bank Transfer",
-    notes: string = ""
+    notes: string = "",
   ) => {
     const target = staff.find((s) => s.id === staffId);
     if (!target) return;
@@ -2657,7 +3158,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Salary Paid", "Staff", `Disbursed ${settings.currencySymbol}${target.salary.toLocaleString("en-IN")} to ${target.name} (${target.role}) via ${paymentMethod}`);
+    addSystemLog(
+      "Salary Paid",
+      "Staff",
+      `Disbursed ${settings.currencySymbol}${target.salary.toLocaleString("en-IN")} to ${target.name} (${target.role}) via ${paymentMethod}`,
+    );
   };
 
   const toggleStaffStatus = (staffId: string, status: "On Floor" | "Off Duty" | "On Leave") => {
@@ -2666,7 +3171,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
-    addSystemLog("Staff Status Changed", "Staff", `Changed status of staff ${staffId} to ${status}`);
+    addSystemLog(
+      "Staff Status Changed",
+      "Staff",
+      `Changed status of staff ${staffId} to ${status}`,
+    );
   };
 
   const approveLeaveRequest = (staffId: string, leaveId: string) => {
@@ -2675,7 +3184,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (s.id === staffId) {
           return {
             ...s,
-            leaveRecords: s.leaveRecords.map((l) => (l.id === leaveId ? { ...l, status: "Approved" as const } : l)),
+            leaveRecords: s.leaveRecords.map((l) =>
+              l.id === leaveId ? { ...l, status: "Approved" as const } : l,
+            ),
           };
         }
         return s;
@@ -2683,11 +3194,20 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_staff`, updated);
       return updated;
     });
-    addSystemLog("Leave Approved", "Staff", `Approved leave request ${leaveId} for staff ${staffId}`);
+    addSystemLog(
+      "Leave Approved",
+      "Staff",
+      `Approved leave request ${leaveId} for staff ${staffId}`,
+    );
   };
 
   // Plans CRUD
-  const addPlan = (planData: Omit<MembershipPlan, "id" | "activeCount" | "expiringCount" | "frozenCount" | "upgradeOpportunities">) => {
+  const addPlan = (
+    planData: Omit<
+      MembershipPlan,
+      "id" | "activeCount" | "expiringCount" | "frozenCount" | "upgradeOpportunities"
+    >,
+  ) => {
     const newPlan: MembershipPlan = {
       ...planData,
       id: `plan-${Date.now()}`,
@@ -2701,7 +3221,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
-    addSystemLog("Plan Created", "Plan", `Created new membership plan: ${newPlan.name} (${settings.currencySymbol}${newPlan.price})`);
+    addSystemLog(
+      "Plan Created",
+      "Plan",
+      `Created new membership plan: ${newPlan.name} (${settings.currencySymbol}${newPlan.price})`,
+    );
   };
 
   const updatePlan = (id: string, updates: Partial<MembershipPlan>) => {
@@ -2751,7 +3275,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const convertLeadToMember = (leadId: string, planName: string, initialPaid?: number, method: "UPI" | "Cash" | "Card" | "Bank" = "UPI") => {
+  const convertLeadToMember = (
+    leadId: string,
+    planName: string,
+    initialPaid?: number,
+    method: "UPI" | "Cash" | "Card" | "Bank" = "UPI",
+  ) => {
     const targetLead = leads.find((l) => l.id === leadId);
     if (!targetLead) return;
 
@@ -2768,7 +3297,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       planPrice,
       due,
       joinDate: new Date().toISOString().split("T")[0],
-      expiry: new Date(Date.now() + (planObj?.durationMonths || 1) * 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      expiry: new Date(Date.now() + (planObj?.durationMonths || 1) * 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
       status: due > 0 ? "Partial" : "Active",
       healthGoal: targetLead.fitnessGoal,
       assignedTrainer: targetLead.assignedTrainer,
@@ -2779,7 +3310,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Workout Programs & Diets
-  const addWorkoutProgram = (programData: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">) => {
+  const addWorkoutProgram = (
+    programData: Omit<WorkoutProgram, "id" | "assignedCount" | "createdAt">,
+  ) => {
     const newProg: WorkoutProgram = {
       ...programData,
       id: `wo-${Date.now()}`,
@@ -2838,7 +3371,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const prog = workoutPrograms.find((w) => w.id === workoutId);
     if (!prog) return;
     setMembers((prev) => {
-      const updated = prev.map((m) => (m.id === memberId ? { ...m, assignedWorkout: prog.title, assignedWorkoutId: prog.id } : m));
+      const updated = prev.map((m) =>
+        m.id === memberId ? { ...m, assignedWorkout: prog.title, assignedWorkoutId: prog.id } : m,
+      );
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
@@ -2903,13 +3438,20 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const diet = dietPlans.find((d) => d.id === dietId);
     if (!diet) return;
     setMembers((prev) => {
-      const updated = prev.map((m) => (m.id === memberId ? { ...m, assignedDiet: diet.title, assignedDietId: diet.id } : m));
+      const updated = prev.map((m) =>
+        m.id === memberId ? { ...m, assignedDiet: diet.title, assignedDietId: diet.id } : m,
+      );
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
   };
 
-  const assignProgramToMember = (memberId: string, workoutId?: string, dietId?: string, notes?: string) => {
+  const assignProgramToMember = (
+    memberId: string,
+    workoutId?: string,
+    dietId?: string,
+    notes?: string,
+  ) => {
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
@@ -2932,7 +3474,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Lockers
-  const assignLocker = (lockerNumber: number, memberId: string, memberName: string, durationDays = 30) => {
+  const assignLocker = (
+    lockerNumber: number,
+    memberId: string,
+    memberName: string,
+    durationDays = 30,
+  ) => {
     const exp = new Date();
     exp.setDate(exp.getDate() + durationDays);
     const expStr = exp.toISOString().split("T")[0];
@@ -2964,7 +3511,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setMembers((prev) => {
-      const updated = prev.map((m) => (m.id === memberId ? { ...m, assignedLocker: lockerNumber } : m));
+      const updated = prev.map((m) =>
+        m.id === memberId ? { ...m, assignedLocker: lockerNumber } : m,
+      );
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
       return updated;
     });
@@ -3056,7 +3605,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const completeLockerRepair = (lockerNumber: number, repairNotes?: string, repairedBy = "Maintenance Team") => {
+  const completeLockerRepair = (
+    lockerNumber: number,
+    repairNotes?: string,
+    repairedBy = "Maintenance Team",
+  ) => {
     const todayStr = new Date().toISOString().split("T")[0];
     setLockers((prev) => {
       const updated = prev.map((l) => {
@@ -3093,7 +3646,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Broadcast Communications
-  const sendBroadcastMessage = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
+  const sendBroadcastMessage = (
+    broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">,
+  ) => {
     const todayStr = new Date().toISOString().split("T")[0];
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const newBroadcast: BroadcastMessage = {
@@ -3108,10 +3663,16 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_broadcasts`, updated);
       return updated;
     });
-    addSystemLog("Broadcast Sent", "Settings", `Dispatched broadcast "${newBroadcast.title}" to ${newBroadcast.recipientCount} members`);
+    addSystemLog(
+      "Broadcast Sent",
+      "Settings",
+      `Dispatched broadcast "${newBroadcast.title}" to ${newBroadcast.recipientCount} members`,
+    );
   };
 
-  const saveDraftBroadcast = (broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">) => {
+  const saveDraftBroadcast = (
+    broadcastData: Omit<BroadcastMessage, "id" | "createdAt" | "status" | "sentAt">,
+  ) => {
     const todayStr = new Date().toISOString().split("T")[0];
     const draft: BroadcastMessage = {
       ...broadcastData,
@@ -3239,7 +3800,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       extractDominantColor(logoBase64)
         .then((hex) => {
           setBrandColor(hex, "Extracted from Gym Logo");
-          addSystemLog("Brand Color Extracted", "Settings", `Extracted dominant logo color: ${hex}`);
+          addSystemLog(
+            "Brand Color Extracted",
+            "Settings",
+            `Extracted dominant logo color: ${hex}`,
+          );
         })
         .catch((err) => {
           console.warn("[ColorExtractor] Failed to extract dominant color:", err);
@@ -3249,11 +3814,16 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const removeGymLogo = () => {
     setSettings((prev) => {
-      const updated = { ...prev, logoUrl: "", brandColor: "#8b5cf6", brandThemeName: "Ultra Violet" };
+      const updated = {
+        ...prev,
+        logoUrl: "",
+        brandColor: "#3b82f6",
+        brandThemeName: "Cobalt Enterprise",
+      };
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
-    applyBrandThemeCss("#8b5cf6");
+    applyBrandThemeCss("#3b82f6");
   };
 
   const resetToDefaultData = () => {
@@ -3291,7 +3861,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     safePersist(`${STORAGE_KEY_PEAKREP}_renewals`, DEFAULT_RENEWALS);
     safePersist(`${STORAGE_KEY_PEAKREP}_current_loc`, "loc-1");
 
-    applyBrandThemeCss("#8b5cf6");
+    applyBrandThemeCss("#3b82f6");
   };
 
   return (

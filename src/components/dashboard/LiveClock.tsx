@@ -54,9 +54,7 @@ export function LiveClock({
           </span>
           <span className="text-foreground font-bold">{timeString}</span>
         </div>
-        {showDate && (
-          <span className="text-xs text-muted-foreground font-sans">{dateString}</span>
-        )}
+        {showDate && <span className="text-xs text-muted-foreground font-sans">{dateString}</span>}
       </div>
     );
   }

@@ -13,15 +13,8 @@ import {
 import { useGymStore, Lead, LeadStage } from "../gym-store";
 
 export function LeadsCRMScreen() {
-  const {
-    leads,
-    addLead,
-    updateLeadStage,
-    convertLeadToMember,
-    deleteLead,
-    theme,
-    settings,
-  } = useGymStore();
+  const { leads, addLead, updateLeadStage, convertLeadToMember, deleteLead, theme, settings } =
+    useGymStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filterStage, setFilterStage] = useState<string>("All");
@@ -29,7 +22,9 @@ export function LeadsCRMScreen() {
   // Form
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+91 ");
-  const [source, setSource] = useState<"Walk-In" | "Instagram" | "Google Maps" | "Referral" | "Website">("Instagram");
+  const [source, setSource] = useState<
+    "Walk-In" | "Instagram" | "Google Maps" | "Referral" | "Website"
+  >("Instagram");
   const [stage, setStage] = useState<LeadStage>("Trial Scheduled");
   const [fitnessGoal, setFitnessGoal] = useState("");
   const [trialDate, setTrialDate] = useState("Today, 5:00 PM");
@@ -60,7 +55,7 @@ export function LeadsCRMScreen() {
 
   const handleWhatsAppLead = (l: Lead) => {
     const text = encodeURIComponent(
-      `Hi ${l.name}, this is ${settings.name}! We're thrilled to invite you for your free trial workout session: ${l.trialDate || "Today"}. Let us know if you need directions!`
+      `Hi ${l.name}, this is ${settings.name}! We're thrilled to invite you for your free trial workout session: ${l.trialDate || "Today"}. Let us know if you need directions!`,
     );
     const cleanPhone = l.phone.replace(/[^0-9]/g, "");
     Linking.openURL(`https://wa.me/${cleanPhone}?text=${text}`);
@@ -72,13 +67,17 @@ export function LeadsCRMScreen() {
   });
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       {/* Top Header */}
       <View style={styles.header}>
         <View>
           <Text style={[styles.title, { color: textPrimary }]}>Prospect & Trial CRM</Text>
           <Text style={[styles.subtitle, { color: textMuted }]}>
-            {leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length} Active Funnel Prospects
+            {leads.filter((l) => l.stage !== "Won" && l.stage !== "Lost").length} Active Funnel
+            Prospects
           </Text>
         </View>
         <TouchableOpacity
@@ -102,12 +101,7 @@ export function LeadsCRMScreen() {
                 : { backgroundColor: surface, borderColor: border, borderWidth: 1 },
             ]}
           >
-            <Text
-              style={[
-                styles.stageTabText,
-                { color: filterStage === st ? bg : textMuted },
-              ]}
-            >
+            <Text style={[styles.stageTabText, { color: filterStage === st ? bg : textMuted }]}>
               {st}
             </Text>
           </TouchableOpacity>
@@ -134,7 +128,15 @@ export function LeadsCRMScreen() {
                 <View
                   style={[
                     styles.stageBadge,
-                    { backgroundColor: isWon ? (isDark ? "#064e3b" : "#d1fae5") : (isDark ? "#581c87" : "#f3e8ff") },
+                    {
+                      backgroundColor: isWon
+                        ? isDark
+                          ? "#064e3b"
+                          : "#d1fae5"
+                        : isDark
+                          ? "#581c87"
+                          : "#f3e8ff",
+                    },
                   ]}
                 >
                   <Text style={[styles.stageBadgeText, { color: isWon ? emerald : "#9333ea" }]}>
@@ -145,11 +147,13 @@ export function LeadsCRMScreen() {
 
               <View style={[styles.cardBody, { borderColor: border }]}>
                 <Text style={[styles.bodyText, { color: textMuted }]}>
-                  🎯 Goal: <Text style={{ color: textPrimary, fontWeight: "600" }}>{lead.fitnessGoal}</Text>
+                  🎯 Goal:{" "}
+                  <Text style={{ color: textPrimary, fontWeight: "600" }}>{lead.fitnessGoal}</Text>
                 </Text>
                 {lead.trialDate && (
                   <Text style={[styles.bodyText, { color: textMuted }]}>
-                    🗓️ Trial: <Text style={{ color: textPrimary, fontWeight: "600" }}>{lead.trialDate}</Text>
+                    🗓️ Trial:{" "}
+                    <Text style={{ color: textPrimary, fontWeight: "600" }}>{lead.trialDate}</Text>
                   </Text>
                 )}
                 <Text style={[styles.bodyText, { color: textMuted }]}>📞 {lead.phone}</Text>
@@ -158,7 +162,10 @@ export function LeadsCRMScreen() {
               <View style={styles.cardFooter}>
                 <TouchableOpacity
                   onPress={() => handleWhatsAppLead(lead)}
-                  style={[styles.actionBtn, { backgroundColor: surface, borderColor: border, borderWidth: 1 }]}
+                  style={[
+                    styles.actionBtn,
+                    { backgroundColor: surface, borderColor: border, borderWidth: 1 },
+                  ]}
                 >
                   <Text style={[styles.actionBtnText, { color: textPrimary }]}>💬 WhatsApp</Text>
                 </TouchableOpacity>
@@ -168,11 +175,17 @@ export function LeadsCRMScreen() {
                     onPress={() => convertLeadToMember(lead.id, settings.membershipPlans[0].name)}
                     style={[styles.actionBtn, { backgroundColor: emerald }]}
                   >
-                    <Text style={[styles.actionBtnText, { color: "#ffffff" }]}>Convert to Member →</Text>
+                    <Text style={[styles.actionBtnText, { color: "#ffffff" }]}>
+                      Convert to Member →
+                    </Text>
                   </TouchableOpacity>
                 ) : (
-                  <View style={[styles.actionBtn, { backgroundColor: isDark ? "#064e3b" : "#d1fae5" }]}>
-                    <Text style={[styles.actionBtnText, { color: emerald }]}>✓ Enrolled Member</Text>
+                  <View
+                    style={[styles.actionBtn, { backgroundColor: isDark ? "#064e3b" : "#d1fae5" }]}
+                  >
+                    <Text style={[styles.actionBtnText, { color: emerald }]}>
+                      ✓ Enrolled Member
+                    </Text>
                   </View>
                 )}
               </View>
@@ -194,7 +207,10 @@ export function LeadsCRMScreen() {
                 placeholderTextColor={textMuted}
                 value={name}
                 onChangeText={setName}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.inputLabel, { color: textMuted }]}>Phone Number</Text>
@@ -203,7 +219,10 @@ export function LeadsCRMScreen() {
                 placeholderTextColor={textMuted}
                 value={phone}
                 onChangeText={setPhone}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.inputLabel, { color: textMuted }]}>Fitness Goal</Text>
@@ -212,7 +231,10 @@ export function LeadsCRMScreen() {
                 placeholderTextColor={textMuted}
                 value={fitnessGoal}
                 onChangeText={setFitnessGoal}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.inputLabel, { color: textMuted }]}>Trial Slot Date & Time</Text>
@@ -221,7 +243,10 @@ export function LeadsCRMScreen() {
                 placeholderTextColor={textMuted}
                 value={trialDate}
                 onChangeText={setTrialDate}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
             </View>
 

@@ -22,12 +22,38 @@ function numberToWordsIndian(num: number): string {
   if (!num || isNaN(num) || num === 0) return "Zero Rupees Only";
 
   const singleDigits = [
-    "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
-    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
-    "Seventeen", "Eighteen", "Nineteen",
+    "",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
   ];
   const tensDigits = [
-    "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety",
+    "",
+    "",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
   ];
 
   function convertSection(n: number): string {
@@ -94,12 +120,13 @@ export function InvoiceModal() {
   const member = members.find(
     (m) =>
       (inv.memberId && m.id === inv.memberId) ||
-      m.name.toLowerCase().trim() === inv.member.toLowerCase().trim()
+      m.name.toLowerCase().trim() === inv.member.toLowerCase().trim(),
   );
 
   const memberPhone = member?.phone || "+91 98860 12345";
   const memberEmail = member?.email || "member@fitnesshub.com";
-  const memberPlan = member?.plan || (inv.category === "Membership" ? "Annual Elite Gym Pass" : inv.category);
+  const memberPlan =
+    member?.plan || (inv.category === "Membership" ? "Annual Elite Gym Pass" : inv.category);
   const startDate = member?.joinDate || inv.date;
   const endDate = member?.expiry || "1 Year Validity";
   const brandColor = settings.brandColor || "#10b981";
@@ -112,21 +139,24 @@ export function InvoiceModal() {
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
       `*OFFICIAL TAX INVOICE & RECEIPT*\n` +
-      `*${settings.name}*\n` +
-      `----------------------------------------\n` +
-      `📄 *Invoice No:* ${inv.invoiceNumber}\n` +
-      `📅 *Date:* ${inv.date}\n` +
-      `👤 *Member:* ${inv.member}\n` +
-      `🏋️ *Plan:* ${memberPlan}\n` +
-      `💰 *Amount Paid:* ${settings.currencySymbol}${inv.amount.toLocaleString("en-IN")}\n` +
-      `💳 *Payment Mode:* ${inv.method}\n` +
-      `✅ *Status:* ${inv.status.toUpperCase()} (Tax Included)\n` +
-      `🏛️ *GSTIN:* ${settings.gstNumber || "29AABCU9603R1ZM"}\n` +
-      `----------------------------------------\n` +
-      `Thank you for training with us! 💪`
+        `*${settings.name}*\n` +
+        `----------------------------------------\n` +
+        `📄 *Invoice No:* ${inv.invoiceNumber}\n` +
+        `📅 *Date:* ${inv.date}\n` +
+        `👤 *Member:* ${inv.member}\n` +
+        `🏋️ *Plan:* ${memberPlan}\n` +
+        `💰 *Amount Paid:* ${settings.currencySymbol}${inv.amount.toLocaleString("en-IN")}\n` +
+        `💳 *Payment Mode:* ${inv.method}\n` +
+        `✅ *Status:* ${inv.status.toUpperCase()} (Tax Included)\n` +
+        `🏛️ *GSTIN:* ${settings.gstNumber || "29AABCU9603R1ZM"}\n` +
+        `----------------------------------------\n` +
+        `Thank you for training with us! 💪`,
     );
     const phoneClean = memberPhone.replace(/[^0-9]/g, "");
-    const waUrl = phoneClean.length >= 10 ? `https://wa.me/${phoneClean}?text=${text}` : `https://wa.me/?text=${text}`;
+    const waUrl =
+      phoneClean.length >= 10
+        ? `https://wa.me/${phoneClean}?text=${text}`
+        : `https://wa.me/?text=${text}`;
     window.open(waUrl, "_blank");
     toast.success("WhatsApp receipt dispatched!");
   };
@@ -153,12 +183,16 @@ export function InvoiceModal() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-foreground">Official Tax Invoice & Payment Receipt</span>
+                <span className="text-xs font-bold text-foreground">
+                  Official Tax Invoice & Payment Receipt
+                </span>
                 <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">
                   GST INV-01 Compliant
                 </span>
               </div>
-              <p className="text-[11px] text-muted-foreground">Original for Recipient · 1-Page A4 Standard</p>
+              <p className="text-[11px] text-muted-foreground">
+                Original for Recipient · 1-Page A4 Standard
+              </p>
             </div>
           </div>
 
@@ -168,7 +202,11 @@ export function InvoiceModal() {
               className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition"
               title="Copy Summary"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+              )}
               <span>{copied ? "Copied" : "Copy"}</span>
             </button>
 
@@ -261,14 +299,17 @@ export function InvoiceModal() {
             <div className="text-left sm:text-right space-y-1 shrink-0">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-xs font-bold text-emerald-800 shadow-2xs">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                <span>{inv.status === "Paid" ? "PAID IN FULL · VERIFIED" : inv.status.toUpperCase()}</span>
+                <span>
+                  {inv.status === "Paid" ? "PAID IN FULL · VERIFIED" : inv.status.toUpperCase()}
+                </span>
               </div>
               <h2 className="text-base sm:text-lg font-black tracking-tight text-zinc-950 font-heading">
                 TAX INVOICE & RECEIPT
               </h2>
               <div className="space-y-0.5 text-xs text-zinc-600 font-medium">
                 <p className="font-mono text-zinc-900 font-bold">
-                  Invoice No: <span className="text-zinc-950 font-extrabold">{inv.invoiceNumber}</span>
+                  Invoice No:{" "}
+                  <span className="text-zinc-950 font-extrabold">{inv.invoiceNumber}</span>
                 </p>
                 <p className="flex sm:justify-end items-center gap-1 text-[11px]">
                   <Calendar className="h-3 w-3 text-zinc-400" />
@@ -332,19 +373,27 @@ export function InvoiceModal() {
                 <div>
                   <span className="text-zinc-400 block text-[10px]">Payment Method:</span>
                   <span className="font-bold text-zinc-900 font-mono">
-                    {inv.method === "UPI" ? "UPI / Instant QR" : inv.method === "Card" ? "POS Card Terminal" : inv.method === "Cash" ? "Cash at Reception" : "Bank Transfer"}
+                    {inv.method === "UPI"
+                      ? "UPI / Instant QR"
+                      : inv.method === "Card"
+                        ? "POS Card Terminal"
+                        : inv.method === "Cash"
+                          ? "Cash at Reception"
+                          : "Bank Transfer"}
                   </span>
                 </div>
                 <div>
                   <span className="text-zinc-400 block text-[10px]">Transaction Ref / UTR:</span>
                   <span className="font-mono text-zinc-800 font-semibold">
-                    TXN-{inv.method.toUpperCase()}-{inv.invoiceNumber.replace(/[^0-9]/g, "") || "8849"}
+                    TXN-{inv.method.toUpperCase()}-
+                    {inv.invoiceNumber.replace(/[^0-9]/g, "") || "8849"}
                   </span>
                 </div>
                 <div>
                   <span className="text-zinc-400 block text-[10px]">Authorized Desk Officer:</span>
                   <span className="text-zinc-900 font-medium">
-                    {inv.collectedBy || currentUser.name} ({currentUser.role === "admin" ? "Director" : "Front Desk"})
+                    {inv.collectedBy || currentUser.name} (
+                    {currentUser.role === "admin" ? "Director" : "Front Desk"})
                   </span>
                 </div>
                 <div>
@@ -374,31 +423,44 @@ export function InvoiceModal() {
               </thead>
               <tbody className="divide-y divide-zinc-200 bg-white">
                 <tr className="hover:bg-zinc-50/50">
-                  <td className="py-2.5 px-3 text-center font-mono text-zinc-400 font-semibold">01</td>
+                  <td className="py-2.5 px-3 text-center font-mono text-zinc-400 font-semibold">
+                    01
+                  </td>
                   <td className="py-2.5 px-3">
                     <div className="font-bold text-zinc-950 text-xs flex items-center gap-1.5">
-                      <span>{inv.category} Subscription · {memberPlan}</span>
+                      <span>
+                        {inv.category} Subscription · {memberPlan}
+                      </span>
                       <Award className="h-3 w-3 text-amber-500 inline shrink-0" />
                     </div>
                     <p className="text-[11px] text-zinc-500 mt-0.5 leading-tight">
-                      {inv.notes || "Comprehensive strength equipment access, cardio floor, locker bay, smart workout tracking & shower facility."}
+                      {inv.notes ||
+                        "Comprehensive strength equipment access, cardio floor, locker bay, smart workout tracking & shower facility."}
                     </p>
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono text-zinc-600 text-[11px]">999723</td>
+                  <td className="py-2.5 px-3 text-center font-mono text-zinc-600 text-[11px]">
+                    999723
+                  </td>
                   <td className="py-2.5 px-3 text-center font-medium text-zinc-700 text-[11px]">
-                    {inv.installmentIndex ? `Inst. #${inv.installmentIndex}/${inv.totalInstallments || 1}` : "Active Term"}
+                    {inv.installmentIndex
+                      ? `Inst. #${inv.installmentIndex}/${inv.totalInstallments || 1}`
+                      : "Active Term"}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono font-medium text-zinc-800">
-                    {settings.currencySymbol}{baseAmount.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {baseAmount.toLocaleString("en-IN")}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-zinc-600">
-                    {settings.currencySymbol}{cgstAmount.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {cgstAmount.toLocaleString("en-IN")}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-zinc-600">
-                    {settings.currencySymbol}{sgstAmount.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {sgstAmount.toLocaleString("en-IN")}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono font-extrabold text-zinc-950 text-xs">
-                    {settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {inv.amount.toLocaleString("en-IN")}
                   </td>
                 </tr>
               </tbody>
@@ -422,12 +484,15 @@ export function InvoiceModal() {
               <div className="flex flex-wrap items-center gap-2 text-[11px]">
                 <div className="flex items-center gap-1.5 rounded-lg bg-zinc-100 border border-zinc-200 px-2.5 py-1 text-zinc-700 font-medium">
                   <Calendar className="h-3 w-3 text-zinc-500" />
-                  <span>Cycle: <strong>{startDate}</strong> to <strong>{endDate}</strong></span>
+                  <span>
+                    Cycle: <strong>{startDate}</strong> to <strong>{endDate}</strong>
+                  </span>
                 </div>
               </div>
 
               <p className="text-[10px] text-zinc-500 leading-relaxed">
-                * Taxes calculated as per Central GST Act 2017 & State GST Act 2017 under SAC 999723 (Health, Fitness & Physical Well-being Services).
+                * Taxes calculated as per Central GST Act 2017 & State GST Act 2017 under SAC 999723
+                (Health, Fitness & Physical Well-being Services).
               </p>
             </div>
 
@@ -435,24 +500,37 @@ export function InvoiceModal() {
             <div className="sm:col-span-5 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3.5 space-y-1.5 text-xs font-mono">
               <div className="flex justify-between text-zinc-600">
                 <span className="font-sans font-medium">Taxable Base Subtotal:</span>
-                <span className="font-semibold">{settings.currencySymbol}{baseAmount.toLocaleString("en-IN")}</span>
+                <span className="font-semibold">
+                  {settings.currencySymbol}
+                  {baseAmount.toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between text-zinc-600">
                 <span className="font-sans font-medium">Central Tax (CGST {taxPercent / 2}%):</span>
-                <span>{settings.currencySymbol}{cgstAmount.toLocaleString("en-IN")}</span>
+                <span>
+                  {settings.currencySymbol}
+                  {cgstAmount.toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between text-zinc-600">
                 <span className="font-sans font-medium">State Tax (SGST {taxPercent / 2}%):</span>
-                <span>{settings.currencySymbol}{sgstAmount.toLocaleString("en-IN")}</span>
+                <span>
+                  {settings.currencySymbol}
+                  {sgstAmount.toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between text-zinc-600 border-t border-zinc-200 pt-1">
                 <span className="font-sans font-semibold">Total GST ({taxPercent}%):</span>
-                <span className="font-semibold">{settings.currencySymbol}{taxAmount.toLocaleString("en-IN")}</span>
+                <span className="font-semibold">
+                  {settings.currencySymbol}
+                  {taxAmount.toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm font-extrabold text-zinc-950 border-t-2 border-zinc-300 pt-1.5 font-sans">
                 <span className="font-heading text-sm">Grand Total Paid:</span>
                 <span className="font-mono text-base text-zinc-950 font-black">
-                  {settings.currencySymbol}{inv.amount.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {inv.amount.toLocaleString("en-IN")}
                 </span>
               </div>
               <div className="flex justify-between text-[11px] text-emerald-700 font-semibold border-t border-dashed border-zinc-200 pt-1">
@@ -466,7 +544,20 @@ export function InvoiceModal() {
           <div className="flex items-end justify-between pt-4 border-t border-zinc-200">
             <div className="text-[9px] text-zinc-400 space-y-0.5">
               <p>Powered by PEAKREP Gym Operating System · High-Performance Enterprise Edition</p>
-              <p>Generated on {new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}, {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</p>
+              <p>
+                Generated on{" "}
+                {new Date().toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+                ,{" "}
+                {new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+              </p>
             </div>
 
             {/* Right: Signature as requested (e.g. Gedde, From Gold's Gym) */}
@@ -477,9 +568,7 @@ export function InvoiceModal() {
               <div className="border-t border-zinc-400 pt-1 text-[11px] font-bold text-zinc-900 uppercase tracking-wider">
                 {settings.ownerName || "Director"}, From {settings.name}
               </div>
-              <p className="text-[10px] text-zinc-500 font-medium">
-                (Authorized Signatory)
-              </p>
+              <p className="text-[10px] text-zinc-500 font-medium">(Authorized Signatory)</p>
             </div>
           </div>
         </div>

@@ -46,7 +46,7 @@ Divya Sharma,+91 98000 44444,divya.s@gmail.com,Monthly Flex,0,2026-05-19,Conditi
         if (!line) continue;
         const values = line.split(",").map((v) => v.trim());
 
-        const rowData: any = {};
+        const rowData: Partial<Member> = {};
         headers.forEach((header, idx) => {
           const val = values[idx] || "";
           if (header === "name") rowData.name = val;
@@ -64,8 +64,9 @@ Divya Sharma,+91 98000 44444,divya.s@gmail.com,Monthly Flex,0,2026-05-19,Conditi
       }
 
       setParsedRows(rows);
-    } catch (e: any) {
-      setErrorMsg("Failed to parse CSV formatting: " + e.message);
+    } catch (e) {
+      const err = e as Error;
+      setErrorMsg("Failed to parse CSV formatting: " + err.message);
     }
   };
 
@@ -113,7 +114,9 @@ Divya Sharma,+91 98000 44444,divya.s@gmail.com,Monthly Flex,0,2026-05-19,Conditi
             </div>
             <div>
               <h3 className="text-base font-bold text-foreground">Bulk Member CSV Import</h3>
-              <p className="text-xs text-muted-foreground">Import multiple members, plans, and opening balances at once</p>
+              <p className="text-xs text-muted-foreground">
+                Import multiple members, plans, and opening balances at once
+              </p>
             </div>
           </div>
           <button
@@ -138,7 +141,12 @@ Divya Sharma,+91 98000 44444,divya.s@gmail.com,Monthly Flex,0,2026-05-19,Conditi
           <label className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-foreground text-background font-semibold cursor-pointer hover:opacity-90 transition">
             <Upload className="h-3.5 w-3.5" />
             <span>Upload .CSV File</span>
-            <input type="file" accept=".csv,text/csv" onChange={handleFileUpload} className="hidden" />
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
           </label>
         </div>
 

@@ -54,7 +54,9 @@ function LockerRegistryPage() {
 
   const [maintenanceModalLocker, setMaintenanceModalLocker] = useState<Locker | null>(null);
   const [maintenanceIssue, setMaintenanceIssue] = useState("");
-  const [maintenanceDate, setMaintenanceDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [maintenanceDate, setMaintenanceDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
 
   const [repairModalLocker, setRepairModalLocker] = useState<Locker | null>(null);
   const [repairNotes, setRepairNotes] = useState("Lock cylinder replaced and interior sanitized.");
@@ -162,7 +164,7 @@ function LockerRegistryPage() {
       case "Occupied":
         return "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30";
       case "Reserved":
-        return "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30";
+        return "bg-brand-soft text-brand border-brand/30";
       case "Under Maintenance":
         return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
       case "Expired":
@@ -176,13 +178,16 @@ function LockerRegistryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Locker Registry & Maintenance</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Locker Registry & Maintenance
+            </h1>
             <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
               {totalLockers} Total Lockers
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Complete locker allocation lifecycle, member assignments, reservation holds, and maintenance repair workflows.
+            Complete locker allocation lifecycle, member assignments, reservation holds, and
+            maintenance repair workflows.
           </p>
         </div>
 
@@ -242,20 +247,22 @@ function LockerRegistryPage() {
           onClick={() => setSelectedStatus(selectedStatus === "Reserved" ? "All" : "Reserved")}
           className={`cursor-pointer rounded-2xl border p-4 transition ${
             selectedStatus === "Reserved"
-              ? "border-purple-500 bg-purple-500/10 ring-2 ring-purple-500"
+              ? "border-brand bg-brand-soft ring-2 ring-brand"
               : "border-border bg-surface hover:bg-muted/50"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">Reserved</span>
-            <BookmarkCheck className="h-4 w-4 text-purple-500" />
+            <BookmarkCheck className="h-4 w-4 text-brand" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2">{reservedCount}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">On VIP / Guest hold</p>
         </div>
 
         <div
-          onClick={() => setSelectedStatus(selectedStatus === "Under Maintenance" ? "All" : "Under Maintenance")}
+          onClick={() =>
+            setSelectedStatus(selectedStatus === "Under Maintenance" ? "All" : "Under Maintenance")
+          }
           className={`cursor-pointer rounded-2xl border p-4 transition ${
             selectedStatus === "Under Maintenance"
               ? "border-amber-500 bg-amber-500/10 ring-2 ring-amber-500"
@@ -322,12 +329,10 @@ function LockerRegistryPage() {
             key={l.id}
             className={`rounded-2xl border bg-surface p-5 space-y-3.5 shadow-2xs transition hover:border-foreground/40 flex flex-col justify-between ${
               l.status === "Under Maintenance"
-                ? "border-amber-500/40 bg-amber-500/5"
-                : l.status === "Occupied"
-                ? "border-blue-500/30"
-                : l.status === "Reserved"
-                ? "border-purple-500/30"
-                : "border-border"
+                ? "border-border bg-muted/20"
+                : l.status === "Occupied" || l.status === "Reserved"
+                  ? "border-brand/30"
+                  : "border-border"
             }`}
           >
             <div>
@@ -338,14 +343,14 @@ function LockerRegistryPage() {
                     #{l.number}
                   </div>
                   <div>
-                    <h3 className="text-xs font-semibold text-foreground">
-                      Locker #{l.number}
-                    </h3>
+                    <h3 className="text-xs font-semibold text-foreground">Locker #{l.number}</h3>
                     <p className="text-[10px] text-muted-foreground">{l.section}</p>
                   </div>
                 </div>
 
-                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${getStatusBadge(l.status)}`}>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${getStatusBadge(l.status)}`}
+                >
                   {l.status}
                 </span>
               </div>
@@ -357,14 +362,18 @@ function LockerRegistryPage() {
                     <p className="text-muted-foreground text-[10px] font-medium">Assigned Member</p>
                     <p className="font-bold text-foreground truncate">{l.assignedMemberName}</p>
                     {l.expiresOn && (
-                      <p className="text-[10px] font-mono text-muted-foreground">Expires: {l.expiresOn}</p>
+                      <p className="text-[10px] font-mono text-muted-foreground">
+                        Expires: {l.expiresOn}
+                      </p>
                     )}
                   </div>
                 )}
 
                 {l.status === "Reserved" && (
-                  <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-2.5 space-y-1">
-                    <p className="text-purple-600 dark:text-purple-400 text-[10px] font-medium">Reserved Holder</p>
+                  <div className="rounded-xl border border-brand/20 bg-brand-soft/20 p-2.5 space-y-1">
+                    <p className="text-brand text-[10px] font-medium">
+                      Reserved Holder
+                    </p>
                     <p className="font-bold text-foreground truncate">{l.reservedFor}</p>
                   </div>
                 )}
@@ -374,16 +383,22 @@ function LockerRegistryPage() {
                     <p className="text-amber-600 dark:text-amber-400 text-[10px] font-bold flex items-center gap-1">
                       <Wrench className="h-3 w-3" /> Reported Issue
                     </p>
-                    <p className="font-medium text-foreground text-[11px]">{l.maintenanceIssue || "General Inspection"}</p>
+                    <p className="font-medium text-foreground text-[11px]">
+                      {l.maintenanceIssue || "General Inspection"}
+                    </p>
                     {l.maintenanceDate && (
-                      <p className="text-[10px] font-mono text-muted-foreground">Reported on: {l.maintenanceDate}</p>
+                      <p className="text-[10px] font-mono text-muted-foreground">
+                        Reported on: {l.maintenanceDate}
+                      </p>
                     )}
                   </div>
                 )}
 
                 {l.status === "Available" && (
                   <div className="rounded-xl border border-dashed border-border bg-canvas p-2.5 text-center">
-                    <p className="text-[11px] text-muted-foreground">Available for immediate assignment or hold.</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Available for immediate assignment or hold.
+                    </p>
                   </div>
                 )}
               </div>
@@ -484,25 +499,34 @@ function LockerRegistryPage() {
                   #{assignModalLocker.number}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">Assign Locker #{assignModalLocker.number}</h3>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Assign Locker #{assignModalLocker.number}
+                  </h3>
                   <p className="text-[11px] text-muted-foreground">{assignModalLocker.section}</p>
                 </div>
               </div>
-              <button onClick={() => setAssignModalLocker(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setAssignModalLocker(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmAssign} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Select Member *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Select Member *
+                </label>
                 <select
                   required
                   value={selectedMemberId}
                   onChange={(e) => setSelectedMemberId(e.target.value)}
                   className="w-full rounded-xl border border-border bg-canvas px-3 py-2.5 text-xs outline-none focus:border-emerald"
                 >
-                  <option value="" disabled>Choose a member...</option>
+                  <option value="" disabled>
+                    Choose a member...
+                  </option>
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name} ({m.plan} • {m.phone})
@@ -512,7 +536,9 @@ function LockerRegistryPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Allocation Duration (Days)</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Allocation Duration (Days)
+                </label>
                 <input
                   type="number"
                   required
@@ -550,22 +576,31 @@ function LockerRegistryPage() {
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="grid h-8 w-8 place-items-center rounded-xl bg-purple-500 text-white font-mono font-bold text-sm">
+                <div className="grid h-8 w-8 place-items-center rounded-xl bg-brand text-brand-foreground font-mono font-bold text-sm">
                   #{reserveModalLocker.number}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">Reserve Locker #{reserveModalLocker.number}</h3>
-                  <p className="text-[11px] text-muted-foreground">Place locker on VIP or prospective member hold</p>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Reserve Locker #{reserveModalLocker.number}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    Place locker on VIP or prospective member hold
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setReserveModalLocker(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setReserveModalLocker(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmReserve} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Reserved Holder Name *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Reserved Holder Name *
+                </label>
                 <input
                   type="text"
                   required
@@ -577,7 +612,9 @@ function LockerRegistryPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Reservation Note</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Reservation Note
+                </label>
                 <textarea
                   rows={2}
                   placeholder="Reason or expected conversion date..."
@@ -618,17 +655,24 @@ function LockerRegistryPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-foreground">Report Maintenance Issue</h3>
-                  <p className="text-[11px] text-muted-foreground">Locker #{maintenanceModalLocker.number}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Locker #{maintenanceModalLocker.number}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setMaintenanceModalLocker(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setMaintenanceModalLocker(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmMaintenance} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Issue / Defect Description *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Issue / Defect Description *
+                </label>
                 <textarea
                   required
                   rows={3}
@@ -640,7 +684,9 @@ function LockerRegistryPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Date Reported</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Date Reported
+                </label>
                 <input
                   type="date"
                   required
@@ -680,23 +726,36 @@ function LockerRegistryPage() {
                   #{repairModalLocker.number}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">Mark as Repaired & Restore Locker</h3>
-                  <p className="text-[11px] text-emerald font-semibold">Will automatically return to "Available" status</p>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Mark as Repaired & Restore Locker
+                  </h3>
+                  <p className="text-[11px] text-emerald font-semibold">
+                    Will automatically return to "Available" status
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setRepairModalLocker(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setRepairModalLocker(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-foreground space-y-0.5">
-              <p className="font-semibold text-amber-600 dark:text-amber-400">Original Reported Issue:</p>
-              <p className="text-muted-foreground">{repairModalLocker.maintenanceIssue || "General Maintenance"}</p>
+              <p className="font-semibold text-amber-600 dark:text-amber-400">
+                Original Reported Issue:
+              </p>
+              <p className="text-muted-foreground">
+                {repairModalLocker.maintenanceIssue || "General Maintenance"}
+              </p>
             </div>
 
             <form onSubmit={handleConfirmRepair} className="space-y-4 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Resolution & Repair Notes *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Resolution & Repair Notes *
+                </label>
                 <textarea
                   required
                   rows={2}
@@ -707,7 +766,9 @@ function LockerRegistryPage() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Repaired By Staff / Technician</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Repaired By Staff / Technician
+                </label>
                 <input
                   type="text"
                   required
@@ -754,8 +815,12 @@ function LockerRegistryPage() {
                   #{historyDrawerLocker.number}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-foreground">Locker #{historyDrawerLocker.number} Audit Log</h3>
-                  <p className="text-xs text-muted-foreground">{historyDrawerLocker.section} • Status: {historyDrawerLocker.status}</p>
+                  <h3 className="text-base font-bold text-foreground">
+                    Locker #{historyDrawerLocker.number} Audit Log
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {historyDrawerLocker.section} • Status: {historyDrawerLocker.status}
+                  </p>
                 </div>
               </div>
               <button
@@ -776,18 +841,27 @@ function LockerRegistryPage() {
               {historyDrawerLocker.repairHistory.length > 0 ? (
                 <div className="space-y-2">
                   {historyDrawerLocker.repairHistory.map((rep) => (
-                    <div key={rep.id} className="p-3 rounded-xl border border-border bg-canvas text-xs space-y-1">
+                    <div
+                      key={rep.id}
+                      className="p-3 rounded-xl border border-border bg-canvas text-xs space-y-1"
+                    >
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-foreground">{rep.issue}</span>
-                        <span className="text-[10px] font-mono text-muted-foreground">{rep.repairedAt}</span>
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          {rep.repairedAt}
+                        </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">{rep.notes}</p>
-                      <p className="text-[10px] text-emerald font-medium">Repaired by: {rep.repairedBy}</p>
+                      <p className="text-[10px] text-emerald font-medium">
+                        Repaired by: {rep.repairedBy}
+                      </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground italic py-2">No historical repair records logged.</p>
+                <p className="text-xs text-muted-foreground italic py-2">
+                  No historical repair records logged.
+                </p>
               )}
             </div>
 
@@ -800,10 +874,15 @@ function LockerRegistryPage() {
 
               <div className="space-y-2">
                 {historyDrawerLocker.history.map((h) => (
-                  <div key={h.id} className="p-3 rounded-xl border border-border bg-canvas text-xs space-y-0.5">
+                  <div
+                    key={h.id}
+                    className="p-3 rounded-xl border border-border bg-canvas text-xs space-y-0.5"
+                  >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-foreground">{h.action}</span>
-                      <span className="text-[10px] font-mono text-muted-foreground">{h.timestamp}</span>
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {h.timestamp}
+                      </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground">{h.details}</p>
                   </div>

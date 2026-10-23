@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { X, Settings as SettingsIcon, Building, ShieldCheck, MessageSquare, Tag } from "lucide-react";
+import {
+  X,
+  Settings as SettingsIcon,
+  Building,
+  ShieldCheck,
+  MessageSquare,
+  Tag,
+} from "lucide-react";
 import { useGymStore } from "../lib/gym-store";
 import { toast } from "sonner";
 
@@ -191,7 +198,11 @@ export function SettingsModal() {
                 {[
                   { name: "Karan Johar", role: "Owner / Admin", email: "karan@ironhouse.com" },
                   { name: "Siddharth Malhotra", role: "Head Trainer", email: "sid@ironhouse.com" },
-                  { name: "Ananya Panday", role: "Front Desk Manager", email: "ananya@ironhouse.com" },
+                  {
+                    name: "Ananya Panday",
+                    role: "Front Desk Manager",
+                    email: "ananya@ironhouse.com",
+                  },
                 ].map((s) => (
                   <div key={s.email} className="flex items-center justify-between p-3">
                     <div>
@@ -227,7 +238,9 @@ export function SettingsModal() {
                   className="w-full rounded-md border border-border bg-canvas px-3 py-2 outline-none focus:border-emerald text-xs font-mono"
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Available tags: <code className="bg-muted px-1 rounded">&#123;name&#125;</code>, <code className="bg-muted px-1 rounded">&#123;reason&#125;</code>, <code className="bg-muted px-1 rounded">&#123;due&#125;</code>
+                  Available tags: <code className="bg-muted px-1 rounded">&#123;name&#125;</code>,{" "}
+                  <code className="bg-muted px-1 rounded">&#123;reason&#125;</code>,{" "}
+                  <code className="bg-muted px-1 rounded">&#123;due&#125;</code>
                 </p>
               </div>
 
@@ -265,18 +278,27 @@ export function SettingsModal() {
             <form onSubmit={handleSavePlans} className="space-y-4">
               <div className="space-y-3">
                 {plans.map((p, idx) => (
-                  <div key={p.id} className="flex items-center justify-between rounded-lg border border-border bg-canvas p-3">
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between rounded-lg border border-border bg-canvas p-3"
+                  >
                     <div>
                       <p className="font-medium">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{p.durationMonths} month duration</p>
+                      <p className="text-xs text-muted-foreground">
+                        {p.durationMonths} month duration
+                      </p>
                     </div>
                     <div className="flex items-center gap-1 font-mono">
-                      <span className="text-xs text-muted-foreground">{settings.currencySymbol}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {settings.currencySymbol}
+                      </span>
                       <input
                         type="number"
                         min="0"
                         value={p.price}
-                        onChange={(e) => handlePlanPriceChange(idx, parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          handlePlanPriceChange(idx, parseFloat(e.target.value) || 0)
+                        }
                         className="w-24 rounded border border-border bg-surface px-2 py-1 text-right text-sm font-semibold outline-none focus:border-emerald"
                       />
                     </div>

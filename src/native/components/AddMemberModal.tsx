@@ -12,13 +12,7 @@ import {
 import { useGymStore } from "../gym-store";
 
 export function AddMemberModal() {
-  const {
-    isAddMemberOpen,
-    setIsAddMemberOpen,
-    addMember,
-    settings,
-    theme,
-  } = useGymStore();
+  const { isAddMemberOpen, setIsAddMemberOpen, addMember, settings, theme } = useGymStore();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+91 ");
@@ -45,7 +39,8 @@ export function AddMemberModal() {
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const selectedPlan = settings.membershipPlans.find((p) => p.name === plan) || settings.membershipPlans[0];
+    const selectedPlan =
+      settings.membershipPlans.find((p) => p.name === plan) || settings.membershipPlans[0];
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + (selectedPlan ? selectedPlan.durationMonths : 1));
 
@@ -93,7 +88,10 @@ export function AddMemberModal() {
                 placeholderTextColor={textMuted}
                 value={name}
                 onChangeText={setName}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
             </View>
 
@@ -104,13 +102,20 @@ export function AddMemberModal() {
                 placeholderTextColor={textMuted}
                 value={phone}
                 onChangeText={setPhone}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
             </View>
 
             <View>
               <Text style={[styles.label, { color: textMuted }]}>Membership Plan</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: "row", marginTop: 4 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ flexDirection: "row", marginTop: 4 }}
+              >
                 {settings.membershipPlans.map((p) => (
                   <TouchableOpacity
                     key={p.id}
@@ -127,10 +132,7 @@ export function AddMemberModal() {
                     ]}
                   >
                     <Text
-                      style={[
-                        styles.planChipText,
-                        { color: plan === p.name ? bg : textMuted },
-                      ]}
+                      style={[styles.planChipText, { color: plan === p.name ? bg : textMuted }]}
                     >
                       {p.name} (₹{p.price})
                     </Text>
@@ -148,7 +150,10 @@ export function AddMemberModal() {
                   value={amountPaid}
                   onChangeText={setAmountPaid}
                   keyboardType="numeric"
-                  style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                  style={[
+                    styles.input,
+                    { backgroundColor: bg, borderColor: border, color: textPrimary },
+                  ]}
                 />
               </View>
 
@@ -160,7 +165,10 @@ export function AddMemberModal() {
                   value={due}
                   onChangeText={setDue}
                   keyboardType="numeric"
-                  style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                  style={[
+                    styles.input,
+                    { backgroundColor: bg, borderColor: border, color: textPrimary },
+                  ]}
                 />
               </View>
             </View>
@@ -180,10 +188,7 @@ export function AddMemberModal() {
                     ]}
                   >
                     <Text
-                      style={[
-                        styles.methodText,
-                        { color: paymentMethod === m ? bg : textMuted },
-                      ]}
+                      style={[styles.methodText, { color: paymentMethod === m ? bg : textMuted }]}
                     >
                       {m}
                     </Text>
@@ -199,7 +204,10 @@ export function AddMemberModal() {
                 placeholderTextColor={textMuted}
                 value={notes}
                 onChangeText={setNotes}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
             </View>
 

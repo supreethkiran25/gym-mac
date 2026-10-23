@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
 import { useGymStore } from "../gym-store";
 
 export function DynamicUPIQRModal() {
@@ -39,20 +32,18 @@ export function DynamicUPIQRModal() {
           <View style={styles.amountBox}>
             <Text style={[styles.amountLabel, { color: textMuted }]}>Amount Payable</Text>
             <Text style={[styles.amountValue, { color: emerald }]}>
-              {settings.currencySymbol}{upiQRState.amount.toLocaleString("en-IN")}
+              {settings.currencySymbol}
+              {upiQRState.amount.toLocaleString("en-IN")}
             </Text>
             <Text style={[styles.description, { color: textMuted }]}>
-              {upiQRState.memberName ? `Payer: ${upiQRState.memberName} • ` : ""}{upiQRState.description}
+              {upiQRState.memberName ? `Payer: ${upiQRState.memberName} • ` : ""}
+              {upiQRState.description}
             </Text>
           </View>
 
           {/* QR Code Container */}
           <View style={styles.qrContainer}>
-            <Image
-              source={{ uri: qrImageUri }}
-              style={styles.qrImage}
-              resizeMode="contain"
-            />
+            <Image source={{ uri: qrImageUri }} style={styles.qrImage} resizeMode="contain" />
           </View>
 
           <Text style={[styles.upiIdText, { color: textMuted }]}>

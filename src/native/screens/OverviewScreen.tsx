@@ -1,15 +1,8 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from "react-native";
 import { useGymStore, Member } from "../gym-store";
 
-export function OverviewScreen({ navigation }: any) {
+export function OverviewScreen({ navigation }: { navigation?: unknown }) {
   const {
     members,
     leads,
@@ -34,15 +27,22 @@ export function OverviewScreen({ navigation }: any) {
   const pendingDuesTotal = members.reduce((sum, m) => sum + m.due, 0);
   const expiringSoonCount = members.filter((m) => m.status === "Expiring").length;
   const staffOnFloor = staff.filter((s) => s.status === "On Floor").length;
-  const atRiskMembers = members.filter((m) => m.attendanceRate < 70 || m.status === "Expired").slice(0, 3);
+  const atRiskMembers = members
+    .filter((m) => m.attendanceRate < 70 || m.status === "Expired")
+    .slice(0, 3);
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       {/* Header Bar */}
       <View style={styles.header}>
         <View>
           <Text style={[styles.gymName, { color: textPrimary }]}>{settings.name}</Text>
-          <Text style={[styles.gymSub, { color: textMuted }]}>{settings.location} • v6.0 Native</Text>
+          <Text style={[styles.gymSub, { color: textMuted }]}>
+            {settings.location} • v6.0 Native
+          </Text>
         </View>
         <TouchableOpacity
           onPress={() => openUPIQRModal(2800, "Walk-in Guest", "Flex Monthly Pass")}
@@ -59,14 +59,26 @@ export function OverviewScreen({ navigation }: any) {
             <View style={styles.pulseDot} />
             <Text style={[styles.cardTitle, { color: textPrimary }]}>Live Gym Floor Occupancy</Text>
           </View>
-          <Text style={[styles.capacityNumber, { color: emerald }]}>{insideMembers.length} / 80</Text>
+          <Text style={[styles.capacityNumber, { color: emerald }]}>
+            {insideMembers.length} / 80
+          </Text>
         </View>
         <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: `${Math.min(100, (insideMembers.length / 80) * 100)}%` }]} />
+          <View
+            style={[
+              styles.progressBarFill,
+              { width: `${Math.min(100, (insideMembers.length / 80) * 100)}%` },
+            ]}
+          />
         </View>
         <Text style={[styles.cardSubtitle, { color: textMuted }]}>
           {insideMembers.length > 0
-            ? `${insideMembers.map((m) => m.name).slice(0, 2).join(", ")}${insideMembers.length > 2 ? ` +${insideMembers.length - 2} others` : ""}`
+            ? `${insideMembers
+                .map((m) => m.name)
+                .slice(0, 2)
+                .join(
+                  ", ",
+                )}${insideMembers.length > 2 ? ` +${insideMembers.length - 2} others` : ""}`
             : "No occupants right now. Ready for evening rush."}
         </Text>
       </View>
@@ -99,7 +111,8 @@ export function OverviewScreen({ navigation }: any) {
         <View style={[styles.metricTile, { backgroundColor: surface, borderColor: border }]}>
           <Text style={[styles.metricLabel, { color: textMuted }]}>Pending Dues</Text>
           <Text style={[styles.metricValue, { color: "#f59e0b" }]}>
-            {settings.currencySymbol}{pendingDuesTotal.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {pendingDuesTotal.toLocaleString("en-IN")}
           </Text>
           <Text style={[styles.metricSub, { color: textMuted }]}>
             {members.filter((m) => m.due > 0).length} members
@@ -114,7 +127,9 @@ export function OverviewScreen({ navigation }: any) {
 
         <View style={[styles.metricTile, { backgroundColor: surface, borderColor: border }]}>
           <Text style={[styles.metricLabel, { color: textMuted }]}>Staff on Duty</Text>
-          <Text style={[styles.metricValue, { color: textPrimary }]}>{staffOnFloor} / {staff.length}</Text>
+          <Text style={[styles.metricValue, { color: textPrimary }]}>
+            {staffOnFloor} / {staff.length}
+          </Text>
           <Text style={[styles.metricSub, { color: emerald }]}>Shift active</Text>
         </View>
       </View>
@@ -123,7 +138,9 @@ export function OverviewScreen({ navigation }: any) {
       <View style={[styles.card, { backgroundColor: surface, borderColor: border }]}>
         <View style={styles.rowBetween}>
           <Text style={[styles.cardTitle, { color: textPrimary }]}>🔥 Retention & Churn Radar</Text>
-          <Text style={[styles.badgeText, { color: "#f59e0b" }]}>{atRiskMembers.length} Ghost Members</Text>
+          <Text style={[styles.badgeText, { color: "#f59e0b" }]}>
+            {atRiskMembers.length} Ghost Members
+          </Text>
         </View>
         <Text style={[styles.cardSubtitle, { color: textMuted }]}>
           Members with attendance &lt;70% or expired passes.

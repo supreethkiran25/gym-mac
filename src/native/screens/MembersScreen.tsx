@@ -23,7 +23,9 @@ export function MembersScreen() {
   } = useGymStore();
 
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Expiring" | "Pending Dues">("All");
+  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Expiring" | "Pending Dues">(
+    "All",
+  );
 
   const isDark = theme === "dark";
   const bg = isDark ? "#0f172a" : "#f8fafc";
@@ -48,14 +50,17 @@ export function MembersScreen() {
     const text = encodeURIComponent(
       m.due > 0
         ? `Hi ${m.name}, reminder from ${settings.name}: You have a pending balance of ${settings.currencySymbol}${m.due}. Kindly clear at the front desk.`
-        : `Hi ${m.name}, your membership at ${settings.name} for ${m.plan} is active. See you on the floor!`
+        : `Hi ${m.name}, your membership at ${settings.name} for ${m.plan} is active. See you on the floor!`,
     );
     const cleanPhone = m.phone.replace(/[^0-9]/g, "");
     Linking.openURL(`https://wa.me/${cleanPhone}?text=${text}`);
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       {/* Search Bar & Add Button */}
       <View style={styles.topBar}>
         <TextInput
@@ -63,7 +68,10 @@ export function MembersScreen() {
           placeholderTextColor={textMuted}
           value={search}
           onChangeText={setSearch}
-          style={[styles.searchInput, { backgroundColor: surface, borderColor: border, color: textPrimary }]}
+          style={[
+            styles.searchInput,
+            { backgroundColor: surface, borderColor: border, color: textPrimary },
+          ]}
         />
         <TouchableOpacity
           onPress={() => setIsAddMemberOpen(true)}
@@ -86,12 +94,7 @@ export function MembersScreen() {
                 : { backgroundColor: surface, borderColor: border, borderWidth: 1 },
             ]}
           >
-            <Text
-              style={[
-                styles.filterTabText,
-                { color: filterStatus === tab ? bg : textMuted },
-              ]}
-            >
+            <Text style={[styles.filterTabText, { color: filterStatus === tab ? bg : textMuted }]}>
               {tab}
             </Text>
           </TouchableOpacity>
@@ -112,7 +115,9 @@ export function MembersScreen() {
             >
               <View style={styles.cardHeader}>
                 <View style={styles.avatarRow}>
-                  <View style={[styles.avatar, { backgroundColor: isDark ? "#334155" : "#e2e8f0" }]}>
+                  <View
+                    style={[styles.avatar, { backgroundColor: isDark ? "#334155" : "#e2e8f0" }]}
+                  >
                     <Text style={[styles.avatarText, { color: textPrimary }]}>
                       {m.name.slice(0, 2).toUpperCase()}
                     </Text>
@@ -125,7 +130,9 @@ export function MembersScreen() {
 
                 <View style={styles.statusBadges}>
                   {isInside && (
-                    <View style={[styles.badge, { backgroundColor: isDark ? "#064e3b" : "#d1fae5" }]}>
+                    <View
+                      style={[styles.badge, { backgroundColor: isDark ? "#064e3b" : "#d1fae5" }]}
+                    >
                       <Text style={[styles.badgeLabel, { color: emerald }]}>Inside</Text>
                     </View>
                   )}
@@ -134,17 +141,16 @@ export function MembersScreen() {
                       styles.badge,
                       {
                         backgroundColor: isPending
-                          ? isDark ? "#451a03" : "#fef3c7"
-                          : isDark ? "#064e3b" : "#d1fae5",
+                          ? isDark
+                            ? "#451a03"
+                            : "#fef3c7"
+                          : isDark
+                            ? "#064e3b"
+                            : "#d1fae5",
                       },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.badgeLabel,
-                        { color: isPending ? "#f59e0b" : emerald },
-                      ]}
-                    >
+                    <Text style={[styles.badgeLabel, { color: isPending ? "#f59e0b" : emerald }]}>
                       {isPending ? `Due ₹${m.due}` : m.status}
                     </Text>
                   </View>
@@ -154,10 +160,13 @@ export function MembersScreen() {
               {/* Attendance and Phone info */}
               <View style={[styles.cardBody, { borderColor: border }]}>
                 <Text style={[styles.infoText, { color: textMuted }]}>
-                  📞 {m.phone} • Attendance: <Text style={{ color: textPrimary, fontWeight: "700" }}>{m.attendanceRate}%</Text>
+                  📞 {m.phone} • Attendance:{" "}
+                  <Text style={{ color: textPrimary, fontWeight: "700" }}>{m.attendanceRate}%</Text>
                 </Text>
                 <Text style={[styles.infoText, { color: textMuted }]}>
-                  Expires: <Text style={{ color: textPrimary, fontWeight: "600" }}>{m.endDate}</Text> • Visits: {m.totalVisitsThisMonth}/mo
+                  Expires:{" "}
+                  <Text style={{ color: textPrimary, fontWeight: "600" }}>{m.endDate}</Text> •
+                  Visits: {m.totalVisitsThisMonth}/mo
                 </Text>
               </View>
 
@@ -167,7 +176,15 @@ export function MembersScreen() {
                   onPress={() => (isInside ? checkOutMember(m.id) : checkInMember(m.id))}
                   style={[
                     styles.footerBtn,
-                    { backgroundColor: isInside ? (isDark ? "#451a03" : "#fee2e2") : (isDark ? "#064e3b" : "#d1fae5") },
+                    {
+                      backgroundColor: isInside
+                        ? isDark
+                          ? "#451a03"
+                          : "#fee2e2"
+                        : isDark
+                          ? "#064e3b"
+                          : "#d1fae5",
+                    },
                   ]}
                 >
                   <Text style={[styles.footerBtnText, { color: isInside ? "#ef4444" : emerald }]}>
@@ -177,14 +194,20 @@ export function MembersScreen() {
 
                 <TouchableOpacity
                   onPress={() => handleWhatsAppNudge(m)}
-                  style={[styles.footerBtn, { backgroundColor: surface, borderColor: border, borderWidth: 1 }]}
+                  style={[
+                    styles.footerBtn,
+                    { backgroundColor: surface, borderColor: border, borderWidth: 1 },
+                  ]}
                 >
                   <Text style={[styles.footerBtnText, { color: textPrimary }]}>💬 WhatsApp</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => setSelectedMember360(m)}
-                  style={[styles.footerBtn, { backgroundColor: surface, borderColor: border, borderWidth: 1 }]}
+                  style={[
+                    styles.footerBtn,
+                    { backgroundColor: surface, borderColor: border, borderWidth: 1 },
+                  ]}
                 >
                   <Text style={[styles.footerBtnText, { color: emerald }]}>Profile 360 →</Text>
                 </TouchableOpacity>

@@ -51,7 +51,11 @@ export function FreezeMemberModal() {
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-              {isAlreadyFrozen ? <PlayCircle className="h-5 w-5" /> : <PauseCircle className="h-5 w-5" />}
+              {isAlreadyFrozen ? (
+                <PlayCircle className="h-5 w-5" />
+              ) : (
+                <PauseCircle className="h-5 w-5" />
+              )}
             </div>
             <div>
               <h3 className="text-base font-bold text-foreground">
@@ -60,7 +64,10 @@ export function FreezeMemberModal() {
               <p className="text-xs text-muted-foreground">{selectedMemberForFreeze.name}</p>
             </div>
           </div>
-          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-muted text-muted-foreground">
+          <button
+            onClick={handleClose}
+            className="p-1 rounded-lg hover:bg-muted text-muted-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>

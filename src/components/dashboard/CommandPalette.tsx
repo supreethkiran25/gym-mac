@@ -72,7 +72,7 @@ export function CommandPalette() {
         (m) =>
           m.name.toLowerCase().includes(q) ||
           m.phone.includes(q) ||
-          m.plan.toLowerCase().includes(q)
+          m.plan.toLowerCase().includes(q),
       )
     : [];
 
@@ -81,15 +81,13 @@ export function CommandPalette() {
         (s) =>
           s.name.toLowerCase().includes(q) ||
           s.role.toLowerCase().includes(q) ||
-          s.phone.includes(q)
+          s.phone.includes(q),
       )
     : [];
 
   const matchingPlans = q
     ? settings.membershipPlans.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.type.toLowerCase().includes(q)
+        (p) => p.name.toLowerCase().includes(q) || p.type.toLowerCase().includes(q),
       )
     : [];
 
@@ -98,7 +96,7 @@ export function CommandPalette() {
         (l) =>
           l.number.toString().includes(q) ||
           l.assignedMemberName?.toLowerCase().includes(q) ||
-          l.status.toLowerCase().includes(q)
+          l.status.toLowerCase().includes(q),
       )
     : [];
 
@@ -107,15 +105,13 @@ export function CommandPalette() {
         (w) =>
           w.title.toLowerCase().includes(q) ||
           w.category.toLowerCase().includes(q) ||
-          w.focus.toLowerCase().includes(q)
+          w.focus.toLowerCase().includes(q),
       )
     : [];
 
   const matchingDiets = q
     ? dietPlans.filter(
-        (d) =>
-          d.title.toLowerCase().includes(q) ||
-          d.category.toLowerCase().includes(q)
+        (d) => d.title.toLowerCase().includes(q) || d.category.toLowerCase().includes(q),
       )
     : [];
 
@@ -124,7 +120,7 @@ export function CommandPalette() {
         (l) =>
           l.name.toLowerCase().includes(q) ||
           l.phone.includes(q) ||
-          l.fitnessGoal.toLowerCase().includes(q)
+          l.fitnessGoal.toLowerCase().includes(q),
       )
     : [];
 
@@ -203,16 +199,22 @@ export function CommandPalette() {
               <button
                 onClick={() =>
                   handleAction(() => {
-                    openUPIQRModal(settings.membershipPlans[0]?.price || 3000, "Walk-in Member", "Monthly Flex");
+                    openUPIQRModal(
+                      settings.membershipPlans[0]?.price || 3000,
+                      "Walk-in Member",
+                      "Monthly Flex",
+                    );
                   })
                 }
                 className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-muted transition text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <QrCode className="h-4 w-4 text-emerald" />
+                  <QrCode className="h-4 w-4 text-brand" />
                   <span className="font-semibold">Display Dynamic UPI QR Code</span>
                 </div>
-                <span className="text-[11px] text-muted-foreground">Instant counter collection</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Instant counter collection
+                </span>
               </button>
 
               <button
@@ -224,8 +226,14 @@ export function CommandPalette() {
                 className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-muted transition text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  {theme === "dark" ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4" />}
-                  <span className="font-semibold">Toggle Appearance ({theme === "dark" ? "Light" : "Dark"} Mode)</span>
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4 text-amber-500" />
+                  ) : (
+                    <Moon className="h-4 w-4" />
+                  )}
+                  <span className="font-semibold">
+                    Toggle Appearance ({theme === "dark" ? "Light" : "Dark"} Mode)
+                  </span>
                 </div>
               </button>
             </div>
@@ -254,7 +262,7 @@ export function CommandPalette() {
                   key={link.to}
                   onClick={() =>
                     handleAction(() => {
-                      navigate({ to: link.to as any });
+                      navigate({ to: link.to as never });
                     })
                   }
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-muted transition text-foreground"
@@ -285,9 +293,11 @@ export function CommandPalette() {
                     className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-muted transition text-foreground"
                   >
                     <div className="flex items-center gap-2">
-                      <Users className="h-3.5 w-3.5 text-emerald" />
+                      <Users className="h-3.5 w-3.5 text-brand" />
                       <span className="font-semibold">{m.name}</span>
-                      <span className="text-[11px] text-muted-foreground">({m.phone} • {m.plan})</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        ({m.phone} • {m.plan})
+                      </span>
                     </div>
                     <span className="text-[10px] font-mono text-muted-foreground">
                       {m.due > 0 ? `Due: ₹${m.due}` : "Active"}
@@ -316,7 +326,7 @@ export function CommandPalette() {
                     className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-muted transition text-foreground"
                   >
                     <div className="flex items-center gap-2">
-                      <KeyRound className="h-3.5 w-3.5 text-purple-500" />
+                      <KeyRound className="h-3.5 w-3.5 text-brand" />
                       <span className="font-semibold">Locker #{l.number}</span>
                       <span className="text-[11px] text-muted-foreground">({l.section})</span>
                     </div>
@@ -345,10 +355,12 @@ export function CommandPalette() {
                     className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-muted transition text-foreground"
                   >
                     <div className="flex items-center gap-2">
-                      <Dumbbell className="h-3.5 w-3.5 text-emerald" />
+                      <Dumbbell className="h-3.5 w-3.5 text-brand" />
                       <span className="font-semibold">{w.title}</span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-mono">{w.category}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {w.category}
+                    </span>
                   </button>
                 ))}
               </div>

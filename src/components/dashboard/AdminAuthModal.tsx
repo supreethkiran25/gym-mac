@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Lock, ShieldAlert, KeyRound, Eye, EyeOff, X, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Lock,
+  ShieldAlert,
+  KeyRound,
+  Eye,
+  EyeOff,
+  X,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 import { useGymStore } from "../../lib/gym-store";
 
 export const AdminAuthModal: React.FC = () => {
-  const { isAdminAuthModalOpen, setIsAdminAuthModalOpen, verifyAndSwitchToAdmin, settings } = useGymStore();
+  const { isAdminAuthModalOpen, setIsAdminAuthModalOpen, verifyAndSwitchToAdmin, settings } =
+    useGymStore();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -53,12 +63,12 @@ export const AdminAuthModal: React.FC = () => {
       <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border/80 bg-card/95 p-6 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
         {/* Glow Accent */}
         <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-brand/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-brand/15 blur-3xl pointer-events-none" />
 
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shadow-inner">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft border border-brand/30 text-brand shadow-inner">
               <Lock className="h-6 w-6" />
             </div>
             <div>
@@ -79,12 +89,13 @@ export const AdminAuthModal: React.FC = () => {
         </div>
 
         {/* Security Notice */}
-        <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-300 flex items-start gap-2.5">
-          <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
+        <div className="mt-4 rounded-xl border border-brand/20 bg-brand-soft p-3 text-xs text-brand flex items-start gap-2.5">
+          <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-brand" />
           <div className="leading-relaxed">
-            <p className="font-semibold text-amber-200">Director Privilege Gate</p>
+            <p className="font-semibold text-foreground">Director Privilege Gate</p>
             <p className="text-muted-foreground/90 mt-0.5">
-              Reception mode restricts access to financial metrics, staff payroll, and plan pricing. Entering the Admin password unlocks full director capabilities.
+              Reception mode restricts access to financial metrics, staff payroll, and plan pricing.
+              Entering the Admin password unlocks full director capabilities.
             </p>
           </div>
         </div>
@@ -139,7 +150,7 @@ export const AdminAuthModal: React.FC = () => {
             )}
 
             {isSuccess && (
-              <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+              <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-brand">
                 <CheckCircle2 className="h-4 w-4" />
                 Authentication successful! Switching to Admin...
               </div>

@@ -45,8 +45,8 @@ export const PlanEditorModal: React.FC<PlanEditorModalProps> = ({
       setPerks(planToEdit.perks || []);
       setIsTopSeller(
         planToEdit.type === "VIP Pass" ||
-        planToEdit.name.toLowerCase().includes("vip") ||
-        planToEdit.name.toLowerCase().includes("pro")
+          planToEdit.name.toLowerCase().includes("vip") ||
+          planToEdit.name.toLowerCase().includes("pro"),
       );
     } else {
       setName("");
@@ -243,7 +243,8 @@ export const PlanEditorModal: React.FC<PlanEditorModalProps> = ({
                 />
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground font-mono">
-                ~ {settings.currencySymbol}{Math.round(price / Math.max(1, durationMonths)).toLocaleString("en-IN")}/month
+                ~ {settings.currencySymbol}
+                {Math.round(price / Math.max(1, durationMonths)).toLocaleString("en-IN")}/month
               </p>
             </div>
           </div>
@@ -256,7 +257,9 @@ export const PlanEditorModal: React.FC<PlanEditorModalProps> = ({
               </div>
               <div>
                 <p className="text-xs font-bold text-foreground">Featured / Popular Tier</p>
-                <p className="text-[11px] text-muted-foreground">Highlights plan card with glow and 'Featured Tier' badge</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Highlights plan card with glow and 'Featured Tier' badge
+                </p>
               </div>
             </div>
             <input
@@ -275,7 +278,9 @@ export const PlanEditorModal: React.FC<PlanEditorModalProps> = ({
                 <Award className="h-3.5 w-3.5 text-brand" />
                 Included Perks & Privileges ({perks.length})
               </span>
-              <span className="text-[11px] text-muted-foreground">Displayed on membership comparison cards</span>
+              <span className="text-[11px] text-muted-foreground">
+                Displayed on membership comparison cards
+              </span>
             </label>
 
             {/* Current Perks List */}
@@ -336,17 +341,19 @@ export const PlanEditorModal: React.FC<PlanEditorModalProps> = ({
                 Quick Suggestions:
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {COMMON_PERKS_SUGGESTIONS.filter((s) => !perks.includes(s)).slice(0, 5).map((sug, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => handleAddPerk(sug)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-card/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:border-brand hover:text-foreground transition-colors"
-                  >
-                    <Plus className="h-2.5 w-2.5 text-brand" />
-                    {sug}
-                  </button>
-                ))}
+                {COMMON_PERKS_SUGGESTIONS.filter((s) => !perks.includes(s))
+                  .slice(0, 5)
+                  .map((sug, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleAddPerk(sug)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-card/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:border-brand hover:text-foreground transition-colors"
+                    >
+                      <Plus className="h-2.5 w-2.5 text-brand" />
+                      {sug}
+                    </button>
+                  ))}
               </div>
             </div>
           </div>

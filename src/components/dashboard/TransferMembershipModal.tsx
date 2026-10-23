@@ -37,7 +37,7 @@ export function TransferMembershipModal() {
       selectedMemberForTransfer.id,
       toName.trim(),
       toPhone.trim(),
-      toEmail.trim() || `${toName.toLowerCase().replace(/\s+/g, ".")}@gmail.com`
+      toEmail.trim() || `${toName.toLowerCase().replace(/\s+/g, ".")}@gmail.com`,
     );
     toast.success(`Successfully transferred membership to ${toName}!`);
     handleClose();
@@ -55,19 +55,22 @@ export function TransferMembershipModal() {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-soft text-brand border border-brand/20">
               <ArrowRightLeft className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-soft text-brand border border-brand/20">
                   Admin Authorized
                 </span>
               </div>
               <h3 className="text-base font-bold text-foreground mt-0.5">Transfer Membership</h3>
             </div>
           </div>
-          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-muted text-muted-foreground">
+          <button
+            onClick={handleClose}
+            className="p-1 rounded-lg hover:bg-muted text-muted-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -125,9 +128,10 @@ export function TransferMembershipModal() {
             />
           </div>
 
-          <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] leading-tight">
-            Original member's account will be marked as Transferred/Expired, and a new active account with the same
-            validity date ({selectedMemberForTransfer.expiry}) will be created for the recipient.
+          <div className="p-3 rounded-2xl bg-muted/40 border border-border text-muted-foreground text-[11px] leading-tight">
+            Original member's account will be marked as Transferred/Expired, and a new active
+            account with the same validity date ({selectedMemberForTransfer.expiry}) will be created
+            for the recipient.
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
@@ -140,7 +144,7 @@ export function TransferMembershipModal() {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition shadow-md"
+              className="px-5 py-2 rounded-xl bg-brand hover:bg-brand/90 text-white font-bold text-xs transition shadow-md"
             >
               Confirm Transfer
             </button>

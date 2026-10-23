@@ -140,7 +140,8 @@ export function WorkflowStepper({ forcedRole }: WorkflowStepperProps) {
       icon: RotateCw,
       href: "/dashboard/renewals",
       action: () => {
-        const expiring = members.find((m) => m.status === "Expiring" || m.status === "Expired") || members[0];
+        const expiring =
+          members.find((m) => m.status === "Expiring" || m.status === "Expired") || members[0];
         if (expiring) {
           setSelectedMemberForRenewal(expiring);
           setIsRenewModalOpen(true);
@@ -175,7 +176,9 @@ export function WorkflowStepper({ forcedRole }: WorkflowStepperProps) {
         <div className="flex items-center gap-2.5">
           <div
             className={`grid h-7 w-7 place-items-center rounded-xl text-brand-foreground font-bold text-xs ${
-              isAdmin ? "bg-brand shadow-brand/30 shadow-md" : "bg-emerald-600 shadow-emerald-500/30 shadow-md"
+              isAdmin
+                ? "bg-brand shadow-brand/30 shadow-md"
+                : "bg-emerald-600 shadow-emerald-500/30 shadow-md"
             }`}
           >
             <ShieldCheck className="h-4 w-4" />
@@ -240,7 +243,9 @@ export function WorkflowStepper({ forcedRole }: WorkflowStepperProps) {
                 <div className="text-xs font-bold text-foreground leading-snug group-hover:text-foreground">
                   {step.name}
                 </div>
-                <div className="text-[10px] text-muted-foreground leading-tight line-clamp-1">{step.desc}</div>
+                <div className="text-[10px] text-muted-foreground leading-tight line-clamp-1">
+                  {step.desc}
+                </div>
               </div>
 
               {/* Action indicator arrow */}

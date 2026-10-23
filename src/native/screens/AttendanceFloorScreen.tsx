@@ -1,21 +1,9 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useGymStore } from "../gym-store";
 
 export function AttendanceFloorScreen() {
-  const {
-    members,
-    checkInMember,
-    checkOutMember,
-    setIsCheckInOpen,
-    theme,
-  } = useGymStore();
+  const { members, checkInMember, checkOutMember, setIsCheckInOpen, theme } = useGymStore();
 
   const isDark = theme === "dark";
   const bg = isDark ? "#0f172a" : "#f8fafc";
@@ -29,12 +17,17 @@ export function AttendanceFloorScreen() {
   const outsideMembers = members.filter((m) => !m.isCurrentlyInside);
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       {/* Live Floor Status Header */}
       <View style={[styles.heroCard, { backgroundColor: surface, borderColor: border }]}>
         <View style={styles.rowBetween}>
           <View>
-            <Text style={[styles.heroTitle, { color: textPrimary }]}>Floor Occupancy & Heatmap</Text>
+            <Text style={[styles.heroTitle, { color: textPrimary }]}>
+              Floor Occupancy & Heatmap
+            </Text>
             <Text style={[styles.heroSub, { color: textMuted }]}>
               Real-time RFID & front-desk turnstile access
             </Text>
@@ -80,7 +73,8 @@ export function AttendanceFloorScreen() {
                   <View>
                     <Text style={[styles.name, { color: textPrimary }]}>{m.name}</Text>
                     <Text style={[styles.sub, { color: textMuted }]}>
-                      In since {m.checkInTime || "Morning"} • {m.assignedWorkout || "Push-Pull-Legs"}
+                      In since {m.checkInTime || "Morning"} •{" "}
+                      {m.assignedWorkout || "Push-Pull-Legs"}
                     </Text>
                   </View>
                 </View>
@@ -117,7 +111,9 @@ export function AttendanceFloorScreen() {
             >
               <View>
                 <Text style={[styles.name, { color: textPrimary }]}>{m.name}</Text>
-                <Text style={[styles.sub, { color: textMuted }]}>{m.plan} • {m.phone}</Text>
+                <Text style={[styles.sub, { color: textMuted }]}>
+                  {m.plan} • {m.phone}
+                </Text>
               </View>
 
               <TouchableOpacity

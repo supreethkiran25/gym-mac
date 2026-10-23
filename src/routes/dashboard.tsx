@@ -150,33 +150,39 @@ function DashboardLayout() {
   const insideMembersCount = members.filter((m) => m.isCurrentlyInside).length;
 
   return (
-    <div className="flex min-h-screen w-full bg-canvas text-foreground font-sans selection:bg-brand selection:text-brand-foreground">
-      {/* Sleek Enterprise Navigation Rail (Gymforce / Calyxo Style) */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border bg-sidebar select-none print:hidden">
+    <div className="relative flex min-h-screen w-full bg-[#06080d] text-foreground font-sans selection:bg-sky-500/30 selection:text-white">
+      {/* Ambient Sky-Blue Mesh Lights for Glassmorphism Depth */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-20 right-0 w-[550px] h-[550px] rounded-full bg-gradient-to-b from-sky-500/12 to-transparent blur-[140px]" />
+        <div className="absolute bottom-0 left-64 w-[650px] h-[650px] rounded-full bg-gradient-to-tr from-sky-600/08 to-transparent blur-[160px]" />
+      </div>
+
+      {/* Sleek Enterprise Glassmorphic Navigation Rail */}
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-white/6 bg-black/40 backdrop-blur-2xl select-none print:hidden relative z-20">
         {/* Brand Header */}
-        <div className="border-b border-border px-5 py-5">
+        <div className="border-b border-white/6 px-5 py-5">
           <div className="flex items-center gap-3">
             {settings.logoUrl ? (
               <img
                 src={settings.logoUrl}
                 alt={settings.name}
-                className="h-9 w-9 rounded-xl object-cover border border-brand/30 shadow-xs shrink-0"
+                className="h-9 w-9 rounded-xl object-cover border border-sky-500/30 shadow-[0_0_15px_rgba(56,189,248,0.2)] shrink-0"
               />
             ) : (
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground font-heading font-black text-sm shadow-xs shrink-0">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-sky-500 to-sky-300 text-black font-heading font-extrabold text-sm shadow-[0_0_20px_rgba(56,189,248,0.35)] shrink-0">
                 PR
               </div>
             )}
             <div className="leading-tight overflow-hidden flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <h1 className="text-sm font-heading font-black tracking-wider uppercase text-foreground">
+                <h1 className="text-sm font-heading font-extrabold tracking-wider uppercase text-white">
                   PEAKREP
                 </h1>
-                <span className="text-[9px] font-heading uppercase font-extrabold px-2 py-0.5 rounded-full bg-brand-soft text-brand border border-brand/20">
+                <span className="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded-full gradient-sky-pill">
                   {isAdmin ? "Admin" : "Recep"}
                 </span>
               </div>
-              <p className="text-[11px] text-muted-foreground truncate font-medium mt-0.5">
+              <p className="text-xs text-slate-300 truncate font-normal mt-0.5">
                 {settings.name}
               </p>
             </div>
@@ -191,7 +197,7 @@ function DashboardLayout() {
 
             return (
               <div key={group.group} className="space-y-1">
-                <div className="px-3 pb-1 text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground/70">
+                <div className="px-3 pb-1 text-[11px] font-mono font-medium uppercase tracking-wider text-slate-400">
                   {group.group}
                 </div>
 
@@ -205,16 +211,18 @@ function DashboardLayout() {
                     <Link
                       key={item.to}
                       to={item.to}
-                      className={`group flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                      className={`group flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-medium transition ${
                         isActive
-                          ? "bg-brand-soft text-brand border border-brand/30 shadow-xs font-bold"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border border-transparent"
+                          ? "bg-sky-500/15 text-sky-300 border border-sky-400/30 shadow-[0_0_15px_rgba(56,189,248,0.2)] font-semibold"
+                          : "text-slate-300 hover:bg-white/8 hover:text-white border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
                           className={`h-4 w-4 shrink-0 transition-transform ${
-                            isActive ? "text-brand scale-105" : "text-muted-foreground group-hover:text-foreground"
+                            isActive
+                              ? "text-sky-400 scale-105"
+                              : "text-slate-400 group-hover:text-white"
                           }`}
                         />
                         <span className="truncate">{item.label}</span>
@@ -224,7 +232,9 @@ function DashboardLayout() {
                         {item.to === "/dashboard/checkin" && insideMembersCount > 0 && (
                           <span
                             className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                              isActive ? "bg-brand text-brand-foreground" : "bg-emerald-500/20 text-emerald"
+                              isActive
+                                ? "bg-brand text-brand-foreground"
+                                : "bg-brand-soft text-brand"
                             }`}
                           >
                             {insideMembersCount}
@@ -234,7 +244,9 @@ function DashboardLayout() {
                         {item.to === "/dashboard/renewals" && expiringMembersCount > 0 && (
                           <span
                             className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                              isActive ? "bg-brand text-brand-foreground" : "bg-amber-500/20 text-amber-500"
+                              isActive
+                                ? "bg-brand text-brand-foreground"
+                                : "bg-brand-soft text-brand"
                             }`}
                           >
                             {expiringMembersCount}
@@ -244,7 +256,9 @@ function DashboardLayout() {
                         {item.to === "/dashboard/members" && pendingDuesCount > 0 && (
                           <span
                             className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                              isActive ? "bg-brand text-brand-foreground" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                              isActive
+                                ? "bg-brand text-brand-foreground"
+                                : "bg-muted text-foreground border border-border"
                             }`}
                           >
                             {pendingDuesCount}
@@ -254,7 +268,9 @@ function DashboardLayout() {
                         {item.to === "/dashboard/leads" && activeLeadsCount > 0 && (
                           <span
                             className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                              isActive ? "bg-brand text-brand-foreground" : "bg-brand-soft text-brand"
+                              isActive
+                                ? "bg-brand text-brand-foreground"
+                                : "bg-brand-soft text-brand"
                             }`}
                           >
                             {activeLeadsCount}
@@ -278,13 +294,15 @@ function DashboardLayout() {
               </div>
               <div className="leading-tight truncate">
                 <p className="text-xs font-bold text-foreground truncate">{currentUser.name}</p>
-                <p className="text-[10px] text-brand uppercase font-extrabold tracking-wider">{currentUser.role}</p>
+                <p className="text-[10px] text-brand uppercase font-extrabold tracking-wider">
+                  {currentUser.role}
+                </p>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="p-2 rounded-xl border border-border bg-canvas hover:bg-rose-500/10 hover:border-rose-500/30 text-muted-foreground hover:text-rose-500 transition shrink-0"
+              className="p-2 rounded-xl border border-border bg-canvas hover:bg-muted hover:border-border text-muted-foreground hover:text-foreground transition shrink-0"
               title="Log Out Session"
             >
               <LogOut className="h-4 w-4" />
@@ -298,7 +316,11 @@ function DashboardLayout() {
               className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition"
               title="Toggle Theme"
             >
-              {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-slate-700" />
+              )}
             </button>
 
             <button
@@ -345,7 +367,9 @@ function DashboardLayout() {
                   </div>
                 )}
                 <div>
-                  <h2 className="text-sm font-heading font-black tracking-wider uppercase text-foreground">PEAKREP</h2>
+                  <h2 className="text-sm font-heading font-black tracking-wider uppercase text-foreground">
+                    PEAKREP
+                  </h2>
                   <p className="text-[11px] text-muted-foreground truncate">{settings.name}</p>
                 </div>
               </div>
@@ -400,12 +424,12 @@ function DashboardLayout() {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0 pb-16 md:pb-0">
         {/* Redesigned Universal Top Header */}
-        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface/90 px-4 md:px-8 backdrop-blur-md print:hidden">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-white/6 bg-black/40 px-4 md:px-8 backdrop-blur-xl print:hidden">
           {/* Header Left: Menu Toggle + PEAKREP Title & Dynamic Gym Name */}
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => setMobileDrawerOpen(true)}
-              className="lg:hidden p-2 rounded-xl border border-border bg-canvas text-muted-foreground hover:text-foreground"
+              className="lg:hidden p-2 rounded-xl glass-button-secondary text-zinc-400 hover:text-white"
               aria-label="Open mobile menu"
             >
               <Menu className="h-5 w-5" />
@@ -414,11 +438,11 @@ function DashboardLayout() {
             {/* Universal Search & Command Palette Trigger */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className="flex items-center gap-2.5 rounded-xl border border-border bg-canvas px-3.5 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-brand/40 transition w-56 lg:w-72 text-left"
+              className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] border border-white/8 px-3.5 py-2 text-xs text-zinc-400 hover:text-white hover:border-sky-500/40 hover:bg-white/[0.07] transition w-56 lg:w-72 text-left shadow-xs"
             >
-              <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <Search className="h-3.5 w-3.5 shrink-0 text-sky-400" />
               <span className="truncate">Search members, actions...</span>
-              <kbd className="ml-auto inline-flex items-center gap-0.5 text-[10px] font-mono bg-surface px-1.5 py-0.5 rounded border border-border">
+              <kbd className="ml-auto inline-flex items-center gap-0.5 text-[10px] font-mono bg-black/50 px-1.5 py-0.5 rounded border border-white/10 text-zinc-400">
                 ⌘K
               </kbd>
             </button>
@@ -468,7 +492,7 @@ function DashboardLayout() {
                       <Link
                         to="/dashboard/payments"
                         onClick={() => setNotificationsOpen(false)}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-brand-soft border border-brand/20 text-brand hover:bg-brand/20 transition"
                       >
                         <span>{pendingDuesCount} member(s) with pending dues</span>
                         <span className="font-bold">Review →</span>
@@ -478,7 +502,7 @@ function DashboardLayout() {
                       <Link
                         to="/dashboard/renewals"
                         onClick={() => setNotificationsOpen(false)}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-muted border border-border text-foreground hover:bg-muted/80 transition"
                       >
                         <span>{expiringMembersCount} membership(s) expiring soon</span>
                         <span className="font-bold">Renew →</span>

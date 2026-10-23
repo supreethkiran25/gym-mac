@@ -62,7 +62,9 @@ function StaffManager() {
 
   // Salary Disbursement Modal State
   const [salaryTargetStaff, setSalaryTargetStaff] = useState<StaffMember | null>(null);
-  const [salaryMethod, setSalaryMethod] = useState<"UPI" | "Bank Transfer" | "Cash" | "Cheque">("Bank Transfer");
+  const [salaryMethod, setSalaryMethod] = useState<"UPI" | "Bank Transfer" | "Cash" | "Cheque">(
+    "Bank Transfer",
+  );
   const [salaryBonus, setSalaryBonus] = useState("0");
   const [salaryDeduction, setSalaryDeduction] = useState("0");
   const [salaryNotes, setSalaryNotes] = useState("");
@@ -78,7 +80,9 @@ function StaffManager() {
 
   // Form Fields
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"Head Coach" | "Personal Trainer" | "Nutritionist" | "Front Desk Manager" | "Floor Trainer">("Personal Trainer");
+  const [role, setRole] = useState<
+    "Head Coach" | "Personal Trainer" | "Nutritionist" | "Front Desk Manager" | "Floor Trainer"
+  >("Personal Trainer");
   const [phone, setPhone] = useState("+91 ");
   const [email, setEmail] = useState("");
   const [salary, setSalary] = useState(45000);
@@ -88,10 +92,13 @@ function StaffManager() {
   // Payroll Analytics
   const totalMonthlyLiability = staff.reduce((sum, s) => sum + s.salary, 0);
   const currentMonthStr = new Date().toISOString().slice(0, 7); // "2026-05"
-  
+
   // Paid staff in current month
   const disbursedThisMonth = expenses
-    .filter((e) => e.category === "Staff Salary" && e.status === "Paid" && e.date.startsWith(currentMonthStr))
+    .filter(
+      (e) =>
+        e.category === "Staff Salary" && e.status === "Paid" && e.date.startsWith(currentMonthStr),
+    )
     .reduce((sum, e) => sum + e.amount, 0);
 
   const remainingPayroll = Math.max(0, totalMonthlyLiability - disbursedThisMonth);
@@ -186,11 +193,11 @@ function StaffManager() {
     payStaffSalary(
       salaryTargetStaff.id,
       salaryMethod,
-      salaryNotes.trim() || `Monthly Salary + Bonus: ₹${bonusNum} - Deductions: ₹${deductionNum}`
+      salaryNotes.trim() || `Monthly Salary + Bonus: ₹${bonusNum} - Deductions: ₹${deductionNum}`,
     );
 
     toast.success(
-      `Disbursed salary of ${settings.currencySymbol}${netSalary.toLocaleString("en-IN")} to ${salaryTargetStaff.name}! Recorded in Financial Outflow Ledger.`
+      `Disbursed salary of ${settings.currencySymbol}${netSalary.toLocaleString("en-IN")} to ${salaryTargetStaff.name}! Recorded in Financial Outflow Ledger.`,
     );
 
     const todayStr = new Date().toISOString().split("T")[0];
@@ -211,13 +218,16 @@ function StaffManager() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Staff & Payroll Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Staff & Payroll Management
+            </h1>
             <span className="rounded-full bg-emerald-500/20 text-emerald px-2.5 py-0.5 text-xs font-bold font-mono">
               {staff.filter((s) => s.status === "On Floor").length} On Floor Duty
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Manage trainers, front desk managers, shift rosters, 1-click salary disbursements, and automatic expense ledger logging.
+            Manage trainers, front desk managers, shift rosters, 1-click salary disbursements, and
+            automatic expense ledger logging.
           </p>
         </div>
 
@@ -235,13 +245,18 @@ function StaffManager() {
         {/* Total Monthly Liability */}
         <div className="rounded-3xl border border-border bg-surface p-5 space-y-2 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Monthly Payroll Liability</span>
+            <span className="text-xs font-semibold text-muted-foreground">
+              Monthly Payroll Liability
+            </span>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{totalMonthlyLiability.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {totalMonthlyLiability.toLocaleString("en-IN")}
           </p>
-          <p className="text-[11px] text-muted-foreground">Across {staff.length} registered staff members</p>
+          <p className="text-[11px] text-muted-foreground">
+            Across {staff.length} registered staff members
+          </p>
         </div>
 
         {/* Disbursed This Month */}
@@ -251,7 +266,8 @@ function StaffManager() {
             <CheckCircle2 className="h-4 w-4 text-emerald" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{disbursedThisMonth.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {disbursedThisMonth.toLocaleString("en-IN")}
           </p>
           <p className="text-[11px] text-muted-foreground">Logged as Operational Expense Outflow</p>
         </div>
@@ -259,11 +275,14 @@ function StaffManager() {
         {/* Remaining Payroll Balance */}
         <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-2 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Remaining Pending</span>
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+              Remaining Pending
+            </span>
             <Clock className="h-4 w-4 text-amber-500" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold font-mono text-foreground">
-            {settings.currencySymbol}{remainingPayroll.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {remainingPayroll.toLocaleString("en-IN")}
           </p>
           <p className="text-[11px] text-muted-foreground">Awaiting payroll clearance</p>
         </div>
@@ -295,7 +314,16 @@ function StaffManager() {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {(["All", "Head Coach", "Personal Trainer", "Nutritionist", "Front Desk Manager", "Floor Trainer"] as const).map((r) => (
+          {(
+            [
+              "All",
+              "Head Coach",
+              "Personal Trainer",
+              "Nutritionist",
+              "Front Desk Manager",
+              "Floor Trainer",
+            ] as const
+          ).map((r) => (
             <button
               key={r}
               onClick={() => setFilterRole(r)}
@@ -317,7 +345,8 @@ function StaffManager() {
           <Users className="h-10 w-10 text-muted-foreground mx-auto" />
           <h3 className="text-sm font-semibold text-foreground">No Staff Members Registered</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Add head coaches, personal trainers, and front desk managers to manage floor duty and payroll.
+            Add head coaches, personal trainers, and front desk managers to manage floor duty and
+            payroll.
           </p>
           <button
             onClick={handleOpenAdd}
@@ -350,10 +379,7 @@ function StaffManager() {
 
                     <button
                       onClick={() =>
-                        toggleStaffStatus(
-                          s.id,
-                          s.status === "On Floor" ? "Off Duty" : "On Floor"
-                        )
+                        toggleStaffStatus(s.id, s.status === "On Floor" ? "Off Duty" : "On Floor")
                       }
                       className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition ${
                         s.status === "On Floor"
@@ -371,7 +397,9 @@ function StaffManager() {
                       <span className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Shift:
                       </span>
-                      <span className="font-medium text-foreground truncate max-w-[170px]">{s.shift}</span>
+                      <span className="font-medium text-foreground truncate max-w-[170px]">
+                        {s.shift}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span className="flex items-center gap-1.5">
@@ -384,7 +412,8 @@ function StaffManager() {
                         <DollarSign className="h-3.5 w-3.5 text-muted-foreground" /> Monthly Salary:
                       </span>
                       <span className="font-bold text-foreground font-mono">
-                        {settings.currencySymbol}{s.salary.toLocaleString("en-IN")}
+                        {settings.currencySymbol}
+                        {s.salary.toLocaleString("en-IN")}
                       </span>
                     </div>
 
@@ -457,20 +486,25 @@ function StaffManager() {
             <form onSubmit={handleConfirmDisburseSalary} className="space-y-4 text-xs">
               <div className="rounded-2xl border border-border bg-surface p-3.5 space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-foreground text-sm">{salaryTargetStaff.name}</span>
+                  <span className="font-bold text-foreground text-sm">
+                    {salaryTargetStaff.name}
+                  </span>
                   <span className="text-brand font-semibold">{salaryTargetStaff.role}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Base Monthly Contract:</span>
                   <span className="font-mono font-bold text-foreground">
-                    {settings.currencySymbol}{salaryTargetStaff.salary.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {salaryTargetStaff.salary.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Performance Bonus ({settings.currencySymbol})</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Performance Bonus ({settings.currencySymbol})
+                  </label>
                   <input
                     type="number"
                     value={salaryBonus}
@@ -480,7 +514,9 @@ function StaffManager() {
                   />
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Leave Deductions ({settings.currencySymbol})</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Leave Deductions ({settings.currencySymbol})
+                  </label>
                   <input
                     type="number"
                     value={salaryDeduction}
@@ -492,10 +528,14 @@ function StaffManager() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Payment Method</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Payment Method
+                </label>
                 <select
                   value={salaryMethod}
-                  onChange={(e) => setSalaryMethod(e.target.value as any)}
+                  onChange={(e) =>
+                    setSalaryMethod(e.target.value as "Bank Transfer" | "UPI" | "Cash" | "Cheque")
+                  }
                   className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-foreground font-semibold outline-hidden focus:border-brand"
                 >
                   <option value="Bank Transfer">Bank Transfer / NEFT / IMPS</option>
@@ -506,7 +546,9 @@ function StaffManager() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Notes / Voucher Reference</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Notes / Voucher Reference
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. May 2026 Salary + PT Incentive"
@@ -521,11 +563,11 @@ function StaffManager() {
                 <span className="font-bold text-brand">Net Payout Amount:</span>
                 <span className="text-lg font-black font-mono text-foreground">
                   {settings.currencySymbol}
-                  {(
-                    Math.max(
-                      0,
-                      salaryTargetStaff.salary + (parseFloat(salaryBonus) || 0) - (parseFloat(salaryDeduction) || 0)
-                    )
+                  {Math.max(
+                    0,
+                    salaryTargetStaff.salary +
+                      (parseFloat(salaryBonus) || 0) -
+                      (parseFloat(salaryDeduction) || 0),
                   ).toLocaleString("en-IN")}
                 </span>
               </div>
@@ -557,7 +599,9 @@ function StaffManager() {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <FileCheck className="h-5 w-5 text-emerald" />
-                <h3 className="text-sm font-bold text-foreground">Staff Salary Disbursement Slip</h3>
+                <h3 className="text-sm font-bold text-foreground">
+                  Staff Salary Disbursement Slip
+                </h3>
               </div>
               <button
                 onClick={() => setViewSalarySlip(null)}
@@ -601,7 +645,8 @@ function StaffManager() {
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-center justify-between">
                 <span className="font-bold text-emerald">Total Net Salary Paid:</span>
                 <span className="font-black text-foreground text-lg">
-                  {settings.currencySymbol}{viewSalarySlip.amount.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {viewSalarySlip.amount.toLocaleString("en-IN")}
                 </span>
               </div>
 
@@ -651,7 +696,9 @@ function StaffManager() {
 
             <form onSubmit={handleSaveStaff} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Full Name *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Full Name *
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Marcus Vance"
@@ -664,10 +711,21 @@ function StaffManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Role / Designation</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Role / Designation
+                  </label>
                   <select
                     value={role}
-                    onChange={(e) => setRole(e.target.value as any)}
+                    onChange={(e) =>
+                      setRole(
+                        e.target.value as
+                          | "Head Coach"
+                          | "Personal Trainer"
+                          | "Nutritionist"
+                          | "Front Desk Manager"
+                          | "Floor Trainer",
+                      )
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-foreground outline-hidden focus:border-brand"
                   >
                     <option value="Head Coach">Head Coach</option>
@@ -678,7 +736,9 @@ function StaffManager() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Monthly Salary ({settings.currencySymbol}) *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Monthly Salary ({settings.currencySymbol}) *
+                  </label>
                   <input
                     type="number"
                     value={salary}
@@ -692,7 +752,9 @@ function StaffManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Phone Number</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Phone Number
+                  </label>
                   <input
                     type="text"
                     value={phone}
@@ -713,7 +775,9 @@ function StaffManager() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Assigned Shift Schedule</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Assigned Shift Schedule
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Morning 06:00 AM – 02:30 PM"

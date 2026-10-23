@@ -79,8 +79,24 @@ function WorkoutAndDietHub() {
       day: "Day 1: Upper Body Power",
       focus: "Chest, Back & Shoulders",
       exercises: [
-        { id: "ex-1", name: "Incline Dumbbell Press", sets: "4", reps: "8-10", weightTarget: "24 kg DBs", restTime: "90s", instructions: "Control the stretch at bottom." },
-        { id: "ex-2", name: "Barbell Bent Over Row", sets: "4", reps: "8-10", weightTarget: "60 kg", restTime: "90s", instructions: "Keep torso at 45 degrees." },
+        {
+          id: "ex-1",
+          name: "Incline Dumbbell Press",
+          sets: "4",
+          reps: "8-10",
+          weightTarget: "24 kg DBs",
+          restTime: "90s",
+          instructions: "Control the stretch at bottom.",
+        },
+        {
+          id: "ex-2",
+          name: "Barbell Bent Over Row",
+          sets: "4",
+          reps: "8-10",
+          weightTarget: "60 kg",
+          restTime: "90s",
+          instructions: "Keep torso at 45 degrees.",
+        },
       ],
     },
   ]);
@@ -95,9 +111,39 @@ function WorkoutAndDietHub() {
   const [dietCarbs, setDietCarbs] = useState(220);
   const [dietFats, setDietFats] = useState(60);
   const [dietMeals, setDietMeals] = useState<DietMeal[]>([
-    { time: "08:00 AM", name: "Breakfast", items: "3 Whole Eggs, 2 Toast, 1 Banana", quantity: "1 Plate", calories: 500, protein: 28, carbs: 48, fats: 18, instructions: "Drink 500ml water." },
-    { time: "01:30 PM", name: "Lunch", items: "150g Chicken / Paneer, 1 cup Brown Rice, Salad", quantity: "1 Bowl", calories: 650, protein: 48, carbs: 65, fats: 14, instructions: "Light olive oil." },
-    { time: "08:00 PM", name: "Dinner", items: "Grilled Fish / Tofu, Sauteed Veggies, 2 Roti", quantity: "1 Plate", calories: 550, protein: 40, carbs: 55, fats: 12, instructions: "Low sodium." },
+    {
+      time: "08:00 AM",
+      name: "Breakfast",
+      items: "3 Whole Eggs, 2 Toast, 1 Banana",
+      quantity: "1 Plate",
+      calories: 500,
+      protein: 28,
+      carbs: 48,
+      fats: 18,
+      instructions: "Drink 500ml water.",
+    },
+    {
+      time: "01:30 PM",
+      name: "Lunch",
+      items: "150g Chicken / Paneer, 1 cup Brown Rice, Salad",
+      quantity: "1 Bowl",
+      calories: 650,
+      protein: 48,
+      carbs: 65,
+      fats: 14,
+      instructions: "Light olive oil.",
+    },
+    {
+      time: "08:00 PM",
+      name: "Dinner",
+      items: "Grilled Fish / Tofu, Sauteed Veggies, 2 Roti",
+      quantity: "1 Plate",
+      calories: 550,
+      protein: 40,
+      carbs: 55,
+      fats: 12,
+      instructions: "Low sodium.",
+    },
   ]);
 
   // Handlers for Workout Builder
@@ -114,16 +160,48 @@ function WorkoutAndDietHub() {
         day: "Day 1: Upper Body Power",
         focus: "Chest, Back & Shoulders",
         exercises: [
-          { id: `ex-${Date.now()}-1`, name: "Incline Dumbbell Press", sets: "4", reps: "8-10", weightTarget: "24 kg DBs", restTime: "90s", instructions: "Full stretch at bottom." },
-          { id: `ex-${Date.now()}-2`, name: "Barbell Bent Over Row", sets: "4", reps: "8-10", weightTarget: "60 kg", restTime: "90s", instructions: "Squeeze scapulae." },
+          {
+            id: `ex-${Date.now()}-1`,
+            name: "Incline Dumbbell Press",
+            sets: "4",
+            reps: "8-10",
+            weightTarget: "24 kg DBs",
+            restTime: "90s",
+            instructions: "Full stretch at bottom.",
+          },
+          {
+            id: `ex-${Date.now()}-2`,
+            name: "Barbell Bent Over Row",
+            sets: "4",
+            reps: "8-10",
+            weightTarget: "60 kg",
+            restTime: "90s",
+            instructions: "Squeeze scapulae.",
+          },
         ],
       },
       {
         day: "Day 2: Lower Body & Core",
         focus: "Quads, Hamstrings & Glutes",
         exercises: [
-          { id: `ex-${Date.now()}-3`, name: "Barbell Back Squat", sets: "4", reps: "8-10", weightTarget: "80 kg", restTime: "120s", instructions: "Hit parallel depth." },
-          { id: `ex-${Date.now()}-4`, name: "Romanian Deadlift", sets: "3", reps: "10-12", weightTarget: "70 kg", restTime: "90s", instructions: "Hinge at hips." },
+          {
+            id: `ex-${Date.now()}-3`,
+            name: "Barbell Back Squat",
+            sets: "4",
+            reps: "8-10",
+            weightTarget: "80 kg",
+            restTime: "120s",
+            instructions: "Hit parallel depth.",
+          },
+          {
+            id: `ex-${Date.now()}-4`,
+            name: "Romanian Deadlift",
+            sets: "3",
+            reps: "10-12",
+            weightTarget: "70 kg",
+            restTime: "90s",
+            instructions: "Hinge at hips.",
+          },
         ],
       },
     ]);
@@ -180,7 +258,15 @@ function WorkoutAndDietHub() {
         day: `Day ${dayNum}: Specialized Focus`,
         focus: "Arms & Core",
         exercises: [
-          { id: `ex-${Date.now()}`, name: "Cable Bicep Curls", sets: "3", reps: "12-15", weightTarget: "15 kg", restTime: "60s", instructions: "Keep elbows pinned." },
+          {
+            id: `ex-${Date.now()}`,
+            name: "Cable Bicep Curls",
+            sets: "3",
+            reps: "12-15",
+            weightTarget: "15 kg",
+            restTime: "60s",
+            instructions: "Keep elbows pinned.",
+          },
         ],
       },
     ]);
@@ -216,9 +302,39 @@ function WorkoutAndDietHub() {
     setDietCarbs(230);
     setDietFats(65);
     setDietMeals([
-      { time: "07:30 AM", name: "Morning Breakfast", items: "4 Whole Eggs, 2 Whole Wheat Toast, 1 Banana", quantity: "1 Plate", calories: 580, protein: 32, carbs: 54, fats: 22, instructions: "Cook with olive oil spray." },
-      { time: "01:30 PM", name: "Power Lunch", items: "200g Grilled Chicken / Soya, 150g Rice, Cucumber Salad", quantity: "1 Bowl", calories: 680, protein: 55, carbs: 70, fats: 14, instructions: "Add lemon and herbs." },
-      { time: "08:30 PM", name: "Recovery Dinner", items: "180g Fish / Paneer, 2 Rotis, Steamed Broccoli", quantity: "1 Plate", calories: 600, protein: 45, carbs: 55, fats: 15, instructions: "Light spice." },
+      {
+        time: "07:30 AM",
+        name: "Morning Breakfast",
+        items: "4 Whole Eggs, 2 Whole Wheat Toast, 1 Banana",
+        quantity: "1 Plate",
+        calories: 580,
+        protein: 32,
+        carbs: 54,
+        fats: 22,
+        instructions: "Cook with olive oil spray.",
+      },
+      {
+        time: "01:30 PM",
+        name: "Power Lunch",
+        items: "200g Grilled Chicken / Soya, 150g Rice, Cucumber Salad",
+        quantity: "1 Bowl",
+        calories: 680,
+        protein: 55,
+        carbs: 70,
+        fats: 14,
+        instructions: "Add lemon and herbs.",
+      },
+      {
+        time: "08:30 PM",
+        name: "Recovery Dinner",
+        items: "180g Fish / Paneer, 2 Rotis, Steamed Broccoli",
+        quantity: "1 Plate",
+        calories: 600,
+        protein: 45,
+        carbs: 55,
+        fats: 15,
+        instructions: "Light spice.",
+      },
     ]);
     setIsDietModalOpen(true);
   };
@@ -301,14 +417,21 @@ function WorkoutAndDietHub() {
     e.preventDefault();
     if (!assignMemberId) return;
 
-    assignProgramToMember(assignMemberId, selectedWorkoutId || undefined, selectedDietId || undefined, assignmentNote);
+    assignProgramToMember(
+      assignMemberId,
+      selectedWorkoutId || undefined,
+      selectedDietId || undefined,
+      assignmentNote,
+    );
     const targetMember = members.find((m) => m.id === assignMemberId);
     toast.success(`Assigned personalized programs to ${targetMember?.name || "Member"}!`);
     setIsAssignModalOpen(false);
   };
 
   const handleShareWhatsApp = (title: string, details: string) => {
-    const text = encodeURIComponent(`*${settings.name} Personalized Program*\n\n📋 *${title}*\n\n${details}\n\nTrain hard & stay consistent!`);
+    const text = encodeURIComponent(
+      `*${settings.name} Personalized Program*\n\n📋 *${title}*\n\n${details}\n\nTrain hard & stay consistent!`,
+    );
     window.open(`https://wa.me/?text=${text}`, "_blank");
     toast.success(`Generated WhatsApp share link for ${title}`);
   };
@@ -319,13 +442,16 @@ function WorkoutAndDietHub() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Workout & Diet Builder</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Workout & Diet Builder
+            </h1>
             <span className="rounded-full bg-emerald-soft text-accent-foreground px-2.5 py-0.5 text-xs font-semibold">
               Training OS
             </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Build custom exercise splits, calculate macro meal plans, assign to members in 1-click, and dispatch via WhatsApp.
+            Build custom exercise splits, calculate macro meal plans, assign to members in 1-click,
+            and dispatch via WhatsApp.
           </p>
         </div>
 
@@ -394,7 +520,9 @@ function WorkoutAndDietHub() {
           }`}
         >
           <Layers className="h-3.5 w-3.5" />
-          <span>Member Assignments ({members.filter((m) => m.assignedWorkout || m.assignedDiet).length})</span>
+          <span>
+            Member Assignments ({members.filter((m) => m.assignedWorkout || m.assignedDiet).length})
+          </span>
         </button>
       </div>
 
@@ -405,7 +533,9 @@ function WorkoutAndDietHub() {
             <div
               key={wo.id}
               className={`rounded-2xl border bg-surface p-6 space-y-4 shadow-2xs transition flex flex-col justify-between ${
-                wo.isArchived ? "opacity-60 border-dashed" : "border-border hover:border-foreground/40"
+                wo.isArchived
+                  ? "opacity-60 border-dashed"
+                  : "border-border hover:border-foreground/40"
               }`}
             >
               <div>
@@ -416,7 +546,9 @@ function WorkoutAndDietHub() {
                       <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-bold text-foreground">
                         {wo.category}
                       </span>
-                      <span className="text-xs text-muted-foreground">{wo.daysPerWeek} Days / Week</span>
+                      <span className="text-xs text-muted-foreground">
+                        {wo.daysPerWeek} Days / Week
+                      </span>
                       <span className="text-xs text-muted-foreground font-mono">• {wo.level}</span>
                     </div>
                     <h3 className="text-base font-bold text-foreground mt-1.5">{wo.title}</h3>
@@ -433,10 +565,17 @@ function WorkoutAndDietHub() {
                     <div key={i} className="space-y-1">
                       <div className="flex items-center justify-between">
                         <p className="font-semibold text-foreground">{r.day}</p>
-                        <span className="text-[10px] text-muted-foreground font-mono">{r.focus}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {r.focus}
+                        </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        {r.exercises.map((e) => `${e.name} (${e.sets}×${e.reps}${e.weightTarget ? ` • ${e.weightTarget}` : ""})`).join(" • ")}
+                        {r.exercises
+                          .map(
+                            (e) =>
+                              `${e.name} (${e.sets}×${e.reps}${e.weightTarget ? ` • ${e.weightTarget}` : ""})`,
+                          )
+                          .join(" • ")}
                       </p>
                     </div>
                   ))}
@@ -496,9 +635,14 @@ function WorkoutAndDietHub() {
                           .map(
                             (r) =>
                               `*${r.day} (${r.focus})*\n` +
-                              r.exercises.map((e) => `• ${e.name}: ${e.sets} sets × ${e.reps}${e.weightTarget ? ` (${e.weightTarget})` : ""}`).join("\n")
+                              r.exercises
+                                .map(
+                                  (e) =>
+                                    `• ${e.name}: ${e.sets} sets × ${e.reps}${e.weightTarget ? ` (${e.weightTarget})` : ""}`,
+                                )
+                                .join("\n"),
                           )
-                          .join("\n\n")
+                          .join("\n\n"),
                       )
                     }
                     className="px-3 py-1.5 rounded-xl border border-border bg-canvas text-xs font-semibold hover:bg-muted transition flex items-center gap-1.5"
@@ -528,7 +672,9 @@ function WorkoutAndDietHub() {
             <div
               key={diet.id}
               className={`rounded-2xl border bg-surface p-6 space-y-4 shadow-2xs transition flex flex-col justify-between ${
-                diet.isArchived ? "opacity-60 border-dashed" : "border-border hover:border-foreground/40"
+                diet.isArchived
+                  ? "opacity-60 border-dashed"
+                  : "border-border hover:border-foreground/40"
               }`}
             >
               <div>
@@ -539,7 +685,9 @@ function WorkoutAndDietHub() {
                       <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-bold text-foreground">
                         {diet.category}
                       </span>
-                      <span className="text-xs font-mono font-bold text-emerald">{diet.calorieTarget} kcal Target</span>
+                      <span className="text-xs font-mono font-bold text-emerald">
+                        {diet.calorieTarget} kcal Target
+                      </span>
                     </div>
                     <h3 className="text-base font-bold text-foreground mt-1.5">{diet.title}</h3>
                   </div>
@@ -568,9 +716,13 @@ function WorkoutAndDietHub() {
                 <div className="mt-3 space-y-2 rounded-xl border border-border bg-canvas p-3.5 text-xs">
                   {diet.meals.map((m, i) => (
                     <div key={i} className="flex items-baseline justify-between gap-2">
-                      <span className="font-semibold text-foreground truncate">{m.time} - {m.name}:</span>
+                      <span className="font-semibold text-foreground truncate">
+                        {m.time} - {m.name}:
+                      </span>
                       <span className="text-[11px] text-muted-foreground truncate">{m.items}</span>
-                      <span className="font-mono text-muted-foreground shrink-0">{m.calories} kcal</span>
+                      <span className="font-mono text-muted-foreground shrink-0">
+                        {m.calories} kcal
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -627,8 +779,11 @@ function WorkoutAndDietHub() {
                         `${diet.title} (${diet.calorieTarget} kcal)`,
                         `*Macros:* ${diet.proteinGrams}g Protein • ${diet.carbsGrams}g Carbs • ${diet.fatsGrams}g Fats\n\n` +
                           diet.meals
-                            .map((m) => `*${m.time} - ${m.name}:*\n` + `• ${m.items} (${m.calories} kcal)`)
-                            .join("\n\n")
+                            .map(
+                              (m) =>
+                                `*${m.time} - ${m.name}:*\n` + `• ${m.items} (${m.calories} kcal)`,
+                            )
+                            .join("\n\n"),
                       )
                     }
                     className="px-3 py-1.5 rounded-xl border border-border bg-canvas text-xs font-semibold hover:bg-muted transition flex items-center gap-1.5"
@@ -655,15 +810,21 @@ function WorkoutAndDietHub() {
       {activeTab === "assignments" && (
         <div className="rounded-2xl border border-border bg-surface p-6 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-foreground">Active Member Training & Diet Rosters</h3>
+            <h3 className="text-sm font-bold text-foreground">
+              Active Member Training & Diet Rosters
+            </h3>
             <span className="text-xs text-muted-foreground font-mono">
-              {members.filter((m) => m.assignedWorkout || m.assignedDiet).length} Members with Active Programs
+              {members.filter((m) => m.assignedWorkout || m.assignedDiet).length} Members with
+              Active Programs
             </span>
           </div>
 
           <div className="divide-y divide-border rounded-xl border border-border bg-canvas overflow-hidden">
             {members.map((m) => (
-              <div key={m.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-muted/20 transition">
+              <div
+                key={m.id}
+                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-muted/20 transition"
+              >
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-foreground text-sm">{m.name}</span>
@@ -674,11 +835,17 @@ function WorkoutAndDietHub() {
                   <div className="mt-1 flex items-center gap-4 text-muted-foreground text-[11px]">
                     <span className="flex items-center gap-1">
                       <Dumbbell className="h-3 w-3 text-emerald" />
-                      Workout: <strong className="text-foreground">{m.assignedWorkout || "Not Assigned"}</strong>
+                      Workout:{" "}
+                      <strong className="text-foreground">
+                        {m.assignedWorkout || "Not Assigned"}
+                      </strong>
                     </span>
                     <span className="flex items-center gap-1">
                       <Utensils className="h-3 w-3 text-emerald" />
-                      Diet: <strong className="text-foreground">{m.assignedDiet || "Not Assigned"}</strong>
+                      Diet:{" "}
+                      <strong className="text-foreground">
+                        {m.assignedDiet || "Not Assigned"}
+                      </strong>
                     </span>
                   </div>
                 </div>
@@ -710,10 +877,15 @@ function WorkoutAndDietHub() {
                   <Dumbbell className="h-4 w-4" />
                 </div>
                 <h3 className="text-base font-bold text-foreground">
-                  {editingWorkout ? `Edit ${editingWorkout.title}` : "Create Professional Workout Split"}
+                  {editingWorkout
+                    ? `Edit ${editingWorkout.title}`
+                    : "Create Professional Workout Split"}
                 </h3>
               </div>
-              <button onClick={() => setIsWorkoutModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setIsWorkoutModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -721,7 +893,9 @@ function WorkoutAndDietHub() {
             <form onSubmit={handleSaveWorkout} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Program Title *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Program Title *
+                  </label>
                   <input
                     type="text"
                     required
@@ -733,10 +907,17 @@ function WorkoutAndDietHub() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Training Category</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Training Category
+                  </label>
                   <select
                     value={workoutCategory}
-                    onChange={(e) => setWorkoutCategory(e.target.value as any)}
+                    onChange={(e) =>
+                      setWorkoutCategory(
+                        e.target.value as
+                          "Hypertrophy" | "Strength" | "Fat Loss" | "Functional" | "Endurance",
+                      )
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-emerald"
                   >
                     <option value="Hypertrophy">Hypertrophy (Muscle Growth)</option>
@@ -750,10 +931,14 @@ function WorkoutAndDietHub() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Difficulty Level</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Difficulty Level
+                  </label>
                   <select
                     value={workoutLevel}
-                    onChange={(e) => setWorkoutLevel(e.target.value as any)}
+                    onChange={(e) =>
+                      setWorkoutLevel(e.target.value as "Beginner" | "Intermediate" | "Advanced")
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-emerald"
                   >
                     <option value="Beginner">Beginner</option>
@@ -763,7 +948,9 @@ function WorkoutAndDietHub() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Days / Week</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Days / Week
+                  </label>
                   <input
                     type="number"
                     min={1}
@@ -775,7 +962,9 @@ function WorkoutAndDietHub() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Duration (Weeks)</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Duration (Weeks)
+                  </label>
                   <input
                     type="number"
                     min={1}
@@ -788,7 +977,9 @@ function WorkoutAndDietHub() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Focus & Primary Objective</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Focus & Primary Objective
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Progressive overload on compound lifts..."
@@ -801,7 +992,9 @@ function WorkoutAndDietHub() {
               {/* Routine Days Builder */}
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-foreground">Split Routine & Exercise Builder</h4>
+                  <h4 className="text-xs font-bold text-foreground">
+                    Split Routine & Exercise Builder
+                  </h4>
                   <button
                     type="button"
                     onClick={handleAddRoutineDay}
@@ -812,7 +1005,10 @@ function WorkoutAndDietHub() {
                 </div>
 
                 {routineDays.map((day, dIdx) => (
-                  <div key={dIdx} className="p-3.5 rounded-xl border border-border bg-canvas space-y-3">
+                  <div
+                    key={dIdx}
+                    className="p-3.5 rounded-xl border border-border bg-canvas space-y-3"
+                  >
                     <div className="grid grid-cols-2 gap-2">
                       <input
                         type="text"
@@ -841,7 +1037,10 @@ function WorkoutAndDietHub() {
                     {/* Exercises in Day */}
                     <div className="space-y-2">
                       {day.exercises.map((ex, eIdx) => (
-                        <div key={ex.id || eIdx} className="grid grid-cols-12 gap-2 items-center bg-surface p-2 rounded-lg border border-border text-[11px]">
+                        <div
+                          key={ex.id || eIdx}
+                          className="grid grid-cols-12 gap-2 items-center bg-surface p-2 rounded-lg border border-border text-[11px]"
+                        >
                           <input
                             type="text"
                             placeholder="Exercise Name"
@@ -941,7 +1140,10 @@ function WorkoutAndDietHub() {
                   {editingDiet ? `Edit ${editingDiet.title}` : "Create Nutrition & Macro Diet Plan"}
                 </h3>
               </div>
-              <button onClick={() => setIsDietModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setIsDietModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -949,7 +1151,9 @@ function WorkoutAndDietHub() {
             <form onSubmit={handleSaveDiet} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Plan Title *</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Plan Title *
+                  </label>
                   <input
                     type="text"
                     required
@@ -961,10 +1165,17 @@ function WorkoutAndDietHub() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Diet Category</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Diet Category
+                  </label>
                   <select
                     value={dietCategory}
-                    onChange={(e) => setDietCategory(e.target.value as any)}
+                    onChange={(e) =>
+                      setDietCategory(
+                        e.target.value as
+                          "High Protein" | "Muscle Gain" | "Calorie Deficit" | "Ketogenic Shred",
+                      )
+                    }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-emerald"
                   >
                     <option value="High Protein">High Protein Muscle</option>
@@ -978,7 +1189,9 @@ function WorkoutAndDietHub() {
               {/* Macro Targets */}
               <div className="grid grid-cols-4 gap-2">
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Calories (kcal)</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Calories (kcal)
+                  </label>
                   <input
                     type="number"
                     value={dietCalories}
@@ -988,7 +1201,9 @@ function WorkoutAndDietHub() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Protein (g)</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Protein (g)
+                  </label>
                   <input
                     type="number"
                     value={dietProtein}
@@ -998,7 +1213,9 @@ function WorkoutAndDietHub() {
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Carbs (g)</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">
+                    Carbs (g)
+                  </label>
                   <input
                     type="number"
                     value={dietCarbs}
@@ -1032,7 +1249,10 @@ function WorkoutAndDietHub() {
                 </div>
 
                 {dietMeals.map((meal, mIdx) => (
-                  <div key={mIdx} className="p-3 rounded-xl border border-border bg-canvas space-y-2">
+                  <div
+                    key={mIdx}
+                    className="p-3 rounded-xl border border-border bg-canvas space-y-2"
+                  >
                     <div className="grid grid-cols-12 gap-2 items-center">
                       <input
                         type="text"
@@ -1122,17 +1342,24 @@ function WorkoutAndDietHub() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-foreground">Assign Programs to Member</h3>
-                  <p className="text-[11px] text-muted-foreground">Select Workout and/or Nutrition Plan</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Select Workout and/or Nutrition Plan
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setIsAssignModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setIsAssignModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmAssignment} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Target Member *</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Target Member *
+                </label>
                 <select
                   required
                   value={assignMemberId}
@@ -1148,7 +1375,9 @@ function WorkoutAndDietHub() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Select Workout Split</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Select Workout Split
+                </label>
                 <select
                   value={selectedWorkoutId}
                   onChange={(e) => setSelectedWorkoutId(e.target.value)}
@@ -1164,7 +1393,9 @@ function WorkoutAndDietHub() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Select Nutrition & Diet Plan</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Select Nutrition & Diet Plan
+                </label>
                 <select
                   value={selectedDietId}
                   onChange={(e) => setSelectedDietId(e.target.value)}
@@ -1180,7 +1411,9 @@ function WorkoutAndDietHub() {
               </div>
 
               <div>
-                <label className="block text-muted-foreground font-semibold mb-1">Coaching Note</label>
+                <label className="block text-muted-foreground font-semibold mb-1">
+                  Coaching Note
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Focus on form during week 1..."

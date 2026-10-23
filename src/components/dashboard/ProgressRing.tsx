@@ -16,7 +16,7 @@ export function ProgressRing({
   value,
   size = 48,
   strokeWidth = 3.5,
-  color = "#10b981",
+  color = "#3b82f6",
   backgroundColor,
   className,
   label,
@@ -93,55 +93,11 @@ export function ConcentricBiometricRings({
   return (
     <div className={cn("relative inline-flex items-center justify-center", className)}>
       <svg width={size} height={size} className="-rotate-90">
-        {/* Ring 1 - Floor Occupancy (Emerald) */}
+        {/* Ring 1 - Floor Occupancy (Blue Highlight) */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r1}
-          fill="none"
-          stroke="rgba(16, 185, 129, 0.15)"
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r1}
-          fill="none"
-          stroke="#10b981"
-          strokeWidth={strokeWidth}
-          strokeDasharray={c1}
-          strokeDashoffset={offset1}
-          strokeLinecap="round"
-          className="transition-all duration-1000 ease-out"
-        />
-
-        {/* Ring 2 - Revenue Target (Purple) */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r2}
-          fill="none"
-          stroke="rgba(168, 85, 247, 0.15)"
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r2}
-          fill="none"
-          stroke="#a855f7"
-          strokeWidth={strokeWidth}
-          strokeDasharray={c2}
-          strokeDashoffset={offset2}
-          strokeLinecap="round"
-          className="transition-all duration-1000 ease-out delay-100"
-        />
-
-        {/* Ring 3 - Retention (Blue) */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r3}
           fill="none"
           stroke="rgba(59, 130, 246, 0.15)"
           strokeWidth={strokeWidth}
@@ -149,9 +105,53 @@ export function ConcentricBiometricRings({
         <circle
           cx={size / 2}
           cy={size / 2}
-          r={r3}
+          r={r1}
           fill="none"
           stroke="#3b82f6"
+          strokeWidth={strokeWidth}
+          strokeDasharray={c1}
+          strokeDashoffset={offset1}
+          strokeLinecap="round"
+          className="transition-all duration-1000 ease-out"
+        />
+
+        {/* Ring 2 - Revenue Target (White Highlight) */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r2}
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.15)"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r2}
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth={strokeWidth}
+          strokeDasharray={c2}
+          strokeDashoffset={offset2}
+          strokeLinecap="round"
+          className="transition-all duration-1000 ease-out delay-100"
+        />
+
+        {/* Ring 3 - Retention (Sky/Light Blue) */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r3}
+          fill="none"
+          stroke="rgba(96, 165, 250, 0.15)"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r3}
+          fill="none"
+          stroke="#60a5fa"
           strokeWidth={strokeWidth}
           strokeDasharray={c3}
           strokeDashoffset={offset3}

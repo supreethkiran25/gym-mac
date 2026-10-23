@@ -128,9 +128,7 @@ export function EditMemberModal() {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">
-                Plan
-              </label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Plan</label>
               <select
                 value={plan}
                 onChange={(e) => setPlan(e.target.value)}
@@ -158,9 +156,7 @@ export function EditMemberModal() {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">
-                Status
-              </label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as MemberStatus)}
@@ -191,9 +187,7 @@ export function EditMemberModal() {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">
-                Notes
-              </label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Notes</label>
               <input
                 type="text"
                 value={notes}

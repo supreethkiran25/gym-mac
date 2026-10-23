@@ -1,13 +1,6 @@
 import React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  TrendingUp,
-  Users,
-  Award,
-  ArrowUpRight,
-  ShieldCheck,
-  Building,
-} from "lucide-react";
+import { TrendingUp, Users, Award, ArrowUpRight, ShieldCheck, Building } from "lucide-react";
 import { useGymStore } from "../lib/gym-store";
 import { RoleGuard } from "../components/dashboard/RoleGuard";
 
@@ -30,7 +23,9 @@ function AnalyticsDashboard() {
   const { members, payments, staff, settings } = useGymStore();
 
   const totalMembers = members.length;
-  const activeMembers = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
+  const activeMembers = members.filter(
+    (m) => m.status === "Active" || m.status === "Expiring",
+  ).length;
   const retentionRate = totalMembers > 0 ? Math.round((activeMembers / totalMembers) * 100) : 100;
 
   const totalRevenue = payments
@@ -40,7 +35,10 @@ function AnalyticsDashboard() {
   const avgLTV = totalMembers > 0 ? Math.round(totalRevenue / totalMembers) : 0;
 
   // Dynamic Cohort from member join dates
-  const currentMonthName = new Date().toLocaleString("default", { month: "short", year: "numeric" });
+  const currentMonthName = new Date().toLocaleString("default", {
+    month: "short",
+    year: "numeric",
+  });
   const realCohort = [
     {
       cohort: currentMonthName,
@@ -89,17 +87,22 @@ function AnalyticsDashboard() {
       {/* Retention KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-3xl border border-border bg-surface p-5 space-y-2">
-          <span className="text-xs font-semibold text-muted-foreground">Overall Member Retention</span>
-          <p className="text-3xl font-bold font-mono tracking-tight text-emerald">{retentionRate}%</p>
-          <p className="text-xs text-muted-foreground">
-            {totalMembers} enrolled members tracked
+          <span className="text-xs font-semibold text-muted-foreground">
+            Overall Member Retention
+          </span>
+          <p className="text-3xl font-bold font-mono tracking-tight text-emerald">
+            {retentionRate}%
           </p>
+          <p className="text-xs text-muted-foreground">{totalMembers} enrolled members tracked</p>
         </div>
 
         <div className="rounded-3xl border border-border bg-surface p-5 space-y-2">
-          <span className="text-xs font-semibold text-muted-foreground">Average Member Lifetime Value (LTV)</span>
+          <span className="text-xs font-semibold text-muted-foreground">
+            Average Member Lifetime Value (LTV)
+          </span>
           <p className="text-3xl font-bold font-mono tracking-tight text-foreground">
-            {settings.currencySymbol}{avgLTV.toLocaleString("en-IN")}
+            {settings.currencySymbol}
+            {avgLTV.toLocaleString("en-IN")}
           </p>
           <p className="text-xs text-emerald flex items-center gap-1 font-medium">
             <ArrowUpRight className="h-3.5 w-3.5" /> Gross collection / total members
@@ -165,10 +168,11 @@ function AnalyticsDashboard() {
             <div key={t.name} className="p-4 rounded-2xl border border-border bg-canvas space-y-1">
               <span className="text-xs text-muted-foreground">{t.name}</span>
               <p className="text-xl font-bold font-mono text-foreground">
-                {settings.currencySymbol}{t.value.toLocaleString("en-IN")}
+                {settings.currencySymbol}
+                {t.value.toLocaleString("en-IN")}
               </p>
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mt-2">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: "65%" }} />
+                <div className="h-full bg-brand rounded-full" style={{ width: "65%" }} />
               </div>
             </div>
           ))}

@@ -64,7 +64,9 @@ function DashboardOverview() {
   const firstName = currentUser.name.split(" ")[0]?.toUpperCase() || "ADMIN";
 
   // Members & Floor metrics
-  const activeMembersCount = members.filter((m) => m.status === "Active" || m.status === "Expiring").length;
+  const activeMembersCount = members.filter(
+    (m) => m.status === "Active" || m.status === "Expiring",
+  ).length;
   const expiringSoonMembers = members.filter((m) => m.status === "Expiring");
   const expiredMembers = members.filter((m) => m.status === "Expired");
   const overdueMembers = members.filter((m) => m.due > 0);
@@ -76,7 +78,10 @@ function DashboardOverview() {
   const todayStr = new Date().toISOString().split("T")[0];
   const todayPayments = payments.filter((p) => p.date === todayStr && p.status !== "Refunded");
   const todayRevenue = todayPayments.reduce((sum, p) => sum + p.amount, 0);
-  const totalInflow = payments.reduce((sum, p) => sum + (p.status === "Refunded" ? 0 : p.amount), 0);
+  const totalInflow = payments.reduce(
+    (sum, p) => sum + (p.status === "Refunded" ? 0 : p.amount),
+    0,
+  );
   const totalOutflow = expenses.reduce((sum, e) => sum + (e.status === "Paid" ? e.amount : 0), 0);
   const netOperatingBalance = totalInflow - totalOutflow;
   const isNetLoss = netOperatingBalance < 0;
@@ -84,7 +89,10 @@ function DashboardOverview() {
   // Performance Ring Metrics (Target calculations)
   const revenueTarget = 150000;
   const revenuePercent = Math.min(100, Math.round((totalInflow / revenueTarget) * 100));
-  const retentionPercent = members.length > 0 ? Math.round(((members.length - expiredMembers.length) / members.length) * 100) : 100;
+  const retentionPercent =
+    members.length > 0
+      ? Math.round(((members.length - expiredMembers.length) / members.length) * 100)
+      : 100;
   const capacityPercent = Math.min(100, Math.round((insideMembers.length / 25) * 100));
 
   const handleMemberClick = (member: Member) => {
@@ -98,7 +106,7 @@ function DashboardOverview() {
         m.due > 0
           ? `Your outstanding balance is ${settings.currencySymbol}${m.due.toLocaleString("en-IN")}. Please pay online or at the front desk.`
           : `Your ${m.plan} subscription is valid until ${m.expiry}. Keep up the great training!`
-      }`
+      }`,
     );
     const cleanPhone = m.phone.replace(/[^0-9]/g, "");
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, "_blank");
@@ -131,7 +139,9 @@ function DashboardOverview() {
         <div className="space-y-1 pt-1">
           <div className="flex items-center justify-between text-[11px] font-heading font-bold uppercase tracking-wider text-muted-foreground">
             <span>OPERATIONAL CAPACITY</span>
-            <span className="font-mono text-foreground font-semibold">{insideMembers.length} / 25 Peak Slots</span>
+            <span className="font-mono text-foreground font-semibold">
+              {insideMembers.length} / 25 Peak Slots
+            </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div
@@ -142,38 +152,39 @@ function DashboardOverview() {
         </div>
       </div>
 
-      {/* 2. Top Highlight Hero Card (Calyxo Complete Setup style) */}
-      <div className="rounded-3xl border border-brand/30 bg-brand-soft/10 p-5 sm:p-6 shadow-2xs">
+      {/* 2. Top Highlight Hero Card */}
+      <div className="glass-panel-glow rounded-3xl p-5 sm:p-6 shadow-2xl border border-sky-500/25">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="flex items-start gap-4">
-            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-brand text-brand-foreground font-bold shrink-0 shadow-md shadow-brand/25">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-tr from-sky-500 to-sky-300 text-black font-bold shrink-0 shadow-lg shadow-sky-500/30">
               <Zap className="h-5 w-5" />
             </div>
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-sm sm:text-base font-heading font-extrabold text-foreground uppercase tracking-wide">
+                <h3 className="text-sm sm:text-base font-heading font-extrabold text-white uppercase tracking-wide">
                   {settings.name} — ACTIVE FLOOR DESK
                 </h3>
-                <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[10px] font-heading font-bold text-brand uppercase tracking-wider border border-brand/20">
+                <span className="rounded-full gradient-sky-pill px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider">
                   {isAdmin ? "Admin Full Access" : "Front Desk Mode"}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
-                Live Turnstile scanner active with biometric check-in, dues verification, and automated renewal reminders.
+              <p className="text-xs text-zinc-400 max-w-xl leading-relaxed">
+                Live Turnstile scanner active with biometric check-in, dues verification, and
+                automated renewal reminders.
               </p>
 
               {/* Status pills */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] font-medium text-muted-foreground">
-                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] font-medium text-zinc-400">
+                <span className="rounded-lg bg-white/[0.04] border border-white/8 px-2.5 py-1 text-zinc-200 flex items-center gap-1">
                   ✓ Turnstile Gate Online
                 </span>
-                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                <span className="rounded-lg bg-white/[0.04] border border-white/8 px-2.5 py-1 text-zinc-200 flex items-center gap-1">
                   ✓ QR Scanner Ready
                 </span>
-                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                <span className="rounded-lg bg-white/[0.04] border border-white/8 px-2.5 py-1 text-zinc-200 flex items-center gap-1">
                   ✓ Dues Turnstile Lock
                 </span>
-                <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-foreground flex items-center gap-1">
+                <span className="rounded-lg bg-white/[0.04] border border-white/8 px-2.5 py-1 text-zinc-200 flex items-center gap-1">
                   ✓ WhatsApp Alerts
                 </span>
               </div>
@@ -183,7 +194,7 @@ function DashboardOverview() {
           <div className="flex items-center gap-2.5 shrink-0">
             <Link
               to="/dashboard/checkin"
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-brand text-brand-foreground px-5 py-2.5 text-xs font-heading font-extrabold uppercase tracking-wider shadow-lg shadow-brand/25 hover:brightness-110 active:scale-[0.98] transition"
+              className="glass-button-primary inline-flex items-center gap-1.5 rounded-2xl px-5 py-2.5 text-xs font-heading font-extrabold uppercase tracking-wider shadow-lg shadow-sky-500/30 hover:scale-[1.02] active:scale-[0.98] transition"
             >
               <span>Open Scanner</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -192,76 +203,84 @@ function DashboardOverview() {
         </div>
       </div>
 
-      {/* 3. 4 Streak / KPI Cards (Calyxo Login / Streak Tiles Style) */}
+      {/* 3. 4 Streak / KPI Cards in Frosted Glass */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Active Directory Streak */}
-        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+        <div className="glass-card-interactive rounded-3xl p-5 flex items-center justify-between border border-white/8 shadow-xl">
           <div className="space-y-1">
-            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">
               ACTIVE MEMBERS
             </div>
-            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground">
-              {activeMembersCount} <span className="text-xs font-normal text-muted-foreground">members</span>
+            <p className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-white">
+              {activeMembersCount}{" "}
+              <span className="text-xs font-normal text-zinc-500">members</span>
             </p>
-            <div className="text-[11px] text-muted-foreground font-medium">
-              Inside Floor: <strong className="text-brand font-mono">{insideMembers.length}</strong>
+            <div className="text-[11px] text-zinc-400 font-medium">
+              Inside Floor: <strong className="text-sky-400 font-mono">{insideMembers.length}</strong>
             </div>
           </div>
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-brand-soft text-brand border border-brand/20 shrink-0">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-400/20 shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
             <Users className="h-5 w-5" />
           </div>
         </div>
 
         {/* Total Inflow Collections */}
-        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+        <div className="glass-card-interactive rounded-3xl p-5 flex items-center justify-between border border-white/8 shadow-xl">
           <div className="space-y-1">
-            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">
               TOTAL INFLOW
             </div>
-            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground font-mono">
-              {settings.currencySymbol}{totalInflow.toLocaleString("en-IN")}
+            <p className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-white font-mono">
+              {settings.currencySymbol}
+              {totalInflow.toLocaleString("en-IN")}
             </p>
-            <div className="text-[11px] text-muted-foreground font-medium">
-              Today: <strong className="text-emerald font-mono">+{settings.currencySymbol}{todayRevenue.toLocaleString("en-IN")}</strong>
+            <div className="text-[11px] text-zinc-400 font-medium">
+              Today:{" "}
+              <strong className="text-sky-400 font-mono">
+                +{settings.currencySymbol}
+                {todayRevenue.toLocaleString("en-IN")}
+              </strong>
             </div>
           </div>
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500/15 text-emerald border border-emerald-500/25 shrink-0">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-400/20 shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
             <TrendingUp className="h-5 w-5" />
           </div>
         </div>
 
         {/* Operating Burn / Outflow */}
-        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+        <div className="glass-card-interactive rounded-3xl p-5 flex items-center justify-between border border-white/8 shadow-xl">
           <div className="space-y-1">
-            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">
               OPERATING OUTFLOW
             </div>
-            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground font-mono">
-              {settings.currencySymbol}{totalOutflow.toLocaleString("en-IN")}
+            <p className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-white font-mono">
+              {settings.currencySymbol}
+              {totalOutflow.toLocaleString("en-IN")}
             </p>
-            <div className="text-[11px] text-muted-foreground font-medium">
+            <div className="text-[11px] text-zinc-400 font-medium">
               Rent, Power, Payroll
             </div>
           </div>
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-rose-500/15 text-rose-500 border border-rose-500/25 shrink-0">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-zinc-400 border border-white/8 shrink-0">
             <Flame className="h-5 w-5" />
           </div>
         </div>
 
         {/* Pending Member Dues */}
-        <div className="rounded-3xl border border-border bg-surface p-5 flex items-center justify-between shadow-2xs hover:border-brand/30 transition">
+        <div className="glass-card-interactive rounded-3xl p-5 flex items-center justify-between border border-white/8 shadow-xl">
           <div className="space-y-1">
-            <div className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">
               PENDING DUES
             </div>
-            <p className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-foreground font-mono">
-              {settings.currencySymbol}{pendingDuesTotal.toLocaleString("en-IN")}
+            <p className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-white font-mono">
+              {settings.currencySymbol}
+              {pendingDuesTotal.toLocaleString("en-IN")}
             </p>
-            <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+            <div className="text-[11px] text-zinc-400 font-medium">
               {overdueMembers.length} with balance
             </div>
           </div>
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-amber-500/15 text-amber-500 border border-amber-500/25 shrink-0">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-zinc-400 border border-white/8 shrink-0">
             <AlertTriangle className="h-5 w-5" />
           </div>
         </div>
@@ -275,12 +294,13 @@ function DashboardOverview() {
               Live Floor Traffic & Operational Shift Matrix
             </h3>
             <p className="text-xs text-muted-foreground">
-              Real-time hourly attendance distribution, peak gym rush windows, and daily desk targets.
+              Real-time hourly attendance distribution, peak gym rush windows, and daily desk
+              targets.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-[11px] font-heading font-bold text-emerald uppercase tracking-wider">
-              <span className="h-2 w-2 rounded-full bg-emerald animate-pulse" />
+            <span className="flex items-center gap-1.5 rounded-full bg-brand-soft border border-brand/20 px-3 py-1 text-[11px] font-heading font-bold text-brand uppercase tracking-wider">
+              <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
               <span>Turnstile Active</span>
             </span>
           </div>
@@ -300,11 +320,41 @@ function DashboardOverview() {
 
             <div className="grid grid-cols-5 gap-2 pt-2">
               {[
-                { time: "06-09 AM", label: "Morning Rush", count: 18, max: 25, isCurrent: hour >= 6 && hour < 9 },
-                { time: "09-12 PM", label: "Mid-Morning", count: 8, max: 25, isCurrent: hour >= 9 && hour < 12 },
-                { time: "12-04 PM", label: "Afternoon", count: 4, max: 25, isCurrent: hour >= 12 && hour < 16 },
-                { time: "05-08 PM", label: "Peak Prime", count: 22, max: 25, isCurrent: hour >= 17 && hour < 20 },
-                { time: "08-10 PM", label: "Late Session", count: 11, max: 25, isCurrent: hour >= 20 && hour < 22 },
+                {
+                  time: "06-09 AM",
+                  label: "Morning Rush",
+                  count: 18,
+                  max: 25,
+                  isCurrent: hour >= 6 && hour < 9,
+                },
+                {
+                  time: "09-12 PM",
+                  label: "Mid-Morning",
+                  count: 8,
+                  max: 25,
+                  isCurrent: hour >= 9 && hour < 12,
+                },
+                {
+                  time: "12-04 PM",
+                  label: "Afternoon",
+                  count: 4,
+                  max: 25,
+                  isCurrent: hour >= 12 && hour < 16,
+                },
+                {
+                  time: "05-08 PM",
+                  label: "Peak Prime",
+                  count: 22,
+                  max: 25,
+                  isCurrent: hour >= 17 && hour < 20,
+                },
+                {
+                  time: "08-10 PM",
+                  label: "Late Session",
+                  count: 11,
+                  max: 25,
+                  isCurrent: hour >= 20 && hour < 22,
+                },
               ].map((slot) => {
                 const pct = Math.round((slot.count / slot.max) * 100);
                 return (
@@ -327,7 +377,9 @@ function DashboardOverview() {
 
                     <div className="space-y-1">
                       <div className="flex items-baseline justify-between text-[11px]">
-                        <span className="font-heading font-black text-foreground">{slot.count}</span>
+                        <span className="font-heading font-black text-foreground">
+                          {slot.count}
+                        </span>
                         <span className="text-[10px] text-muted-foreground font-mono">{pct}%</span>
                       </div>
                       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
@@ -359,10 +411,12 @@ function DashboardOverview() {
             <div className="space-y-1.5">
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-heading font-black text-foreground font-mono">
-                  {settings.currencySymbol}{totalInflow.toLocaleString("en-IN")}
+                  {settings.currencySymbol}
+                  {totalInflow.toLocaleString("en-IN")}
                 </span>
                 <span className="text-xs text-muted-foreground font-mono">
-                  Target: {settings.currencySymbol}{revenueTarget.toLocaleString("en-IN")}
+                  Target: {settings.currencySymbol}
+                  {revenueTarget.toLocaleString("en-IN")}
                 </span>
               </div>
               <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -375,12 +429,20 @@ function DashboardOverview() {
 
             <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/60">
               <div className="space-y-0.5">
-                <div className="text-[10px] uppercase font-bold text-muted-foreground">Retention</div>
-                <div className="font-heading font-black text-foreground">{retentionPercent}% Retained</div>
+                <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                  Retention
+                </div>
+                <div className="font-heading font-black text-foreground">
+                  {retentionPercent}% Retained
+                </div>
               </div>
               <div className="space-y-0.5">
-                <div className="text-[10px] uppercase font-bold text-muted-foreground">Active Leads</div>
-                <div className="font-heading font-black text-brand">{activeLeadsCount} Prospects</div>
+                <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                  Active Leads
+                </div>
+                <div className="font-heading font-black text-brand">
+                  {activeLeadsCount} Prospects
+                </div>
               </div>
             </div>
           </div>
@@ -471,7 +533,9 @@ function DashboardOverview() {
               <h3 className="text-sm font-heading font-black uppercase tracking-wider text-foreground">
                 Live Member Roster & Status
               </h3>
-              <p className="text-xs text-muted-foreground">Click member to open profile, freeze, or transfer</p>
+              <p className="text-xs text-muted-foreground">
+                Click member to open profile, freeze, or transfer
+              </p>
             </div>
             <Link
               to="/dashboard/members"
@@ -495,14 +559,17 @@ function DashboardOverview() {
                   </div>
                   <div>
                     <p className="font-bold text-foreground">{m.name}</p>
-                    <p className="text-[11px] text-muted-foreground font-mono">{m.phone} • {m.plan}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">
+                      {m.phone} • {m.plan}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {m.due > 0 ? (
                     <span className="rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold px-2.5 py-0.5 text-[10px] font-mono">
-                      Due: {settings.currencySymbol}{m.due.toLocaleString("en-IN")}
+                      Due: {settings.currencySymbol}
+                      {m.due.toLocaleString("en-IN")}
                     </span>
                   ) : (
                     <span
@@ -510,10 +577,10 @@ function DashboardOverview() {
                         m.status === "Active"
                           ? "bg-emerald-500/20 text-emerald"
                           : m.status === "Expiring"
-                          ? "bg-amber-500/20 text-amber-500"
-                          : m.status === "Frozen"
-                          ? "bg-blue-500/20 text-blue-500"
-                          : "bg-rose-500/20 text-rose-500"
+                            ? "bg-amber-500/20 text-amber-500"
+                            : m.status === "Frozen"
+                              ? "bg-blue-500/20 text-blue-500"
+                              : "bg-rose-500/20 text-rose-500"
                       }`}
                     >
                       {m.status}
@@ -542,7 +609,9 @@ function DashboardOverview() {
               <h3 className="text-sm font-heading font-black uppercase tracking-wider text-foreground">
                 Recent Receipts & Collections
               </h3>
-              <p className="text-xs text-muted-foreground">Logged payments and generated tax receipts</p>
+              <p className="text-xs text-muted-foreground">
+                Logged payments and generated tax receipts
+              </p>
             </div>
             <Link
               to="/dashboard/payments"
@@ -570,13 +639,16 @@ function DashboardOverview() {
                         {p.method}
                       </span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground font-mono">{p.invoiceNumber} • {p.date}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">
+                      {p.invoiceNumber} • {p.date}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <span className="font-mono font-bold text-foreground text-sm">
-                    {settings.currencySymbol}{p.amount.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {p.amount.toLocaleString("en-IN")}
                   </span>
                   <button
                     onClick={() => {

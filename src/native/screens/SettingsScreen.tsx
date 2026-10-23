@@ -24,7 +24,9 @@ export function SettingsScreen() {
     toggleTheme,
   } = useGymStore();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "plans" | "tax" | "theme" | "backup">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "plans" | "tax" | "theme" | "backup">(
+    "profile",
+  );
 
   // Profile Form
   const [gymName, setGymName] = useState(settings.name);
@@ -75,7 +77,10 @@ export function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: bg }]}
+      contentContainerStyle={styles.content}
+    >
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -106,7 +111,7 @@ export function SettingsScreen() {
         ].map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            onPress={() => setActiveTab(tab.id as any)}
+            onPress={() => setActiveTab(tab.id as "profile" | "plans" | "tax" | "theme" | "backup")}
             style={[
               styles.tabBtn,
               activeTab === tab.id
@@ -114,12 +119,7 @@ export function SettingsScreen() {
                 : { backgroundColor: surface, borderColor: border, borderWidth: 1 },
             ]}
           >
-            <Text
-              style={[
-                styles.tabBtnText,
-                { color: activeTab === tab.id ? bg : textMuted },
-              ]}
-            >
+            <Text style={[styles.tabBtnText, { color: activeTab === tab.id ? bg : textMuted }]}>
               {tab.label}
             </Text>
           </TouchableOpacity>
@@ -136,21 +136,32 @@ export function SettingsScreen() {
             <TextInput
               value={gymName}
               onChangeText={setGymName}
-              style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+              style={[
+                styles.input,
+                { backgroundColor: bg, borderColor: border, color: textPrimary },
+              ]}
             />
 
             <Text style={[styles.label, { color: textMuted }]}>Location / Branch</Text>
             <TextInput
               value={location}
               onChangeText={setLocation}
-              style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+              style={[
+                styles.input,
+                { backgroundColor: bg, borderColor: border, color: textPrimary },
+              ]}
             />
 
-            <Text style={[styles.label, { color: textMuted }]}>UPI Merchant VPA (for QR Payments)</Text>
+            <Text style={[styles.label, { color: textMuted }]}>
+              UPI Merchant VPA (for QR Payments)
+            </Text>
             <TextInput
               value={upiId}
               onChangeText={setUpiId}
-              style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+              style={[
+                styles.input,
+                { backgroundColor: bg, borderColor: border, color: textPrimary },
+              ]}
             />
 
             <TouchableOpacity
@@ -190,7 +201,8 @@ export function SettingsScreen() {
                     </Text>
                   </View>
                   <Text style={[styles.planPrice, { color: emerald }]}>
-                    {settings.currencySymbol}{p.price.toLocaleString("en-IN")}
+                    {settings.currencySymbol}
+                    {p.price.toLocaleString("en-IN")}
                   </Text>
                 </View>
 
@@ -203,7 +215,9 @@ export function SettingsScreen() {
                       ]);
                     }}
                   >
-                    <Text style={{ color: "#ef4444", fontSize: 11, fontWeight: "600" }}>Delete</Text>
+                    <Text style={{ color: "#ef4444", fontSize: 11, fontWeight: "600" }}>
+                      Delete
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -222,14 +236,20 @@ export function SettingsScreen() {
             <TextInput
               value={gstNumber}
               onChangeText={setGstNumber}
-              style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+              style={[
+                styles.input,
+                { backgroundColor: bg, borderColor: border, color: textPrimary },
+              ]}
             />
 
             <Text style={[styles.label, { color: textMuted }]}>Invoice Prefix</Text>
             <TextInput
               value={invoicePrefix}
               onChangeText={setInvoicePrefix}
-              style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+              style={[
+                styles.input,
+                { backgroundColor: bg, borderColor: border, color: textPrimary },
+              ]}
             />
 
             <TouchableOpacity
@@ -251,7 +271,11 @@ export function SettingsScreen() {
               onPress={() => setTheme("dark")}
               style={[
                 styles.themeCard,
-                { backgroundColor: "#0f172a", borderColor: isDark ? emerald : border, borderWidth: isDark ? 2 : 1 },
+                {
+                  backgroundColor: "#0f172a",
+                  borderColor: isDark ? emerald : border,
+                  borderWidth: isDark ? 2 : 1,
+                },
               ]}
             >
               <Text style={{ color: "#ffffff", fontWeight: "700" }}>🌙 Onyx Dark Mode</Text>
@@ -264,7 +288,11 @@ export function SettingsScreen() {
               onPress={() => setTheme("light")}
               style={[
                 styles.themeCard,
-                { backgroundColor: "#ffffff", borderColor: !isDark ? emerald : border, borderWidth: !isDark ? 2 : 1 },
+                {
+                  backgroundColor: "#ffffff",
+                  borderColor: !isDark ? emerald : border,
+                  borderWidth: !isDark ? 2 : 1,
+                },
               ]}
             >
               <Text style={{ color: "#0f172a", fontWeight: "700" }}>☀️ Editorial Light Mode</Text>
@@ -300,7 +328,9 @@ export function SettingsScreen() {
             }}
             style={[styles.resetBtn, { borderColor: "#ef4444", borderWidth: 1 }]}
           >
-            <Text style={{ color: "#ef4444", fontWeight: "700" }}>⚠️ Reset to Default Demo Data</Text>
+            <Text style={{ color: "#ef4444", fontWeight: "700" }}>
+              ⚠️ Reset to Default Demo Data
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -318,7 +348,10 @@ export function SettingsScreen() {
                 placeholderTextColor={textMuted}
                 value={planName}
                 onChangeText={setPlanName}
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.label, { color: textMuted }]}>Price (₹)</Text>
@@ -328,7 +361,10 @@ export function SettingsScreen() {
                 value={planPrice}
                 onChangeText={setPlanPrice}
                 keyboardType="numeric"
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
 
               <Text style={[styles.label, { color: textMuted }]}>Duration (Months)</Text>
@@ -338,7 +374,10 @@ export function SettingsScreen() {
                 value={planMonths}
                 onChangeText={setPlanMonths}
                 keyboardType="numeric"
-                style={[styles.input, { backgroundColor: bg, borderColor: border, color: textPrimary }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: bg, borderColor: border, color: textPrimary },
+                ]}
               />
             </View>
 

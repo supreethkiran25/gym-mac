@@ -33,7 +33,8 @@ export function Member360Sheet() {
     setIsMember360Open,
     selectedMember360,
     renewMember,
-    toggleFreezeMember,
+    freezeMember,
+    unfreezeMember,
     setPaymentForMember,
     setIsRecordPaymentOpen,
     setActiveInvoicePayment,
@@ -63,7 +64,7 @@ export function Member360Sheet() {
         m.due > 0
           ? `You have a pending balance of ${settings.currencySymbol}${m.due.toLocaleString("en-IN")}. Please scan your UPI code or pay online to keep training smoothly.`
           : `Your ${m.plan} membership is valid until ${m.expiry}. See you on the workout floor!`
-      }`
+      }`,
     );
     const cleanPhone = m.phone.replace(/[^0-9]/g, "");
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, "_blank");
@@ -77,16 +78,21 @@ export function Member360Sheet() {
   };
 
   const handleFreezeToggle = () => {
-    toggleFreezeMember(m.id);
-    toast.info(m.status === "Frozen" ? `Resumed membership for ${m.name}` : `Paused/Frozen membership for ${m.name}`);
+    if (m.status === "Frozen") {
+      unfreezeMember(m.id);
+      toast.info(`Resumed membership for ${m.name}`);
+    } else {
+      freezeMember(m.id, 14, "Member request");
+      toast.info(`Paused/Frozen membership for ${m.name}`);
+    }
   };
 
   const statusBadgeColor: Record<MemberStatus, string> = {
-    Active: "bg-emerald-soft text-accent-foreground border-emerald/30",
-    Expiring: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-    Expired: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30",
-    Partial: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
-    Frozen: "bg-muted text-muted-foreground border-border",
+    Active: "bg-brand-soft text-brand border border-brand/30",
+    Expiring: "bg-muted text-foreground border border-border",
+    Expired: "bg-muted/60 text-muted-foreground border border-border",
+    Partial: "bg-brand-soft text-brand border border-brand/30",
+    Frozen: "bg-muted text-muted-foreground border border-border",
   };
 
   return (
@@ -104,11 +110,15 @@ export function Member360Sheet() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-semibold tracking-tight">{m.name}</h2>
-                <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusBadgeColor[m.status]}`}>
+                <span
+                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusBadgeColor[m.status]}`}
+                >
                   {m.status}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">ID: {m.id} · Enrolled {m.joinDate}</p>
+              <p className="text-xs text-muted-foreground">
+                ID: {m.id} · Enrolled {m.joinDate}
+              </p>
             </div>
           </div>
           <button
@@ -125,7 +135,9 @@ export function Member360Sheet() {
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl border border-border bg-canvas p-3.5">
               <p className="text-[11px] font-medium text-muted-foreground">Days Remaining</p>
-              <p className={`mt-1 font-mono text-xl font-bold ${isExpired ? "text-danger" : isExpiringSoon ? "text-warn" : "text-foreground"}`}>
+              <p
+                className={`mt-1 font-mono text-xl font-bold ${isExpired ? "text-danger" : isExpiringSoon ? "text-warn" : "text-foreground"}`}
+              >
                 {isExpired ? "Expired" : `${diffDays} days`}
               </p>
               <p className="text-[10px] text-muted-foreground mt-0.5">Expires {m.expiry}</p>
@@ -147,8 +159,12 @@ export function Member360Sheet() {
 
             <div className="rounded-xl border border-border bg-canvas p-3.5">
               <p className="text-[11px] font-medium text-muted-foreground">Outstanding Due</p>
-              <p className={`mt-1 font-mono text-xl font-bold ${m.due > 0 ? "text-warn" : "text-emerald"}`}>
-                {m.due > 0 ? `${settings.currencySymbol}${m.due.toLocaleString("en-IN")}` : "Paid in Full"}
+              <p
+                className={`mt-1 font-mono text-xl font-bold ${m.due > 0 ? "text-warn" : "text-emerald"}`}
+              >
+                {m.due > 0
+                  ? `${settings.currencySymbol}${m.due.toLocaleString("en-IN")}`
+                  : "Paid in Full"}
               </p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{m.plan}</p>
             </div>
@@ -205,8 +221,12 @@ export function Member360Sheet() {
                 className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-surface hover:border-emerald hover:bg-emerald-soft/30 transition text-center"
               >
                 <QrCode className="h-4 w-4 text-blue-500" />
-                <span className="mt-1.5 text-xs font-semibold">{m.due > 0 ? "Scan QR Pay" : "Pay Dues"}</span>
-                <span className="text-[10px] text-muted-foreground">{m.due > 0 ? `₹${m.due}` : "Record Log"}</span>
+                <span className="mt-1.5 text-xs font-semibold">
+                  {m.due > 0 ? "Scan QR Pay" : "Pay Dues"}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {m.due > 0 ? `₹${m.due}` : "Record Log"}
+                </span>
               </button>
             </div>
 
@@ -269,23 +289,27 @@ export function Member360Sheet() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
               <div className="p-2.5 rounded-xl border border-border bg-surface space-y-1">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Dumbbell className="h-3.5 w-3.5 text-purple-500" />
+                  <Dumbbell className="h-3.5 w-3.5 text-brand" />
                   <span className="font-semibold text-[11px]">Workout Split</span>
                 </div>
-                <p className="font-medium text-foreground truncate">{m.assignedWorkout || "Push-Pull-Legs Split"}</p>
+                <p className="font-medium text-foreground truncate">
+                  {m.assignedWorkout || "Push-Pull-Legs Split"}
+                </p>
               </div>
 
               <div className="p-2.5 rounded-xl border border-border bg-surface space-y-1">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Utensils className="h-3.5 w-3.5 text-emerald" />
+                  <Utensils className="h-3.5 w-3.5 text-brand" />
                   <span className="font-semibold text-[11px]">Nutrition Plan</span>
                 </div>
-                <p className="font-medium text-foreground truncate">{m.assignedDiet || "High Protein Muscle (2400 kcal)"}</p>
+                <p className="font-medium text-foreground truncate">
+                  {m.assignedDiet || "High Protein Muscle (2400 kcal)"}
+                </p>
               </div>
 
               <div className="p-2.5 rounded-xl border border-border bg-surface space-y-1">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <KeyRound className="h-3.5 w-3.5 text-blue-500" />
+                  <KeyRound className="h-3.5 w-3.5 text-brand" />
                   <span className="font-semibold text-[11px]">Locker Box</span>
                 </div>
                 <p className="font-medium text-foreground">
@@ -408,38 +432,39 @@ export function Member360Sheet() {
             </span>
 
             {(() => {
-              const timelineEvents = m.timeline && m.timeline.length > 0
-                ? m.timeline
-                : [
-                    {
-                      id: "evt-reg",
-                      title: `Enrolled in ${m.plan}`,
-                      timestamp: m.joinDate || "1 May 2026",
-                      type: "upgrade" as const,
-                    },
-                    ...(m.invoices || []).map((inv) => ({
-                      id: `evt-inv-${inv.id}`,
-                      title: `Payment received: ${settings.currencySymbol}${inv.amount.toLocaleString("en-IN")} via ${inv.method} (${inv.invoiceNumber})`,
-                      timestamp: inv.date,
-                      type: "payment" as const,
-                    })),
-                    {
-                      id: "evt-plan",
-                      title: `Active Training Status: ${m.plan} (${m.status})`,
-                      timestamp: m.joinDate || "1 May 2026",
-                      type: "upgrade" as const,
-                    },
-                    ...(m.assignedWorkout
-                      ? [
-                          {
-                            id: "evt-wo",
-                            title: `Assigned Workout Program: ${m.assignedWorkout}`,
-                            timestamp: "Active Routine",
-                            type: "pt_session" as const,
-                          },
-                        ]
-                      : []),
-                  ];
+              const timelineEvents =
+                m.timeline && m.timeline.length > 0
+                  ? m.timeline
+                  : [
+                      {
+                        id: "evt-reg",
+                        title: `Enrolled in ${m.plan}`,
+                        timestamp: m.joinDate || "1 May 2026",
+                        type: "upgrade" as const,
+                      },
+                      ...(m.invoices || []).map((inv) => ({
+                        id: `evt-inv-${inv.id}`,
+                        title: `Payment received: ${settings.currencySymbol}${inv.amount.toLocaleString("en-IN")} via ${inv.method} (${inv.invoiceNumber})`,
+                        timestamp: inv.date,
+                        type: "payment" as const,
+                      })),
+                      {
+                        id: "evt-plan",
+                        title: `Active Training Status: ${m.plan} (${m.status})`,
+                        timestamp: m.joinDate || "1 May 2026",
+                        type: "upgrade" as const,
+                      },
+                      ...(m.assignedWorkout
+                        ? [
+                            {
+                              id: "evt-wo",
+                              title: `Assigned Workout Program: ${m.assignedWorkout}`,
+                              timestamp: "Active Routine",
+                              type: "pt_session" as const,
+                            },
+                          ]
+                        : []),
+                    ];
 
               return (
                 <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
@@ -447,15 +472,15 @@ export function Member360Sheet() {
                     const getIcon = () => {
                       switch (event.type) {
                         case "attendance":
-                          return <CheckCircle2 className="h-3.5 w-3.5 text-emerald" />;
+                          return <CheckCircle2 className="h-3.5 w-3.5 text-brand" />;
                         case "payment":
-                          return <CreditCard className="h-3.5 w-3.5 text-blue-500" />;
+                          return <CreditCard className="h-3.5 w-3.5 text-foreground" />;
                         case "upgrade":
-                          return <TrendingUp className="h-3.5 w-3.5 text-purple-500" />;
+                          return <TrendingUp className="h-3.5 w-3.5 text-brand" />;
                         case "pt_session":
-                          return <Dumbbell className="h-3.5 w-3.5 text-amber-500" />;
+                          return <Dumbbell className="h-3.5 w-3.5 text-foreground" />;
                         case "freeze":
-                          return <PauseCircle className="h-3.5 w-3.5 text-orange-500" />;
+                          return <PauseCircle className="h-3.5 w-3.5 text-muted-foreground" />;
                         default:
                           return <Clock className="h-3.5 w-3.5 text-muted-foreground" />;
                       }
@@ -468,7 +493,9 @@ export function Member360Sheet() {
                         </div>
                         <div>
                           <p className="text-xs font-medium text-foreground">{event.title}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{event.timestamp}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {event.timestamp}
+                          </p>
                         </div>
                       </div>
                     );

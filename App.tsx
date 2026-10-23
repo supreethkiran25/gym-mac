@@ -96,7 +96,11 @@ function MainAppNavigator() {
 
       {/* Top Header Rail for Navigation */}
       <View style={[styles.topNavRail, { backgroundColor: surface, borderColor: border }]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.navScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.navScroll}
+        >
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -120,12 +124,7 @@ function MainAppNavigator() {
                   {item.label}
                 </Text>
                 {item.badge !== undefined && item.badge > 0 && (
-                  <View
-                    style={[
-                      styles.badgeCircle,
-                      { backgroundColor: isActive ? bg : emerald },
-                    ]}
-                  >
+                  <View style={[styles.badgeCircle, { backgroundColor: isActive ? bg : emerald }]}>
                     <Text
                       style={[
                         styles.badgeCircleText,
@@ -143,9 +142,7 @@ function MainAppNavigator() {
       </View>
 
       {/* Active Screen Viewport */}
-      <View style={styles.screenContainer}>
-        {renderActiveScreen()}
-      </View>
+      <View style={styles.screenContainer}>{renderActiveScreen()}</View>
 
       {/* Global Native Modals */}
       <DynamicUPIQRModal />
