@@ -1,5 +1,22 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { extractDominantColor, applyBrandThemeCss } from "./color-extractor";
+import { toast } from "sonner";
+import {
+  formatDateYMD,
+  deriveMembershipLifecycleStatus,
+  calculateRenewalExpiry,
+  calculateFreezeWindow,
+  calculateUnfreezeExpiry,
+} from "./membership-lifecycle";
+import { evaluateAccessDecision, AccessDecision } from "./access-engine";
+import {
+  generateNextInvoiceNumber,
+  generateNextCreditNoteNumber,
+  evaluateRefundState,
+} from "./invoice-engine";
+import { validateCsvImportBatch, ImportValidationResult } from "./csv-import-validator";
+import { identifyAttendanceDrops, calculateRetentionMetrics } from "./retention-engine";
+import { runFinancialReconciliation, computeDailyCloseSummary } from "./reconciliation-engine";
 
 export type UserRole = "admin" | "reception";
 
@@ -1491,7 +1508,11 @@ interface GymStoreContextType {
   ) => void;
   updateMember: (id: string, updates: Partial<Member>) => void;
   deleteMember: (id: string) => void;
-  checkInMember: (memberId: string) => void;
+  checkInMember: (memberId: string) => boolean;
+  evaluateAndCheckInMember: (
+    memberId: string,
+    options?: { isOverride?: boolean; overrideReason?: string },
+  ) => AccessDecision;
   checkOutMember: (memberId: string) => void;
   renewMember: (
     memberId: string,
@@ -1509,7 +1530,14 @@ interface GymStoreContextType {
     toPhone: string,
     toEmail: string,
   ) => void;
-  bulkImportMembers: (newMembers: Array<Partial<Member>>) => number;
+  bulkImportMembers: (newMembers: Array<Record<string, string> | Partial<Member>>) => number;
+  validateImportBatch: (rows: Array<Record<string, string>>) => ImportValidationResult;
+
+  // New Analytics & Reconciliation Features
+  runReconciliation: () => ReturnType<typeof runFinancialReconciliation>;
+  getAttendanceDropAlerts: () => ReturnType<typeof identifyAttendanceDrops>;
+  getRetentionMetrics: () => ReturnType<typeof calculateRetentionMetrics>;
+  getDailyClose: (date?: string) => ReturnType<typeof computeDailyCloseSummary>;
 
   // Payment & Inflow Actions
   recordPayment: (payment: {
@@ -2396,48 +2424,121 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const bulkImportMembers = (newMembersList: Array<Partial<Member>>): number => {
-    const today = new Date().toISOString().split("T")[0];
-    let importedCount = 0;
+  const validateImportBatch = (rows: Array<Record<string, string>>): ImportValidationResult => {
+    return validateCsvImportBatch(rows, members, settings.membershipPlans);
+  };
 
-    const importedMembers: Member[] = newMembersList.map((data, index) => {
-      const planName = data.plan || "Monthly Flex";
-      const planObj = settings.membershipPlans.find((p) => p.name === planName);
-      const planPrice = data.planPrice || planObj?.price || 3000;
-      const due = data.due !== undefined ? data.due : 0;
-      const collected = Math.max(0, planPrice - due);
+  const bulkImportMembers = (
+    newMembersList: Array<Record<string, string> | Partial<Member>>,
+  ): number => {
+    const stringRecords = newMembersList.map((item) => {
+      const res: Record<string, string> = {};
+      for (const [k, v] of Object.entries(item)) {
+        res[k] = v !== undefined && v !== null ? String(v) : "";
+      }
+      return res;
+    });
 
-      const member: Member = {
-        id: `m-bulk-${Date.now()}-${index}`,
-        name: data.name || `Member ${index + 1}`,
-        phone: data.phone || "+91 90000 00000",
-        email: data.email || `member${index + 1}@gym.com`,
-        plan: planName,
-        planPrice,
-        collectedAmount: collected,
-        due,
-        joinDate: data.joinDate || today,
-        expiry:
-          data.expiry ||
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        status: (data.status as MemberStatus) || (due > 0 ? "Partial" : "Active"),
+    const validation = validateCsvImportBatch(stringRecords, members, settings.membershipPlans);
+    if (validation.validCount === 0) {
+      toast.error(
+        `Import blocked: All ${validation.totalRows} rows had validation errors or duplicate phone numbers.`,
+      );
+      return 0;
+    }
+
+    const todayStr = formatDateYMD(new Date());
+    const currentInvoices = [
+      ...payments.map((p) => p.invoiceNumber),
+      ...members.flatMap((m) => m.invoices.map((i) => i.invoiceNumber)),
+    ].filter(Boolean);
+
+    const newPaymentsToAdd: Payment[] = [];
+    const importedMembers: Member[] = validation.validRows.map((row, index) => {
+      const newId = `m-import-${Date.now()}-${index}`;
+      const invNum = generateNextInvoiceNumber(
+        currentInvoices,
+        settings.invoicePrefix || "INV-2026-",
+      );
+      currentInvoices.push(invNum);
+
+      if (row.paidAmount && row.paidAmount > 0) {
+        newPaymentsToAdd.push({
+          id: `p-imp-${Date.now()}-${index}`,
+          memberId: newId,
+          member: row.name,
+          date: row.joinDate || todayStr,
+          method: "UPI",
+          amount: row.paidAmount,
+          category: "Membership",
+          status: row.computedDue === 0 ? "Paid" : "Partial",
+          invoiceNumber: invNum,
+          installmentIndex: 1,
+          totalInstallments: row.computedDue > 0 ? 2 : 1,
+          notes: "Initial payment via validated CSV bulk import",
+          collectedBy: `${currentUser.name} (${currentUser.role})`,
+        });
+      }
+
+      return {
+        id: newId,
+        name: row.name,
+        phone: row.phone,
+        email: row.email,
+        plan: row.plan,
+        planPrice: row.planPrice || 3000,
+        collectedAmount: row.paidAmount || 0,
+        due: row.computedDue,
+        joinDate: row.joinDate || todayStr,
+        expiry: row.expiry || calculateRenewalExpiry(todayStr, 1),
+        status: row.computedStatus,
         attendanceRate: 100,
         lastVisit: "Imported via CSV",
         isCurrentlyInside: false,
-        notes: data.notes || "Bulk imported member record",
-        installments: [],
+        healthGoal: row.healthGoal,
+        notes: row.notes || "Imported via Safe CSV Upload",
+        installments:
+          row.paidAmount && row.paidAmount > 0
+            ? [
+                {
+                  id: `inst-imp-${Date.now()}-${index}`,
+                  amount: row.paidAmount,
+                  date: row.joinDate || todayStr,
+                  method: "UPI",
+                  invoiceNumber: invNum,
+                  installmentNumber: 1,
+                  totalInstallments: row.computedDue > 0 ? 2 : 1,
+                  note: "Import deposit",
+                },
+              ]
+            : [],
         timeline: [
           {
-            id: `t-bulk-${Date.now()}-${index}`,
+            id: `t-imp-${Date.now()}-${index}`,
             type: "registration",
-            title: "Imported via Bulk CSV upload",
+            title: `Imported via validated CSV upload (${row.plan})`,
             timestamp: "Just now",
           },
         ],
-        invoices: [],
+        invoices:
+          row.paidAmount && row.paidAmount > 0
+            ? [
+                {
+                  id: `inv-imp-${Date.now()}-${index}`,
+                  invoiceNumber: invNum,
+                  date: row.joinDate || todayStr,
+                  amount: row.paidAmount,
+                  plan: row.plan,
+                  method: "UPI",
+                  status: row.computedDue === 0 ? "Paid" : "Partial",
+                  installmentInfo:
+                    row.computedDue > 0
+                      ? `Imported with remaining due: ${settings.currencySymbol}${row.computedDue}`
+                      : "Full Paid",
+                },
+              ]
+            : [],
       };
-      importedCount++;
-      return member;
     });
 
     setMembers((prev) => {
@@ -2446,12 +2547,25 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
+    if (newPaymentsToAdd.length > 0) {
+      setPayments((prev) => {
+        const updated = [...newPaymentsToAdd, ...prev];
+        safePersist(`${STORAGE_KEY_PEAKREP}_payments`, updated);
+        return updated;
+      });
+    }
+
     addSystemLog(
       "Bulk Member Import",
       "Member",
-      `Successfully bulk-imported ${importedCount} members`,
+      `Safely imported ${validation.validCount} members (${validation.errorCount} skipped/duplicates)`,
     );
-    return importedCount;
+    toast.success(
+      `Imported ${validation.validCount} members${
+        validation.errorCount > 0 ? ` (${validation.errorCount} skipped/duplicates)` : ""
+      }`,
+    );
+    return validation.validCount;
   };
 
   const updateMember = (id: string, updates: Partial<Member>) => {
@@ -2462,9 +2576,15 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (item.planPrice !== undefined && item.collectedAmount !== undefined) {
             item.due = Math.max(0, item.planPrice - item.collectedAmount);
           }
-          if (item.due === 0 && (item.status === "Partial" || item.status === "Expired")) {
-            item.status = "Active";
-          }
+          const lifecycle = deriveMembershipLifecycleStatus(item.expiry, item.freezeUntil);
+          item.status =
+            lifecycle === "Expired"
+              ? "Expired"
+              : lifecycle === "Frozen"
+              ? "Frozen"
+              : item.due > 0
+              ? "Partial"
+              : "Active";
           return item;
         }
         return m;
@@ -2476,7 +2596,14 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteMember = (id: string) => {
+    if (!hasPermission("canDeleteMember")) {
+      toast.error("Permission Denied: Only Directors and Administrators can delete member records.");
+      return;
+    }
     const target = members.find((m) => m.id === id);
+    if (target?.assignedLocker) {
+      releaseLocker(target.assignedLocker);
+    }
     setMembers((prev) => {
       const updated = prev.filter((m) => m.id !== id);
       safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
@@ -2487,16 +2614,34 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedMember360(null);
     }
     addSystemLog("Member Deleted", "Member", `Permanently removed member: ${target?.name || id}`);
+    toast.success(`Removed member ${target?.name || id}`);
   };
 
-  const checkInMember = (memberId: string) => {
-    const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    let memberName = "";
+  const evaluateAndCheckInMember = (
+    memberId: string,
+    options?: { isOverride?: boolean; overrideReason?: string },
+  ): AccessDecision => {
+    const member = members.find((m) => m.id === memberId);
+    const decision = evaluateAccessDecision(member, {
+      operatorName: currentUser.name,
+      operatorRole: currentUser.role,
+      isOverride: options?.isOverride,
+      overrideReason: options?.overrideReason,
+    });
 
+    if (!decision.allowed) {
+      addSystemLog(
+        "Turnstile Access Blocked",
+        "Attendance",
+        `${member?.name || memberId}: ${decision.message}`,
+      );
+      return decision;
+    }
+
+    const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
-          memberName = m.name;
           return {
             ...m,
             isCurrentlyInside: true,
@@ -2506,7 +2651,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               {
                 id: `t-${Date.now()}`,
                 type: "attendance" as const,
-                title: `Checked in at floor turnstile (${timeNow})`,
+                title:
+                  decision.code === "OVERRIDDEN"
+                    ? `Turnstile Override: Checked in (${options?.overrideReason})`
+                    : `Checked in at floor turnstile (${timeNow})`,
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -2520,10 +2668,19 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     addSystemLog(
-      "Member Check-In",
+      decision.code === "OVERRIDDEN" ? "Turnstile Override Authorized" : "Member Check-In",
       "Attendance",
-      `Checked in ${memberName || memberId} at ${timeNow}`,
+      `${member?.name || memberId} authorized at ${timeNow}${
+        decision.overrideReason ? ` (Reason: ${decision.overrideReason})` : ""
+      }`,
     );
+
+    return decision;
+  };
+
+  const checkInMember = (memberId: string): boolean => {
+    const decision = evaluateAndCheckInMember(memberId);
+    return decision.allowed;
   };
 
   const checkOutMember = (memberId: string) => {
@@ -2568,26 +2725,36 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     paidAmount?: number,
     paymentMethod: "UPI" | "Cash" | "Card" | "Bank" = "UPI",
   ) => {
-    const today = new Date();
-    today.setMonth(today.getMonth() + durationMonths);
-    const newExpiry = today.toISOString().split("T")[0];
-    const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
-    const todayStr = new Date().toISOString().split("T")[0];
+    const fromMember = members.find((m) => m.id === memberId);
+    if (!fromMember) {
+      toast.error("Member not found for renewal.");
+      return;
+    }
 
-    let renewedMemberName = "";
-    let prevExp = "";
+    const todayStr = formatDateYMD(new Date());
+    // Early renewers preserve their remaining days!
+    const newExpiry = calculateRenewalExpiry(fromMember.expiry, durationMonths, todayStr);
+
+    const existingInvoices = [
+      ...payments.map((p) => p.invoiceNumber),
+      ...members.flatMap((m) => m.invoices.map((i) => i.invoiceNumber)),
+    ].filter(Boolean);
+    const invoiceNum = generateNextInvoiceNumber(
+      existingInvoices,
+      settings.invoicePrefix || "INV-2026-",
+    );
+
+    let renewedMemberName = fromMember.name;
+    let prevExp = fromMember.expiry;
+    const selectedPlan = planName || fromMember.plan;
+    const planObj = settings.membershipPlans.find((p) => p.name === selectedPlan);
+    const planPrice = planObj?.price || 3000;
+    const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
+    const remainingDue = Math.max(0, planPrice - actualPaid);
 
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
-          renewedMemberName = m.name;
-          prevExp = m.expiry;
-          const selectedPlan = planName || m.plan;
-          const planPrice =
-            settings.membershipPlans.find((p) => p.name === selectedPlan)?.price || 3000;
-          const actualPaid = paidAmount !== undefined ? paidAmount : planPrice;
-          const remainingDue = Math.max(0, planPrice - actualPaid);
-
           const newInstallment: InstallmentRecord = {
             id: `inst-${Date.now()}`,
             amount: actualPaid,
@@ -2644,7 +2811,6 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     // Record Payment
-    const actualPaid = paidAmount !== undefined ? paidAmount : 3000;
     if (actualPaid > 0) {
       const newPayment: Payment = {
         id: `p-${Date.now()}`,
@@ -2735,9 +2901,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const freezeMember = (memberId: string, days: number, reason: string) => {
-    const today = new Date();
-    today.setDate(today.getDate() + days);
-    const freezeUntil = today.toISOString().split("T")[0];
+    const { freezeStartDate, freezeUntilDate } = calculateFreezeWindow(days);
     let memberName = "";
 
     setMembers((prev) => {
@@ -2747,13 +2911,13 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             ...m,
             status: "Frozen" as MemberStatus,
-            freezeUntil,
+            freezeUntil: freezeUntilDate,
             freezeReason: reason,
             timeline: [
               {
                 id: `t-${Date.now()}`,
                 type: "freeze" as const,
-                title: `Membership frozen for ${days} days until ${freezeUntil} (${reason})`,
+                title: `Membership frozen for ${days} days until ${freezeUntilDate} (Start: ${freezeStartDate} - ${reason})`,
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -2769,27 +2933,49 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addSystemLog(
       "Membership Frozen",
       "Member",
-      `Froze membership for ${memberName} until ${freezeUntil} (${reason})`,
+      `Froze membership for ${memberName} until ${freezeUntilDate} (${reason})`,
     );
+    toast.info(`Froze membership for ${memberName} until ${freezeUntilDate}`);
   };
 
   const unfreezeMember = (memberId: string) => {
     let memberName = "";
+    let extendedDays = 0;
+    let newExpiryDate = "";
 
     setMembers((prev) => {
       const updated = prev.map((m) => {
         if (m.id === memberId) {
           memberName = m.name;
+          const todayStr = formatDateYMD(new Date());
+          const freezeEvent = m.timeline.find((t) => t.type === "freeze");
+          const freezeMatch = freezeEvent?.title.match(/Start:\s*(\d{4}-\d{2}-\d{2})/);
+          const freezeStartDate = freezeMatch ? freezeMatch[1] : todayStr;
+
+          const { newExpiry, daysExtended } = calculateUnfreezeExpiry(
+            m.expiry,
+            freezeStartDate,
+            todayStr,
+          );
+          extendedDays = daysExtended;
+          newExpiryDate = newExpiry;
+
+          const lifecycle = deriveMembershipLifecycleStatus(newExpiry);
           return {
             ...m,
-            status: (m.due > 0 ? "Partial" : "Active") as MemberStatus,
+            expiry: newExpiry,
+            status: (lifecycle === "Expired"
+              ? "Expired"
+              : m.due > 0
+              ? "Partial"
+              : "Active") as MemberStatus,
             freezeUntil: undefined,
             freezeReason: undefined,
             timeline: [
               {
                 id: `t-${Date.now()}`,
                 type: "freeze" as const,
-                title: "Membership resumed / unfrozen",
+                title: `Membership resumed: extended by +${daysExtended} days (New expiry: ${newExpiry})`,
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -2802,7 +2988,14 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    addSystemLog("Membership Unfrozen", "Member", `Resumed/unfroze membership for ${memberName}`);
+    addSystemLog(
+      "Membership Unfrozen",
+      "Member",
+      `Resumed membership for ${memberName}: extended by +${extendedDays} days until ${newExpiryDate}`,
+    );
+    toast.success(
+      `Unfroze ${memberName} and extended validity by +${extendedDays} days until ${newExpiryDate}`,
+    );
   };
 
   const transferMembership = (
@@ -2811,20 +3004,44 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     toPhone: string,
     toEmail: string,
   ) => {
+    if (!hasPermission("canTransferMembership")) {
+      toast.error("Permission Denied: Only Directors and Administrators can transfer memberships.");
+      return;
+    }
     const fromMember = members.find((m) => m.id === fromMemberId);
-    if (!fromMember) return;
+    if (!fromMember) {
+      toast.error("Member record not found.");
+      return;
+    }
+    if (fromMember.status === "Expired") {
+      toast.error("Cannot transfer an expired membership. Please renew first.");
+      return;
+    }
+
+    // Release old locker if held
+    if (fromMember.assignedLocker) {
+      releaseLocker(fromMember.assignedLocker);
+    }
 
     const newId = `m-transfer-${Date.now()}`;
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = formatDateYMD(new Date());
 
     const newRecipient: Member = {
-      ...fromMember,
       id: newId,
       name: toName,
       phone: toPhone,
       email: toEmail,
-      status: "Active",
+      plan: fromMember.plan,
+      planPrice: fromMember.planPrice,
+      collectedAmount: fromMember.collectedAmount,
+      due: fromMember.due,
+      joinDate: todayStr,
+      expiry: fromMember.expiry,
+      status: fromMember.due > 0 ? "Partial" : "Active",
+      attendanceRate: 100,
+      lastVisit: "Transferred today",
       isCurrentlyInside: false,
+      installments: [],
       notes: `Transferred from ${fromMember.name} on ${todayStr}`,
       timeline: [
         {
@@ -2834,6 +3051,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           timestamp: "Just now",
         },
       ],
+      invoices: [],
     };
 
     setMembers((prev) => {
@@ -2842,12 +3060,13 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             ...m,
             status: "Expired" as MemberStatus,
-            notes: `Transferred remaining membership to ${toName} on ${todayStr}`,
+            assignedLocker: undefined,
+            notes: `${m.notes || ""} [Transferred remaining membership to ${toName} on ${todayStr}]`,
             timeline: [
               {
                 id: `t-tr-${Date.now()}`,
                 type: "transfer" as const,
-                title: `Transferred membership to ${toName}`,
+                title: `Transferred remaining membership to ${toName}`,
                 timestamp: "Just now",
               },
               ...m.timeline,
@@ -2866,6 +3085,7 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       "Member",
       `Transferred membership from ${fromMember.name} to ${toName}`,
     );
+    toast.success(`Transferred membership to ${toName}!`);
   };
 
   // Payment Actions
@@ -2880,7 +3100,15 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     installmentNumber?: number;
     totalInstallments?: number;
   }) => {
-    const invoiceNum = `${settings.invoicePrefix || "PEAK-2026-"}${Math.floor(1000 + Math.random() * 9000)}`;
+    const existingInvoices = [
+      ...payments.map((p) => p.invoiceNumber),
+      ...members.flatMap((m) => m.invoices.map((i) => i.invoiceNumber)),
+    ].filter(Boolean);
+    const invoiceNum = generateNextInvoiceNumber(
+      existingInvoices,
+      settings.invoicePrefix || "INV-2026-",
+    );
+
     const newPayment: Payment = {
       ...paymentData,
       id: `p-${Date.now()}`,
@@ -2930,13 +3158,22 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 : "Full Paid",
           };
 
+          // DEF-004 FIX: Do NOT mark an expired member Active just because debt was cleared!
+          const lifecycle = deriveMembershipLifecycleStatus(m.expiry, m.freezeUntil);
+          const newStatus: MemberStatus =
+            lifecycle === "Expired"
+              ? "Expired"
+              : lifecycle === "Frozen"
+              ? "Frozen"
+              : newDue > 0
+              ? "Partial"
+              : "Active";
+
           return {
             ...m,
             collectedAmount: newCollected,
             due: newDue,
-            status: (newDue === 0 && (m.status === "Partial" || m.status === "Expired")
-              ? "Active"
-              : m.status) as MemberStatus,
+            status: newStatus,
             installments: [newInstallment, ...m.installments],
             invoices: [newInvoice, ...m.invoices],
             timeline: [
@@ -2960,24 +3197,52 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addSystemLog(
       "Payment Collected",
       "Payment",
-      `Collected ${settings.currencySymbol}${paymentData.amount} from ${paymentData.member} via ${paymentData.method}`,
+      `Collected ${settings.currencySymbol}${paymentData.amount} from ${paymentData.member} via ${paymentData.method} (${invoiceNum})`,
+    );
+    toast.success(
+      `Recorded payment of ${settings.currencySymbol}${paymentData.amount.toLocaleString("en-IN")} (${invoiceNum})`,
     );
   };
 
   const refundPayment = (paymentId: string, refundAmount: number, reason: string): boolean => {
+    if (!hasPermission("canProcessRefunds")) {
+      toast.error("Permission Denied: Only Directors and Administrators can process refunds.");
+      return false;
+    }
+
     const targetPayment = payments.find((p) => p.id === paymentId);
-    if (!targetPayment) return false;
+    if (!targetPayment) {
+      toast.error("Payment record not found.");
+      return false;
+    }
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const targetMember = members.find((m) => m.id === targetPayment.memberId);
+    const refundEval = evaluateRefundState(
+      targetPayment.amount,
+      refundAmount,
+      targetMember?.collectedAmount || targetPayment.amount,
+      targetMember?.planPrice || targetPayment.amount,
+    );
 
-    // Mark payment as refunded
+    if (!refundEval.isEligible) {
+      toast.error(refundEval.errorMessage || "Invalid refund amount.");
+      return false;
+    }
+
+    const todayStr = formatDateYMD(new Date());
+    const existingCreditNotes = refunds.map((r) => r.id);
+    const creditNoteNum = generateNextCreditNoteNumber(existingCreditNotes);
+
+    // Update payment record with partial or full status
     setPayments((prev) => {
       const updated = prev.map((p) => {
         if (p.id === paymentId) {
           return {
             ...p,
-            status: "Refunded" as const,
-            notes: `${p.notes || ""} [REFUNDED: ${settings.currencySymbol}${refundAmount} on ${todayStr} - Reason: ${reason}]`,
+            status: (refundEval.paymentStatus === "Refunded"
+              ? "Refunded"
+              : "Partial") as Payment["status"],
+            notes: `${p.notes || ""} [REFUND ${creditNoteNum}: ${settings.currencySymbol}${refundAmount} on ${todayStr} - ${reason}]`,
           };
         }
         return p;
@@ -2986,23 +3251,43 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    // Update Member balance
+    // Update member balance and append credit note to invoice register
     if (targetPayment.memberId) {
       setMembers((prev) => {
         const updated = prev.map((m) => {
           if (m.id === targetPayment.memberId) {
-            const newCollected = Math.max(0, m.collectedAmount - refundAmount);
-            const newDue = Math.max(0, m.planPrice - newCollected);
+            const creditNoteInvoice: MemberInvoice = {
+              id: `cn-${Date.now()}`,
+              invoiceNumber: creditNoteNum,
+              date: todayStr,
+              amount: -refundAmount,
+              plan: `Credit Note (${targetPayment.invoiceNumber})`,
+              method: targetPayment.method,
+              status: "Refunded",
+              installmentInfo: `Credit Note against ${targetPayment.invoiceNumber} (${reason})`,
+            };
+
+            const lifecycle = deriveMembershipLifecycleStatus(m.expiry, m.freezeUntil);
+            const updatedStatus: MemberStatus =
+              lifecycle === "Expired"
+                ? "Expired"
+                : lifecycle === "Frozen"
+                ? "Frozen"
+                : refundEval.newDue > 0
+                ? "Partial"
+                : "Active";
+
             return {
               ...m,
-              collectedAmount: newCollected,
-              due: newDue,
-              status: (newDue > 0 ? "Partial" : m.status) as MemberStatus,
+              collectedAmount: refundEval.newCollectedAmount,
+              due: refundEval.newDue,
+              status: updatedStatus,
+              invoices: [creditNoteInvoice, ...m.invoices],
               timeline: [
                 {
                   id: `t-ref-${Date.now()}`,
                   type: "refund" as const,
-                  title: `Processed Refund of ${settings.currencySymbol}${refundAmount} (${reason})`,
+                  title: `Processed Refund (${creditNoteNum}) of ${settings.currencySymbol}${refundAmount} (${reason})`,
                   timestamp: "Just now",
                   amount: -refundAmount,
                 },
@@ -3017,9 +3302,9 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    // Record Refund
+    // Record authoritative Refund entry
     const refundRecord: RefundRecord = {
-      id: `ref-${Date.now()}`,
+      id: creditNoteNum,
       paymentId,
       memberId: targetPayment.memberId || "",
       memberName: targetPayment.member,
@@ -3039,7 +3324,10 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addSystemLog(
       "Payment Refunded",
       "Refund",
-      `Refunded ${settings.currencySymbol}${refundAmount} to ${targetPayment.member} (${reason})`,
+      `Refunded ${settings.currencySymbol}${refundAmount} (${creditNoteNum}) to ${targetPayment.member} (${reason})`,
+    );
+    toast.success(
+      `Processed refund of ${settings.currencySymbol}${refundAmount.toLocaleString("en-IN")} (${creditNoteNum})`,
     );
     return true;
   };
@@ -3208,6 +3496,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       "id" | "activeCount" | "expiringCount" | "frozenCount" | "upgradeOpportunities"
     >,
   ) => {
+    if (!hasPermission("canManagePlans")) {
+      toast.error(
+        "Permission Denied: Only Directors and Administrators can configure membership plans.",
+      );
+      return;
+    }
     const newPlan: MembershipPlan = {
       ...planData,
       id: `plan-${Date.now()}`,
@@ -3226,9 +3520,14 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       "Plan",
       `Created new membership plan: ${newPlan.name} (${settings.currencySymbol}${newPlan.price})`,
     );
+    toast.success(`Created plan ${newPlan.name}!`);
   };
 
   const updatePlan = (id: string, updates: Partial<MembershipPlan>) => {
+    if (!hasPermission("canManagePlans")) {
+      toast.error("Permission Denied: Only Directors and Administrators can edit membership plans.");
+      return;
+    }
     setSettings((prev) => {
       const updated = {
         ...prev,
@@ -3238,9 +3537,26 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
     addSystemLog("Plan Updated", "Plan", `Updated plan ID ${id}`);
+    toast.success("Updated membership plan!");
   };
 
   const deletePlan = (id: string) => {
+    if (!hasPermission("canManagePlans")) {
+      toast.error(
+        "Permission Denied: Only Directors and Administrators can delete membership plans.",
+      );
+      return;
+    }
+    const targetPlan = settings.membershipPlans.find((p) => p.id === id);
+    if (!targetPlan) return;
+    const enrolledMembersCount = members.filter((m) => m.plan === targetPlan.name).length;
+    if (enrolledMembersCount > 0) {
+      toast.error(
+        `Cannot delete "${targetPlan.name}": ${enrolledMembersCount} members are currently enrolled. Reassign them first.`,
+      );
+      return;
+    }
+
     setSettings((prev) => {
       const updated = {
         ...prev,
@@ -3249,7 +3565,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_settings`, updated);
       return updated;
     });
-    addSystemLog("Plan Deleted", "Plan", `Deleted plan ID ${id}`);
+    addSystemLog("Plan Deleted", "Plan", `Deleted plan: ${targetPlan.name}`);
+    toast.success(`Deleted plan ${targetPlan.name}`);
   };
 
   // Lead CRM
@@ -3479,7 +3796,31 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     memberId: string,
     memberName: string,
     durationDays = 30,
-  ) => {
+  ): boolean => {
+    const targetLocker = lockers.find((l) => l.number === lockerNumber);
+    if (
+      targetLocker &&
+      targetLocker.status === "Occupied" &&
+      targetLocker.assignedMemberId !== memberId
+    ) {
+      toast.error(
+        `Locker #${lockerNumber} is already occupied by ${targetLocker.assignedMemberName}.`,
+      );
+      return false;
+    }
+    if (targetLocker && targetLocker.status === "Under Maintenance") {
+      toast.error(`Locker #${lockerNumber} is currently under maintenance.`);
+      return false;
+    }
+
+    // Release any previous locker held by this member
+    const prevLocker = lockers.find(
+      (l) => l.assignedMemberId === memberId && l.number !== lockerNumber,
+    );
+    if (prevLocker) {
+      releaseLocker(prevLocker.number);
+    }
+
     const exp = new Date();
     exp.setDate(exp.getDate() + durationDays);
     const expStr = exp.toISOString().split("T")[0];
@@ -3519,6 +3860,8 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     addSystemLog("Locker Assigned", "Locker", `Assigned locker #${lockerNumber} to ${memberName}`);
+    toast.success(`Assigned locker #${lockerNumber} to ${memberName}`);
+    return true;
   };
 
   const reserveLocker = (lockerNumber: number, reservedFor: string, note?: string) => {
@@ -3548,9 +3891,12 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const releaseLocker = (lockerNumber: number) => {
+    let releasedMemberId: string | undefined;
+
     setLockers((prev) => {
       const updated = prev.map((l) => {
         if (l.number === lockerNumber) {
+          releasedMemberId = l.assignedMemberId;
           const oldMember = l.assignedMemberName;
           return {
             ...l,
@@ -3575,6 +3921,19 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safePersist(`${STORAGE_KEY_PEAKREP}_lockers`, updated);
       return updated;
     });
+
+    // Clear assignedLocker on member
+    if (releasedMemberId) {
+      setMembers((prev) => {
+        const updated = prev.map((m) =>
+          m.id === releasedMemberId ? { ...m, assignedLocker: undefined } : m,
+        );
+        safePersist(`${STORAGE_KEY_PEAKREP}_members`, updated);
+        return updated;
+      });
+    }
+
+    addSystemLog("Locker Released", "Locker", `Released locker #${lockerNumber}`);
   };
 
   const markLockerMaintenance = (lockerNumber: number, issue: string, date?: string) => {
@@ -3901,9 +4260,11 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addSystemLog,
         addMember,
         bulkImportMembers,
+        validateImportBatch,
         updateMember,
         deleteMember,
         checkInMember,
+        evaluateAndCheckInMember,
         checkOutMember,
         renewMember,
         extendMembershipDays,
@@ -3912,6 +4273,16 @@ export const GymProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transferMembership,
         recordPayment,
         refundPayment,
+        runReconciliation: () => runFinancialReconciliation(payments, members, refunds),
+        getAttendanceDropAlerts: () => identifyAttendanceDrops(members),
+        getRetentionMetrics: () => calculateRetentionMetrics(members),
+        getDailyClose: (date?: string) =>
+          computeDailyCloseSummary(
+            date || formatDateYMD(new Date()),
+            payments,
+            expenses,
+            refunds,
+          ),
         addExpense,
         updateExpense,
         deleteExpense,

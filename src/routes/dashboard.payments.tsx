@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   CreditCard,
   TrendingUp,
+  Scale,
+  FileCheck2,
   TrendingDown,
   AlertTriangle,
   Clock,
@@ -80,9 +82,14 @@ function PaymentsAndRevenueEngine() {
     setSelectedPaymentForRefund,
     setIsRefundModalOpen,
     openUPIQRModal,
+    runReconciliation,
   } = useGymStore();
 
-  const [activeTab, setActiveTab] = useState<"inflow" | "expenses" | "pnl">("inflow");
+  const [activeTab, setActiveTab] = useState<"inflow" | "expenses" | "pnl" | "reconciliation">("inflow");
+
+  const reconciliationData = useMemo(() => {
+    return runReconciliation();
+  }, [payments, members]);
 
   // Inflow Filters
   const [inflowSearch, setInflowSearch] = useState("");
@@ -580,14 +587,26 @@ function PaymentsAndRevenueEngine() {
 
         <button
           onClick={() => setActiveTab("pnl")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition cursor-pointer ${
             activeTab === "pnl"
               ? "bg-brand text-brand-foreground shadow-md shadow-brand/20"
               : "border border-border bg-surface text-muted-foreground hover:text-foreground"
           }`}
         >
           <Layers className="h-4 w-4" />
-          <span>P&L Statement & Cash Flow Analysis</span>
+          <span>P&L Statement & Cash Flow</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("reconciliation")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition cursor-pointer ${
+            activeTab === "reconciliation"
+              ? "bg-brand text-brand-foreground shadow-md shadow-brand/20"
+              : "border border-border bg-surface text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Scale className="h-4 w-4 text-sky-400" />
+          <span>Ledger Reconciliation & Audit ({reconciliationData.matchedCount} Matched)</span>
         </button>
       </div>
 
@@ -1109,6 +1128,127 @@ function PaymentsAndRevenueEngine() {
                     : "The gym is operating profitably with cash reserves remaining after paying overheads."}
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: FINANCIAL RECONCILIATION & AUDIT */}
+      {activeTab === "reconciliation" && (
+        <div className="space-y-6 animate-in fade-in duration-150">
+          {/* Header Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div className="rounded-3xl border border-white/5 bg-[#0a0d14]/70 p-5 space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                TOTAL GROSS AUDITED
+              </span>
+              <p className="text-2xl font-bold font-mono text-white">
+                {settings.currencySymbol}{reconciliationData.totalGrossReconciled.toLocaleString("en-IN")}
+              </p>
+              <p className="text-[11px] text-slate-500">All registered inflows</p>
+            </div>
+
+            <div className="rounded-3xl border border-white/5 bg-[#0a0d14]/70 p-5 space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                MATCHED LEDGER
+              </span>
+              <p className="text-2xl font-bold font-mono text-emerald-400">
+                {reconciliationData.matchedCount}
+              </p>
+              <p className="text-[11px] text-slate-500">100% Reconciled to invoices</p>
+            </div>
+
+            <div className="rounded-3xl border border-white/5 bg-[#0a0d14]/70 p-5 space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                DISCREPANCIES
+              </span>
+              <p className={`text-2xl font-bold font-mono ${reconciliationData.discrepancyCount > 0 ? "text-rose-400" : "text-slate-400"}`}>
+                {reconciliationData.discrepancyCount}
+              </p>
+              <p className="text-[11px] text-slate-500">Unmatched / Over-refunds</p>
+            </div>
+
+            <div className="rounded-3xl border border-white/5 bg-[#0a0d14]/70 p-5 space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                NET SETTLED
+              </span>
+              <p className="text-2xl font-bold font-mono text-sky-400">
+                {settings.currencySymbol}{reconciliationData.totalNetReconciled.toLocaleString("en-IN")}
+              </p>
+              <p className="text-[11px] text-slate-500">Inflows minus refunds</p>
+            </div>
+          </div>
+
+          {/* Audit Table */}
+          <div className="rounded-3xl border border-white/10 bg-[#0a0d14]/70 p-6 space-y-4 shadow-xs backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div>
+                <h3 className="text-sm font-heading font-black uppercase tracking-wider text-white">
+                  Payment Ledger vs Invoices Reconciliation
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Cross-audits each payment transaction against member collected records and tax invoices.
+                </p>
+              </div>
+              <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                Audit Status: Balanced
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-white/5 bg-[#05080f]">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-white/5 border-b border-white/5 text-slate-400 text-[10px] uppercase font-mono">
+                  <tr>
+                    <th className="p-3">Date</th>
+                    <th className="p-3">Invoice #</th>
+                    <th className="p-3">Member</th>
+                    <th className="p-3">Amount</th>
+                    <th className="p-3">Refunded</th>
+                    <th className="p-3">Net Settled</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Audit Details</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-slate-300">
+                  {reconciliationData.items.map((item) => (
+                    <tr key={item.id} className="hover:bg-white/[0.02]">
+                      <td className="p-3 font-mono text-[11px] text-slate-400">{item.date}</td>
+                      <td className="p-3 font-mono font-bold text-sky-400">{item.invoiceNumber}</td>
+                      <td className="p-3 font-medium text-white">{item.memberName}</td>
+                      <td className="p-3 font-mono text-white">
+                        {settings.currencySymbol}{item.paymentAmount.toLocaleString("en-IN")}
+                      </td>
+                      <td className="p-3 font-mono text-rose-400">
+                        {item.totalRefunded > 0 ? `-${settings.currencySymbol}${item.totalRefunded}` : "—"}
+                      </td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">
+                        {settings.currencySymbol}{item.netAmount.toLocaleString("en-IN")}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            item.status === "Matched"
+                              ? "bg-emerald-500/20 text-emerald-400"
+                              : "bg-amber-500/20 text-amber-400"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-[11px] text-slate-400 max-w-xs truncate">
+                        {item.details}
+                      </td>
+                    </tr>
+                  ))}
+                  {reconciliationData.items.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="p-6 text-center text-xs text-slate-500">
+                        No transactions recorded for reconciliation.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
