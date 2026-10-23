@@ -371,9 +371,7 @@ function LockerRegistryPage() {
 
                 {l.status === "Reserved" && (
                   <div className="rounded-xl border border-brand/20 bg-brand-soft/20 p-2.5 space-y-1">
-                    <p className="text-brand text-[10px] font-medium">
-                      Reserved Holder
-                    </p>
+                    <p className="text-brand text-[10px] font-medium">Reserved Holder</p>
                     <p className="font-bold text-foreground truncate">{l.reservedFor}</p>
                   </div>
                 )}

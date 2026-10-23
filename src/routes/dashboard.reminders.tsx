@@ -525,9 +525,7 @@ function BroadcastCenterPage() {
                   <select
                     value={recipientsType}
                     onChange={(e) =>
-                      setRecipientsType(
-                        e.target.value as BroadcastMessage["recipientsType"],
-                      )
+                      setRecipientsType(e.target.value as BroadcastMessage["recipientsType"])
                     }
                     className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-xs outline-none focus:border-brand"
                   >

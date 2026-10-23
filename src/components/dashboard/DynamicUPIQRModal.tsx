@@ -4,8 +4,14 @@ import { useGymStore } from "../../lib/gym-store";
 import { toast } from "sonner";
 
 export function DynamicUPIQRModal() {
-  const { isUPIQRModalOpen, setIsUPIQRModalOpen, upiQRPaymentDetails, recordPayment, settings, members } =
-    useGymStore();
+  const {
+    isUPIQRModalOpen,
+    setIsUPIQRModalOpen,
+    upiQRPaymentDetails,
+    recordPayment,
+    settings,
+    members,
+  } = useGymStore();
 
   if (!isUPIQRModalOpen || !upiQRPaymentDetails) return null;
 
@@ -22,9 +28,7 @@ export function DynamicUPIQRModal() {
   };
 
   const handleMarkAsPaid = () => {
-    const matchedMember = members.find(
-      (m) => m.name.toLowerCase() === memberName.toLowerCase(),
-    );
+    const matchedMember = members.find((m) => m.name.toLowerCase() === memberName.toLowerCase());
     recordPayment({
       memberId: matchedMember?.id || "walk-in",
       member: memberName,

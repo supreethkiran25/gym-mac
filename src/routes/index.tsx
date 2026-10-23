@@ -118,7 +118,10 @@ function LandingAndAuthPage() {
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-bold text-sm tracking-tight text-white flex items-center gap-1.5">
-                  PEAKREP <span className="text-[10px] text-sky-400 font-mono tracking-widest uppercase">OS</span>
+                  PEAKREP{" "}
+                  <span className="text-[10px] text-sky-400 font-mono tracking-widest uppercase">
+                    OS
+                  </span>
                 </span>
                 <span className="text-[10px] text-zinc-400 font-medium -mt-0.5 tracking-wider">
                   {settings.name || "Gold's Gym Flagship"}
@@ -173,9 +176,7 @@ function LandingAndAuthPage() {
           {/* Majestic Hero Headline in Outfit Font */}
           <h1 className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl leading-[1.12] tracking-tight text-white max-w-4xl">
             Precision control for{" "}
-            <span className="gradient-text-sky block sm:inline">
-              premier fitness clubs.
-            </span>
+            <span className="gradient-text-sky block sm:inline">premier fitness clubs.</span>
           </h1>
 
           {/* Minimalist 1-sentence Subtitle with high contrast */}
@@ -208,19 +209,27 @@ function LandingAndAuthPage() {
           <div className="mt-16 w-full max-w-3xl glass-panel rounded-3xl p-5 sm:p-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center border border-white/10 shadow-2xl">
             <div>
               <p className="font-heading font-bold text-2xl sm:text-3xl text-white">99.98%</p>
-              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">Turnstile Sync</p>
+              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">
+                Turnstile Sync
+              </p>
             </div>
             <div>
               <p className="font-heading font-bold text-2xl sm:text-3xl gradient-text-sky">₹0</p>
-              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">Dues Leakage</p>
+              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">
+                Dues Leakage
+              </p>
             </div>
             <div>
               <p className="font-heading font-bold text-2xl sm:text-3xl text-white">&lt; 2.4s</p>
-              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">Desk Check-in</p>
+              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">
+                Desk Check-in
+              </p>
             </div>
             <div>
               <p className="font-heading font-bold text-2xl sm:text-3xl text-sky-400">Strict</p>
-              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">Dual-Role RBAC</p>
+              <p className="text-xs text-slate-300 mt-1 tracking-wider uppercase font-mono font-medium">
+                Dual-Role RBAC
+              </p>
             </div>
           </div>
         </section>
@@ -309,9 +318,7 @@ function LandingAndAuthPage() {
                     <p className="font-heading font-extrabold text-2xl sm:text-3xl text-white">
                       {simulatedCheckins}
                     </p>
-                    <p className="text-xs text-slate-300 font-mono mt-1">
-                      Capacity: 120 athletes
-                    </p>
+                    <p className="text-xs text-slate-300 font-mono mt-1">Capacity: 120 athletes</p>
                   </div>
                   <button
                     onClick={() => {
@@ -392,8 +399,8 @@ function LandingAndAuthPage() {
                 Autonomous Revenue Ledger
               </h3>
               <p className="text-sm text-slate-300 mt-2.5 leading-relaxed font-normal">
-                Dynamic UPI collection, single-page GST invoices, and automated WhatsApp dues reminders
-                without manual front desk friction.
+                Dynamic UPI collection, single-page GST invoices, and automated WhatsApp dues
+                reminders without manual front desk friction.
               </p>
             </div>
 
@@ -406,8 +413,8 @@ function LandingAndAuthPage() {
                 Executive Dual-Role RBAC
               </h3>
               <p className="text-sm text-slate-300 mt-2.5 leading-relaxed font-normal">
-                Clean division of authority. Directors see full financial telemetry; Front Desk staff
-                operate fast check-ins and member renewals safely.
+                Clean division of authority. Directors see full financial telemetry; Front Desk
+                staff operate fast check-ins and member renewals safely.
               </p>
             </div>
           </div>
@@ -420,9 +427,7 @@ function LandingAndAuthPage() {
               <span className="text-[10px] font-mono tracking-widest text-sky-400 uppercase">
                 Direct Console Access
               </span>
-              <h3 className="font-heading font-bold text-2xl text-white mt-1">
-                Executive Portal
-              </h3>
+              <h3 className="font-heading font-bold text-2xl text-white mt-1">Executive Portal</h3>
             </div>
 
             {/* Minimal Role Tabs */}
@@ -558,7 +563,11 @@ function LandingAndAuthPage() {
                       onClick={() => setShowReceptionPass(!showReceptionPass)}
                       className="absolute right-3.5 top-3 text-slate-400 hover:text-white"
                     >
-                      {showReceptionPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showReceptionPass ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </div>

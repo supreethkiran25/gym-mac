@@ -149,9 +149,7 @@ export function RoleBadge({ variant = "header" }: RoleBadgeProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-foreground">Reception (Front Desk)</span>
-                    {!isAdmin && (
-                      <Check className="h-3.5 w-3.5 text-brand" />
-                    )}
+                    {!isAdmin && <Check className="h-3.5 w-3.5 text-brand" />}
                   </div>
                   <p className="text-[11px] text-muted-foreground">
                     Front desk access: Check-ins, Attendance, Renewals, Payments

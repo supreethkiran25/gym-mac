@@ -182,9 +182,7 @@ function DashboardLayout() {
                   {isAdmin ? "Admin" : "Recep"}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 truncate font-normal mt-0.5">
-                {settings.name}
-              </p>
+              <p className="text-xs text-slate-300 truncate font-normal mt-0.5">{settings.name}</p>
             </div>
           </div>
         </div>

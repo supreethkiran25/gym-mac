@@ -216,7 +216,8 @@ function DashboardOverview() {
               <span className="text-xs font-normal text-zinc-500">members</span>
             </p>
             <div className="text-[11px] text-zinc-400 font-medium">
-              Inside Floor: <strong className="text-sky-400 font-mono">{insideMembers.length}</strong>
+              Inside Floor:{" "}
+              <strong className="text-sky-400 font-mono">{insideMembers.length}</strong>
             </div>
           </div>
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-400/20 shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
@@ -257,9 +258,7 @@ function DashboardOverview() {
               {settings.currencySymbol}
               {totalOutflow.toLocaleString("en-IN")}
             </p>
-            <div className="text-[11px] text-zinc-400 font-medium">
-              Rent, Power, Payroll
-            </div>
+            <div className="text-[11px] text-zinc-400 font-medium">Rent, Power, Payroll</div>
           </div>
           <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] text-zinc-400 border border-white/8 shrink-0">
             <Flame className="h-5 w-5" />
